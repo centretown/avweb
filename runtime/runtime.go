@@ -11,7 +11,7 @@ import (
 
 type Runtime struct {
 	Location      *Location
-	Locations     []Location
+	Locations     []*Location
 	WebcamUrl     string
 	ActionsCamera []*Action
 	ActionsHome   []*Action
@@ -35,8 +35,9 @@ func NewRuntime() (rt *Runtime) {
 		},
 		ActionsHome: []*Action{
 			// {Name: "sun", Title: "Next Sun", Icon: "wb_twilight", Group: Home},
-			{Name: "weather_hourly", Title: "Weather", Icon: "thermometer", Group: Home},
-			{Name: "weather_daily", Title: "Sun", Icon: "wb_twilight", Group: Home},
+			{Name: "weather_hourly", Title: "Hourly Forecast", Icon: "thermometer", Group: Home},
+			{Name: "weather_daily", Title: "Daily Forecast", Icon: "calendar_view_week", Group: Home},
+			{Name: "weather_sun", Title: "Sun", Icon: "wb_twilight", Group: Home},
 			// {Name: "wifi", Title: "WIFI Signals", Icon: "network_wifi", Group: Home},
 			// {Name: "lights", Title: "LED Lights", Icon: "backlight_high", Group: Home},
 		},
@@ -58,10 +59,16 @@ func NewRuntime() (rt *Runtime) {
 	for _, action := range rt.ActionsChat {
 		rt.ActionMap[action.Name] = action
 	}
-	rt.Locations = []Location{
-		{City: "Ottawa", Latitude: 45.42, Longitude: -75.7, Zone: "America%2FNew_York"},
+
+	//45.40608984676536, -75.68631292544273
+	//48.485340413458964, -81.33687676821839
+	//49.77255342394314, -94.48309874840045
+	rt.Locations = []*Location{
+		{City: "Ottawa", Latitude: 45.40608984676536, Longitude: -75.68631292544273, Zone: "America%2FNew_York"},
+		{City: "Timmins", Latitude: 48.485340413458964, Longitude: -81.33687676821839, Zone: "America%2FNew_York"},
+		{City: "Kenora", Latitude: 49.77255342394314, Longitude: -94.48309874840045, Zone: "America%2FNew_York"},
 	}
-	rt.Location = &rt.Locations[0]
+	rt.Location = rt.Locations[0]
 	return
 }
 
@@ -91,15 +98,20 @@ func (rt *Runtime) HandleAction(path string, templ string, data any) {
 }
 
 func (rt *Runtime) HandleWeather() {
-	err := rt.Location.QueryDaily()
-	if err != nil {
-		log.Printf("WeatherDaily: %v", err)
-	}
-	err = rt.Location.QueryHourly()
-	if err != nil {
-		log.Printf("WeatherHourly: %v", err)
+
+	for _, location := range rt.Locations {
+		err := location.QueryDaily()
+		if err != nil {
+			log.Printf("WeatherDaily: %v", err)
+		}
+		err = location.QueryHourly()
+		if err != nil {
+			log.Printf("WeatherHourly: %v", err)
+		}
 	}
 
-	rt.HandleAction("/weather_daily", "weather.daily", &rt.Location.WeatherDaily)
+	rt.HandleAction("/weather_sun", "weather.sun", rt.Locations)
+	rt.HandleAction("/weather_daily", "weather.daily", rt.Locations)
+	rt.HandleAction("/weather_hourly", "weather.hourly", rt.Locations)
 
 }

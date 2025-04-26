@@ -38,7 +38,6 @@ type HourlyUnits struct {
 	PrecipitationProbability string `json:"precipitation_probability"`
 	Precipitation            string `json:"precipitation"`
 	WeatherCode              string `json:"weather_code"`
-	WindSpeed10M             string `json:"wind_speed_10m"`
 }
 
 type Hourly struct {
@@ -47,24 +46,35 @@ type Hourly struct {
 	ApparentTemperature      []float32 `json:"apparent_temperature"`
 	PrecipitationProbability []int32   `json:"precipitation_probability"`
 	Precipitation            []float32 `json:"precipitation"`
-	WeatherCode              []int32   `json:"weather_code"`
+	Code                     []int32   `json:"weather_code"`
 	WindSpeed                []float32 `json:"wind_speed_10m"`
 }
 
 type DailyUnits struct {
-	Time    string `json:"time"`
-	Sunrise string `json:"sunrise"`
-	Sunset  string `json:"sunset"`
-	High    string `json:"temperature_2m_max"`
-	Low     string `json:"temperature_2m_min"`
+	Time             string `json:"time"`
+	Sunrise          string `json:"sunrise"`
+	Sunset           string `json:"sunset"`
+	High             string `json:"temperature_2m_max"`
+	Low              string `json:"temperature_2m_min"`
+	WeatherCode      string `json:"weather_code"`
+	WindSpeed10M     string `json:"wind_speed_10m"`
+	DaylightDuration string `json:"daylight_duration"`
+	SunshineDuration string `json:"sunshine_duration"`
+	Precipitation    string `json:"precipitation_sum"`
+	UvIndex          string `json:"uv_index_max"`
 }
 
 type Daily struct {
-	Time    []string  `json:"time"`
-	Sunrise []string  `json:"sunrise"`
-	Sunset  []string  `json:"sunset"`
-	High    []float64 `json:"temperature_2m_max"`
-	Low     []float64 `json:"temperature_2m_min"`
+	Time          []string  `json:"time"`
+	Sunrise       []string  `json:"sunrise"`
+	Sunset        []string  `json:"sunset"`
+	High          []float64 `json:"temperature_2m_max"`
+	Low           []float64 `json:"temperature_2m_min"`
+	Daylight      []float64 `json:"daylight_duration"`
+	Sunshine      []float64 `json:"sunshine_duration"`
+	Precipitation []float64 `json:"precipitation_sum"`
+	Code          []int     `json:"weather_code"`
+	UvIndex       []float64 `json:"uv_index_max"`
 }
 
 func (w *WeatherDaily) FormatDay(index int) string {
@@ -73,10 +83,16 @@ func (w *WeatherDaily) FormatDay(index int) string {
 }
 
 func (w *WeatherDaily) FormatHigh(index int) string {
-	return fmt.Sprintf("%3.1f %s", w.Daily.High[index], w.DailyUnits.High)
+	return fmt.Sprintf("%4.0f %s", w.Daily.High[index], w.DailyUnits.High)
+}
+func (w *WeatherDaily) FormatPrecipitation(index int) string {
+	return fmt.Sprintf("%4.2f %s", w.Daily.Precipitation[index], w.DailyUnits.Precipitation)
+}
+func (w *WeatherDaily) FormatUvIndex(index int) string {
+	return fmt.Sprintf("%4.2f %s", w.Daily.UvIndex[index], w.DailyUnits.UvIndex)
 }
 func (w *WeatherDaily) FormatLow(index int) string {
-	return fmt.Sprintf("%3.1f %s", w.Daily.Low[index], w.DailyUnits.Low)
+	return fmt.Sprintf("%4.0f %s", w.Daily.Low[index], w.DailyUnits.Low)
 }
 func (w *WeatherDaily) FormatSunset(index int) string {
 	t, err := time.Parse("2006-01-02T15:04", w.Daily.Sunset[index])
@@ -93,8 +109,21 @@ func (w *WeatherDaily) FormatSunrise(index int) string {
 	return t.Format("3:04PM")
 }
 
-const DailyQuery = "https://api.open-meteo.com/v1/forecast?latitude=45.42&longitude=-75.7&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min&timezone=America%2FNew_York"
-const HourlyQuery = "https://api.open-meteo.com/v1/forecast?latitude=45.42&longitude=-75.7&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m&timezone=America%2FNew_York"
+func toHours(fsec float64) string {
+	seconds := int(fsec)
+	hours := seconds / 3600
+	seconds -= hours * 3600
+	minutes := seconds / 60
+	seconds = seconds % 60
+	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
+}
+
+func (w *WeatherDaily) FormatDaylight(index int) string {
+	return toHours(w.Daily.Daylight[index])
+}
+func (w *WeatherDaily) FormatSunshine(index int) string {
+	return toHours(w.Daily.Sunshine[index])
+}
 
 func (c *WeatherCommon) LogCommon() {
 	log.Printf("latitude: %f longitude: %f \ngenerationtime_ms: %f utc_offset_seconds: %d \ntimezone: %s (%s) \nelevation %f\n",

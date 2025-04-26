@@ -9,35 +9,65 @@
     <div class="grid-data">{{.Timezone}}</div>
     <div class="grid-data">{{.Elevation}}</div>
 </div>
-{{ end }} {{ define "weather.daily" }}
+{{ end }} {{ define "weather.sun" }}
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
     {{template "layout.content.head" .Action }}
-    <div class="content">
+    <div class="content scroll">
+        {{range $location := .Data}}
+        <div class="title">{{$location.City}}</div>
         <div class="grid-daily">
             <div class="grid-label">Day</div>
-            <div class="grid-label">High</div>
-            <div class="grid-label">Low</div>
+            <div class="grid-label">Daylight</div>
+            <div class="grid-label">Sunshine</div>
             <div class="grid-label">Sunrise</div>
             <div class="grid-label">Sunset</div>
         </div>
 
         <div class="grid-daily">
-            {{$data := .Data}}{{range $index, $time := .Data.Daily.Time}}
-            <div class="grid-data">{{$data.FormatDay $index}}</div>
-            <div class="grid-data">{{$data.FormatHigh $index}}</div>
-            <div class="grid-data">{{$data.FormatLow $index}}</div>
-            <div class="grid-data">{{$data.FormatSunrise $index}}</div>
-            <div class="grid-data">{{$data.FormatSunset $index}}</div>
+            {{$daily := $location.WeatherDaily}} {{range $index, $time :=
+            $daily.Daily.Time}}
+            <div class="grid-data">{{$daily.FormatDay $index}}</div>
+            <div class="grid-data">{{$daily.FormatDaylight $index}}</div>
+            <div class="grid-data">{{$daily.FormatSunshine $index}}</div>
+            <div class="grid-data">{{$daily.FormatSunrise $index}}</div>
+            <div class="grid-data">{{$daily.FormatSunset $index}}</div>
             {{end}}
         </div>
-        {{template "weather.common" .Data.WeatherCommon }}
+        {{end}}
     </div>
 </div>
+
+{{ end }} {{ define "weather.daily" }}
+<div id="slot-{{.Action.Name}}" class="slot" draggable="false">
+    {{template "layout.content.head" .Action }}
+    <div class="content scroll">
+        {{range $location := .Data}}
+        <div class="title">{{$location.City}}</div>
+        <div class="grid-daily">
+            <div class="grid-label">Day</div>
+            <div class="grid-label">High</div>
+            <div class="grid-label">Low</div>
+            <div class="grid-label">Precip.</div>
+            <div class="grid-label">UV</div>
+        </div>
+
+        <div class="grid-daily">
+            {{$daily := $location.WeatherDaily}} {{range $index, $time :=
+            $daily.Daily.Time}}
+            <div class="grid-data">{{$daily.FormatDay $index}}</div>
+            <div class="grid-data">{{$daily.FormatHigh $index}}</div>
+            <div class="grid-data">{{$daily.FormatLow $index}}</div>
+            <div class="grid-data">{{$daily.FormatPrecipitation $index}}</div>
+            <div class="grid-data">{{$daily.FormatUvIndex $index}}</div>
+            {{end}}
+        </div>
+        {{end}}
+    </div>
+</div>
+
 {{ end }} {{ define "weather.hourly" }}
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
     {{template "layout.content.head" .Action }}
-    <div class="content">
-        {{template "weather.common" .Data.WeatherCommon }}
-    </div>
+    <div class="content"></div>
 </div>
 {{ end }}
