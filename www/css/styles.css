@@ -1,0 +1,377 @@
+:root {
+    --bgOpaque: rgba(0, 0, 0, 0.6);
+    --bgTransparent: rgba(0, 0, 0, 0.15);
+    --bgH3: rgba(0, 127, 255, 0.15);
+    --fgBright: rgba(0, 255, 255, 1);
+    --fgDim: rgba(72, 168, 158, 0.8);
+    --fgOut: rgba(128, 255, 0, 1);
+    --fgIn: rgba(255, 255, 255, 1);
+    --fgClock: rgba(127, 168, 158, 0.5);
+    --fgStatus: rgba(255, 255, 0, 0.9);
+    --slotWidth: 23rem;
+    --slotImageWidth: 18rem;
+    --inputWidth: 8rem;
+}
+
+/* fallback */
+@font-face {
+    font-family: "Material Symbols Outlined";
+    font-style: normal;
+    font-weight: 100 700;
+    src: url(symbols.woff2) format("woff2");
+}
+
+.material-symbols-outlined,
+.symbols,
+.symbols-small,
+.symbols-form {
+    font-family: "Material Symbols Outlined";
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: "liga";
+    -webkit-font-smoothing: antialiased;
+}
+
+.symbols {
+    font-size: 2.25rem;
+}
+
+.symbols-small {
+    margin-right: 0.5rem;
+    font-size: 1rem;
+}
+
+.symbols-form {
+    font-size: 1.5rem;
+    width: 3rem;
+}
+
+.streaming {
+    color: red;
+}
+
+body {
+    font-family: sans-serif;
+    background-color: black;
+    scrollbar-color: var(--fgDim) var(--bgOpaque);
+    scrollbar-width: thin;
+    overflow: auto;
+}
+
+.hide {
+    display: none;
+}
+
+li {
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+h3 {
+    margin: 0rem;
+    font-weight: bold;
+    font-size: 1.25rem;
+    padding: 0.25rem;
+    background-color: var(--bgH3);
+    color: var(--fgBright);
+    border-radius: 1rem 1rem 0rem 0rem;
+}
+
+.slot,
+.chat {
+    position: fixed;
+    top: 5rem;
+    color: var(--fgBright);
+    /*background-color: var(--bgOpaque);*/
+    background-color: rgba(0, 0, 0, 1);
+
+    border-radius: 1rem;
+    animation-name: fade-in-slow;
+    animation-timing-function: ease-out;
+    animation-duration: 1000ms;
+    animation-fill-mode: forwards;
+    max-height: 80%;
+    overflow-x: wrap;
+    overflow-y: auto;
+    scrollbar-color: var(--fgDim) var(--bgOpaque);
+    scrollbar-width: thin;
+}
+
+.slot {
+    left: 1rem;
+    width: var(--slotWidth);
+}
+
+.chat {
+    right: 1rem;
+    width: 15rem;
+}
+
+.content {
+    padding: 1rem;
+}
+
+.cameras {
+    position: absolute;
+    top: 60px;
+    left: 0px;
+    width: 200px;
+    height: 100%;
+    scrollbar-color: var(--fgDim) var(--bgOpaque);
+    scrollbar-width: thin;
+}
+
+.source {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+}
+
+.image {
+    background-color: rgba(0, 0, 0, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image > img {
+    width: var(--slotImageWidth);
+}
+
+.source > img {
+    width: 100%;
+}
+
+.actions {
+    position: fixed;
+    margin: 0.6rem;
+    overflow: hidden;
+}
+
+.actions-right {
+    position: fixed;
+    right: 0rem;
+    margin: 0.6rem;
+    overflow: hidden;
+}
+
+.action {
+    padding: 4px;
+    margin: 2px;
+    background-color: var(--bgTransparent);
+    color: var(--fgDim);
+    border-radius: 0.35rem;
+}
+
+.action:hover,
+.action:focus {
+    opacity: 1;
+    background-color: var(--bgOpaque);
+    color: var(--fgBright);
+}
+
+.close-slot {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background-color: var(--bgH3);
+    color: var(--fgBright);
+    border-radius: 0.35rem;
+}
+
+.label {
+    margin-top: 0.6rem;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.text-input {
+    border-radius: 0.35rem;
+    background-color: rgba(255, 255, 0, 0.1);
+    color: rgba(255, 255, 0, 1);
+    width: 100%;
+}
+
+.messages {
+    overflow-y: auto;
+    overflow-x: wrap;
+    scrollbar-color: var(--fgDim) var(--bgOpaque);
+    scrollbar-width: thin;
+    height: 10rem;
+}
+
+.users,
+.message {
+    margin-left: 0.25rem;
+    font-size: 0.75rem;
+}
+
+.message-item,
+.status {
+    margin-left: 1rem;
+    margin-bottom: 0.25rem;
+    color: var(--fgStatus);
+    font-size: 0.75rem;
+}
+
+.timestamp {
+    color: grey;
+}
+
+.clock {
+    position: fixed;
+    bottom: 1rem;
+    color: var(--fgDim);
+    text-align: center;
+    width: 100%;
+    font-size: 2.5rem;
+}
+
+.clock:hover {
+    color: var(--fgBright);
+}
+
+.name-item {
+    margin-left: 0.5rem;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+}
+
+.user-active {
+    font-weight: bold;
+    font-style: normal;
+}
+
+.user-inactive {
+    font-weight: lighter;
+    font-style: italic;
+}
+
+@keyframes fade-in-slow {
+    0% {
+        opacity: 0.1;
+    }
+    70% {
+        opacity: 0.5;
+    }
+    75% {
+        opacity: 0.55;
+    }
+    80% {
+        opacity: 0.6;
+    }
+    85% {
+        opacity: 0.65;
+    }
+    90% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 0.75;
+    }
+}
+
+.header {
+    padding-bottom: 0.5rem;
+}
+.form-label {
+}
+
+.form-input {
+    font-size: 0.85rem;
+    width: var(--inputWidth);
+    background-color: var(--bgTransparent);
+    color: var(--fgOut);
+}
+
+.form-entry {
+    font-size: 0.85rem;
+    margin-left: 0.5rem;
+    line-height: 1.9;
+}
+
+.form-option {
+    background-color: black;
+    color: var(--fgOut);
+}
+
+.grid-container,
+.grid-daily {
+    padding-bottom: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    font-size: 0.75rem;
+    display: grid;
+    grid-template-columns: 4rem 4rem 8rem 3rem;
+    justify-content: center;
+}
+
+.grid-daily {
+    padding-bottom: 0.2rem;
+    grid-template-columns: 5rem 4rem 4rem 4rem 4rem;
+}
+
+.grid-label {
+    font-size: 0.85rem;
+    background-color: var(--bgTransparent);
+}
+.grid-data {
+    font-size: 0.75rem;
+    background-color: var(--bgTransparent);
+    color: var(--fgOut);
+}
+.note {
+    margin-top: 0.3rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.65rem;
+}
+
+@keyframes fade-out {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    75% {
+        opacity: 0.4;
+    }
+    85% {
+        opacity: 0.3;
+    }
+    90% {
+        opacity: 0.2;
+    }
+    95% {
+        opacity: 0.1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.fade-it {
+    animation-name: fade-out;
+    animation-timing-function: linear;
+    animation-duration: 2500ms;
+    animation-fill-mode: forwards;
+}
+
+#response-div {
+    top: 50%;
+    left: 50%;
+    position: fixed;
+    text-align: center;
+    text-shadow: 0.5rem 0.5rem 0.5rem black;
+    font-size: 6rem;
+    color: var(--fgBright);
+}

@@ -1,0 +1,112 @@
+{{ define "layout.actions" }}
+    <div class="actions">
+        <button class="action" hx-on:click="toggleMenu('leftmenu')" hx-swap=none>
+            <span class="symbols">menu</span>
+        </button>
+        <span id="leftmenu" class="hide">
+            {{range .ActionsCamera}}
+                <div id="{{.Name}}" class="hide"
+                    hx-put="/{{.Name}}" hx-swap="beforeend" 
+                    hx-target="#slots" 
+                    hx-on::afterSwap="addDragHandlers('slot-{{.Name}}')"
+                    hx-vals='js:{source: currentSource()}'>
+                </div>
+                <button class="action" hx-on:click="doAction('{{.Name}}')">
+                    <span class="symbols">{{.Icon}}</span>
+                </button>
+           {{ end }}
+            {{range .ActionsHome}}
+                <div id="{{.Name}}" class="hide"
+                    hx-get="/{{.Name}}" hx-swap="beforeend" 
+                    hx-target="#slots" 
+                    hx-on::afterSwap="addDragHandlers('slot-{{.Name}}')">
+                </div>
+                <button class="action" hx-on:click="doAction('{{.Name}}')">
+                    <span class="symbols">{{.Icon}}</span>
+                </button>
+           {{ end }}
+        </span>
+    </div>
+    <div class="actions-right">
+        <span id="rightmenu">
+            <button class="action" hx-on:click="toggleChat('chat')">
+                <span id="ws-status-menu" class="symbols">chat</span>
+            </button>
+
+            <button class="action" 
+                hx-put="/resetcontrols" hx-swap=none
+                hx-vals='js:{source: currentSource()}'>
+                <span class="symbols">reset_settings</span>
+            </button>
+
+            <button class="action" 
+                hx-put="/record" hx-swap=none
+                hx-vals='js:{source: currentSource()}'>
+                <span id="streamer" class="symbols">
+                    radio_button_checked
+                </span>
+            </button>
+        </span>
+    </div>
+{{ end }}
+
+{{ define "layout.content.head" }}
+    <span>
+        <h3 hx-on:mousedown="setdraggable('slot-{{.Name}}',true)"
+            hx-on:mouseup="setdraggable('slot-{{.Name}}',false)">
+            <span class="symbols">{{.Icon}}</span>
+            <span>{{.Title}}</span>
+        </h3> 
+        <button class="symbols-small close-slot"
+            hx-on:click="doAction('{{.Name}}')">close</button>
+    <span>
+{{ end }}
+
+{{ define "layout.sun" }}
+<div id="slot-{{.Action.Name}}" class="slot" draggable="false">
+    {{template "layout.content.head" .Action }}
+    <div class="content">
+        <ol>
+        {{range .Sensors}}
+            <li>{{.ShortName}} {{.FormatTime}}</li>
+        {{end}}
+        </ol>
+    </div>
+</div>
+{{ end }}
+
+{{ define "layout.wifi" }}
+<div id="slot-{{.Action.Name}}" class="slot" draggable="false">
+    {{template "layout.content.head" .Action }}
+    <div class="content">
+        <div class="grid-container">
+        {{range .Sensors}}
+        <div>
+            <div><span class="symbols-small">{{.SignalIcon}}</span> {{.Attributes.Name}}</div> 
+            <div class="form-entry">{{.State}} {{.Attributes.Units}}</div>
+            <div class="note">Last Update: <span>{{.FormatTime}}</span></div>
+        </div>
+        {{end}}
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "layout.weather" }}
+<div id="slot-{{.Action.Name}}" class="slot" draggable="false">
+    {{template "layout.content.head" .Action }}
+    <div id="weather" class="content">
+        {{range .Properties}}
+        <div class="form-entry">
+            <span class="symbols-small">{{.Icon}}</span>
+            <span>{{.Label}} {{.Value}} {{.Units}}</span>
+        </div>
+        {{end}}
+        <div class="note">{{.Attributes.Attribution}} Last Update: <span>{{.FormatTime}}</span></div>
+   </div>
+</div>
+{{ end }}
+
+{{ define "layout.slot" }}
+{{ end }}
+
