@@ -8,6 +8,7 @@
     --fgIn: rgba(255, 255, 255, 1);
     --fgClock: rgba(127, 168, 158, 0.5);
     --fgStatus: rgba(255, 255, 0, 0.9);
+    --fgIcon: rgba(120, 184, 244, 1);
     --slotWidth: 23rem;
     --slotImageWidth: 18rem;
     --inputWidth: 8rem;
@@ -41,15 +42,18 @@
 }
 
 .symbols {
+    color: var(--fgIcon);
     font-size: 2.25rem;
 }
 
 .symbols-small {
+    color: var(--fgIcon);
     margin-right: 0.5rem;
     font-size: 1rem;
 }
 
 .symbols-form {
+    color: var(--fgIcon);
     font-size: 1.5rem;
     width: 3rem;
 }
@@ -316,6 +320,8 @@ h3 {
 }
 
 .grid-container,
+.grid-sun,
+.grid-hourly,
 .grid-daily {
     padding-bottom: 1rem;
     font-size: 0.75rem;
@@ -324,9 +330,17 @@ h3 {
     justify-content: center;
 }
 
+.grid-hourly {
+    padding-bottom: 0.2rem;
+    grid-template-columns: 1.5rem 4rem 3rem 3rem 3rem 3rem 3rem;
+}
 .grid-daily {
     padding-bottom: 0.2rem;
-    grid-template-columns: 5rem 4rem 4rem 4rem 4rem;
+    grid-template-columns: 1.5rem 4.5rem 3.6rem 4rem 3.6rem 3.6rem;
+}
+.grid-sun {
+    padding-bottom: 0.2rem;
+    grid-template-columns: 1.5rem 4.5rem 4rem 4rem 3.6rem 3.6rem;
 }
 
 .grid-label {

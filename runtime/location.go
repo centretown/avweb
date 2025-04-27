@@ -35,3 +35,11 @@ func (loc *Location) QueryHourly() (err error) {
 	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, trailer)
 	return loc.WeatherHourly.Get(q)
 }
+
+func (loc *Location) QueryCurrent() (err error) {
+	var (
+		trailer = "&minutely_15=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m"
+	)
+	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, trailer)
+	return loc.WeatherHourly.Get(q)
+}

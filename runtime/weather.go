@@ -32,36 +32,60 @@ type WeatherDaily struct {
 }
 
 type HourlyUnits struct {
-	Time                     string `json:"time"`
-	Temperature2M            string `json:"temperature_2m"`
-	ApparentTemperature      string `json:"apparent_temperature"`
-	PrecipitationProbability string `json:"precipitation_probability"`
-	Precipitation            string `json:"precipitation"`
-	WeatherCode              string `json:"weather_code"`
+	Time          string `json:"time"`
+	Temperature   string `json:"temperature_2m"`
+	FeelsLike     string `json:"apparent_temperature"`
+	Probability   string `json:"precipitation_probability"`
+	Precipitation string `json:"precipitation"`
+	WindSpeed     string `json:"wind_speed_10m"`
+	Code          string `json:"weather_code"`
 }
 
 type Hourly struct {
-	Time                     []string  `json:"time"`
-	Temperature              []float32 `json:"temperature_2m"`
-	ApparentTemperature      []float32 `json:"apparent_temperature"`
-	PrecipitationProbability []int32   `json:"precipitation_probability"`
-	Precipitation            []float32 `json:"precipitation"`
-	Code                     []int32   `json:"weather_code"`
-	WindSpeed                []float32 `json:"wind_speed_10m"`
+	Time          []string  `json:"time"`
+	Temperature   []float32 `json:"temperature_2m"`
+	FeelsLike     []float32 `json:"apparent_temperature"`
+	Probability   []int32   `json:"precipitation_probability"`
+	Precipitation []float32 `json:"precipitation"`
+	WindSpeed     []float32 `json:"wind_speed_10m"`
+	Code          []int32   `json:"weather_code"`
+}
+
+func (w *WeatherHourly) FormatTime(index int) string {
+	t, err := time.Parse("2006-01-02T15:04", w.Hourly.Time[index])
+	if err != nil {
+		log.Printf("FormatTime: %v\n", err)
+	}
+	return t.Format("3:04PM")
+}
+
+func (w *WeatherHourly) FormatTemperature(index int) string {
+	return fmt.Sprintf("%6.1f", w.Hourly.Temperature[index])
+}
+func (w *WeatherHourly) FormatFeelsLike(index int) string {
+	return fmt.Sprintf("%6.1f", w.Hourly.FeelsLike[index])
+}
+func (w *WeatherHourly) FormatPrecipitation(index int) string {
+	return fmt.Sprintf("%6.2f", w.Hourly.Precipitation[index])
+}
+func (w *WeatherHourly) FormatProbability(index int) string {
+	return fmt.Sprintf("%6d", w.Hourly.Probability[index])
+}
+func (w *WeatherHourly) FormatWindSpeed(index int) string {
+	return fmt.Sprintf("%6.2f", w.Hourly.WindSpeed[index])
 }
 
 type DailyUnits struct {
-	Time             string `json:"time"`
-	Sunrise          string `json:"sunrise"`
-	Sunset           string `json:"sunset"`
-	High             string `json:"temperature_2m_max"`
-	Low              string `json:"temperature_2m_min"`
-	WeatherCode      string `json:"weather_code"`
-	WindSpeed10M     string `json:"wind_speed_10m"`
-	DaylightDuration string `json:"daylight_duration"`
-	SunshineDuration string `json:"sunshine_duration"`
-	Precipitation    string `json:"precipitation_sum"`
-	UvIndex          string `json:"uv_index_max"`
+	Time          string `json:"time"`
+	Sunrise       string `json:"sunrise"`
+	Sunset        string `json:"sunset"`
+	High          string `json:"temperature_2m_max"`
+	Low           string `json:"temperature_2m_min"`
+	Daylight      string `json:"daylight_duration"`
+	Sunshine      string `json:"sunshine_duration"`
+	Precipitation string `json:"precipitation_sum"`
+	Code          string `json:"weather_code"`
+	UvIndex       string `json:"uv_index_max"`
 }
 
 type Daily struct {
@@ -188,4 +212,53 @@ func LoadWeather(r io.Reader, w any) (err error) {
 		return
 	}
 	return
+}
+
+type WeatherCode struct {
+	Code int
+	Icon string
+}
+
+/*
+0	Clear sky
+1, 2, 3	Mainly clear, partly cloudy, and overcast
+45, 48	Fog and depositing rime fog
+51, 53, 55	Drizzle: Light, moderate, and dense intensity
+56, 57	Freezing Drizzle: Light and dense intensity
+61, 63, 65	Rain: Slight, moderate and heavy intensity
+66, 67	Freezing Rain: Light and heavy intensity
+71, 73, 75	Snow fall: Slight, moderate, and heavy intensity
+77	Snow grains
+80, 81, 82	Rain showers: Slight, moderate, and violent
+85, 86	Snow showers slight and heavy
+95 *	Thunderstorm: Slight or moderate
+96, 99 *	Thunderstorm with slight and heavy hail
+*/
+var WeatherCodes = map[int]string{
+	0:  "clear_day",
+	1:  "clear_day",
+	2:  "partly_cloudy_day",
+	3:  "cloud",
+	45: "foggy",
+	48: "mist",
+	51: "rainy_light",
+	53: "rainy_light",
+	55: "rainy_light",
+	56: "rainy_snow",
+	57: "rainy_snow",
+	61: "rainy_light",
+	63: "rainy",
+	65: "rainy_heavy",
+	71: "snowing",
+	73: "snowing",
+	75: "snowing_heavy",
+	77: "snowing",
+	80: "rainy_light",
+	81: "rainy",
+	82: "rainy_heavy",
+	85: "snowing",
+	86: "snowing_heavy",
+	95: "thunderstorm",
+	96: "weather_hail",
+	99: "weather_hail",
 }

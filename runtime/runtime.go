@@ -75,6 +75,7 @@ func NewRuntime() (rt *Runtime) {
 type FormData struct {
 	Action *Action
 	Data   any
+	Codes  map[int]string
 }
 
 func (rt *Runtime) HandleAction(path string, templ string, data any) {
@@ -86,6 +87,7 @@ func (rt *Runtime) HandleAction(path string, templ string, data any) {
 
 		w.Header().Add("Cache-Control", "no-cache")
 		data := &FormData{
+			Codes:  WeatherCodes,
 			Action: rt.ActionMap[path[1:]],
 			Data:   data}
 
