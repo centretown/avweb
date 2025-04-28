@@ -1,23 +1,22 @@
-
 {{ define "layout.controls" }}
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
-    {{template "layout.content.head" .Action }}
+    {{template "layout.content.head" .Action }} {{$avitem := index .Data.Items
+    0}}
     <div class="content">
-        {{range .WebcamHandlers}}
-            {{range .Controls}}
-            <button class="action" 
-                hx-put="{{.Url}}" hx-swap="outerHTML" 
-                hx-target="#response-div"
-                hx-vals='js:{source: currentSource()}'>
-                <span class="symbols">{{.Icon}}</span> 
-            </button>
-            {{ end }}
-        {{ end }}
+        {{range .Codes}} {{range .}}
+        <button
+            class="action"
+            hx-put="{{$avitem.Url}}{{.Url}}"
+            hx-swap="outerHTML"
+            hx-target="#response-div"
+            hx-vals="js:{source: currentSource()}"
+        >
+            <span class="symbols">{{.Icon}}</span>
+        </button>
+        {{ end }} {{ end }}
     </div>
     <div id="response-div"></div>
 </div>
-{{ end }}
-
-{{ define "layout.response" }}
+{{ end }} {{ define "layout.response" }}
 <div id="response-div" class="fade-it">{{.}}</div>
 {{ end }}

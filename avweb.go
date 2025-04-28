@@ -35,29 +35,29 @@ func main() {
 
 	log.Print("NEW AVHOST")
 	host = avcamx.NewAvHost(hostAddr, hostPort)
-	host.MakeLocal()
+	const pattern = "www/*.html"
+	templ, err := template.ParseGlob(pattern)
+	if err != nil {
+		log.Fatalln("ParseGlob", pattern, err)
+	}
+	sockServer := socket.NewServer(templ)
 
+	host.MakeLocal(sockServer)
 	log.Print("FetchRemote")
 	remote, err := host.FetchRemote(remoteAddr)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Print("MakeProxy")
-	host.MakeProxy(remote)
+	host.MakeProxy(remote, sockServer)
 
-	rt = runtime.NewRuntime()
-	rt.WebcamUrl = host.Items[0].Url
-	rt.Host = host
-	mux := host.Mux()
-	const pattern = "www/*.html"
-	rt.Temp, err = template.ParseGlob(pattern)
-	if err != nil {
-		log.Fatalln("ParseGlob", pattern, err)
-	}
-
-	rt.WebSocket = socket.NewServer(rt.Temp)
+	rt = runtime.NewRuntime(host)
+	rt.Temp = templ
+	rt.WebSocket = sockServer
 	rt.WebSocket.LoadMessages()
 	rt.WebSocket.Run()
+
+	mux := host.Mux()
 
 	fs := http.FileServer(http.Dir("www/"))
 	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
@@ -78,6 +78,7 @@ func main() {
 	mux.HandleFunc("/events", rt.WebSocket.Events)
 
 	rt.HandleWeather()
+	rt.HandleCameras()
 
 	httpErr := make(chan error, 1)
 	go func() {

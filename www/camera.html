@@ -2,99 +2,173 @@
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
     {{template "layout.content.head" .Action }}
     <div class="content">
-    <form id="camera_add_form" hx-post="/camera_post" hx-swap="innerHTML" hx-target="#camera_status">
-        <div class="form-entry">
-            <label for="camera_net">Ip Network</label>
-            <input type="url" id="camera_net" class="form-input" name="camera_net"
-                value="http://192.168.10">
-        </div>
-        <div class="form-entry">
-            <label for="camera_suffix">Ip Suffix</label>
-            <input type="number" id="camera_suffix" class="form-input"
-                name="camera_suffix" required min="2" max="254">
-        </div>
-        <div class="form-entry">
-            <label for="camera_port">Port</label>
-            <input type="number" id="camera_port" class="form-input" name="camera_port"
-                value="8080" required min="80">
-        </div>
-        <div class="form-entry">
-            <label for="camera_url">Url</label>
-            <input type="text" id="camera_url" class="form-input" name="camera_url"
-                value="/">
-        </div>
-        <div class="form-entry">
-            <label for="camera_codec">Format</label>
-            <select id="camera_codec" class="form-input" name="camera_codec" value="MJPG">
-                <option class="form-option" value="MJPG">MJPG</select>
-            </select>
-        </div>
-        <div class="form-entry">
-            <label for="camera_width">Width</label>
-            <input type="number" id="camera_width" class="form-input" name="camera_width"
-                value="1920" required>
-        </div>
-        <div class="form-entry">
-            <label for="camera_height">Height</label>
-            <input type="number" id="camera_height" class="form-input" name="camera_height"
-                value="1080" required>
-        </div>
-        <div class="form-entry">
-            <label  for="camera_fps">Frames/Sec</label>
-            <input type="number" id="camera_fps" class="form-input" name="camera_fps" 
-                value="30" required min="1" max="60">
-        </div>
-        <button type="submit" class="action">
-            <span class="symbols-form">send</span>
-        </button>
-    </form>
-    <div id="camera_status" class="status"></div>
-
+        <form
+            id="camera_add_form"
+            hx-post="/camera_post"
+            hx-swap="innerHTML"
+            hx-target="#camera_status"
+        >
+            <div class="form-entry">
+                <label for="camera_net">Ip Network</label>
+                <input
+                    type="url"
+                    id="camera_net"
+                    class="form-input"
+                    name="camera_net"
+                    value="http://192.168.10"
+                />
+            </div>
+            <div class="form-entry">
+                <label for="camera_suffix">Ip Suffix</label>
+                <input
+                    type="number"
+                    id="camera_suffix"
+                    class="form-input"
+                    name="camera_suffix"
+                    required
+                    min="2"
+                    max="254"
+                />
+            </div>
+            <div class="form-entry">
+                <label for="camera_port">Port</label>
+                <input
+                    type="number"
+                    id="camera_port"
+                    class="form-input"
+                    name="camera_port"
+                    value="8080"
+                    required
+                    min="80"
+                />
+            </div>
+            <div class="form-entry">
+                <label for="camera_url">Url</label>
+                <input
+                    type="text"
+                    id="camera_url"
+                    class="form-input"
+                    name="camera_url"
+                    value="/"
+                />
+            </div>
+            <div class="form-entry">
+                <label for="camera_codec">Format</label>
+                <select
+                    id="camera_codec"
+                    class="form-input"
+                    name="camera_codec"
+                    value="MJPG"
+                >
+                    <option class="form-option" value="MJPG">MJPG</option>
+                </select>
+            </div>
+            <div class="form-entry">
+                <label for="camera_width">Width</label>
+                <input
+                    type="number"
+                    id="camera_width"
+                    class="form-input"
+                    name="camera_width"
+                    value="1920"
+                    required
+                />
+            </div>
+            <div class="form-entry">
+                <label for="camera_height">Height</label>
+                <input
+                    type="number"
+                    id="camera_height"
+                    class="form-input"
+                    name="camera_height"
+                    value="1080"
+                    required
+                />
+            </div>
+            <div class="form-entry">
+                <label for="camera_fps">Frames/Sec</label>
+                <input
+                    type="number"
+                    id="camera_fps"
+                    class="form-input"
+                    name="camera_fps"
+                    value="30"
+                    required
+                    min="1"
+                    max="60"
+                />
+            </div>
+            <button type="submit" class="action">
+                <span class="symbols-form">send</span>
+            </button>
+        </form>
+        <div id="camera_status" class="status"></div>
     </div>
- </div>
-{{ end }}
-
-{{ define "layout.camera.list" }}
+</div>
+{{ end }} {{ define "layout.camera.list" }}
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
     {{template "layout.content.head" .Action }}
     <div class="content">
-        {{range $cam := .Cameras}}
+        {{range $cam := .Data.Items}}
         <div class="form-entry">
             <span class="symbols-small">videocam</span>
-            {{if eq $cam.Source.IsOpened true}}
-                <span>{{$cam.Url}} <span class="symbols-small">link</span>{{$cam.Config.Path}}</span>
-                <div class="image"><img src="{{$cam.Url}}"></div>
-                <button class="action" hx-post="/camera_primary"
-                    hx-target="#camera_list_status" hx-swap="outerHTML"
-                    hx-select="#camera_list_status"
-                    hx-select-oob="#source"
-                    hx-vals='{"path": "{{$cam.Config.Path}}"}'>
-                    <span class="symbols-form">background_replace</span>
-                </button>
-                <button class="action"
-                    hx-put="/resetcontrols" hx-swap=none
-                    hx-vals='{"source": "{{$cam.Url}}"}'>
-                    <span class="symbols-form">reset_settings</span>
-                </button>
-                <button class="action" 
-                    hx-put="/record" hx-swap=none
-                    hx-vals='{"source": "{{$cam.Url}}"}'>
-                    <span id="stream_video{{$cam.Id}}"
-                        class="symbols-form{{if eq $cam.Recording true}} streaming{{end}}">
-                        radio_button_checked
-                    </span>
-                </button>
+            {{if eq $cam.IsOpened true}}
+            <span
+                >{{$cam.Url}}
+                <span class="symbols-small">link</span
+                >{{$cam.Config.Path}}</span
+            >
+            <div class="image"><img src="{{$cam.Url}}" /></div>
+            <button
+                class="action"
+                hx-post="/camera_primary"
+                hx-target="#camera_list_status"
+                hx-swap="outerHTML"
+                hx-select="#camera_list_status"
+                hx-select-oob="#source"
+                hx-vals='{"path": "{{$cam.Url}}"}'
+            >
+                <span class="symbols-form">background_replace</span>
+            </button>
+            <button
+                class="action"
+                hx-put="/resetcontrols"
+                hx-swap="none"
+                hx-vals='{"source": "{{$cam.Url}}"}'
+            >
+                <span class="symbols-form">reset_settings</span>
+            </button>
+            <button
+                class="action"
+                hx-put="/record"
+                hx-swap="none"
+                hx-vals='{"source": "{{$cam.Url}}"}'
+            >
+                <span
+                    id="stream_video{{$cam.ID}}"
+                    class="symbols-form{{if eq $cam.IsRecording true}} streaming{{end}}"
+                >
+                    radio_button_checked
+                </span>
+            </button>
             {{else}}
-                <span>{{$cam.Url}}<span class="symbols-small">link_off</span>{{$cam.Config.Path}}</span>
-                <button class="action" hx-get="/camera_connect"
-                    hx-target="#camera_list_status" hx-swap="innerHTML"
-                    hx-vals='{"path": "{{$cam.Config.Path}}"}'>
-                    <span class="symbols-form">link</span>
-                </button>
+            <span
+                >{{$cam.Url}}<span class="symbols-small">link_off</span
+                >{{$cam.Config.Path}}</span
+            >
+            <button
+                class="action"
+                hx-get="/camera_connect"
+                hx-target="#camera_list_status"
+                hx-swap="innerHTML"
+                hx-vals='{"path": "{{$cam.Config.Path}}"}'
+            >
+                <span class="symbols-form">link</span>
+            </button>
             {{end}}
         </div>
         {{end}}
         <div id="camera_list_status" class="status"></div>
     </div>
- </div>
+</div>
 {{ end }}
