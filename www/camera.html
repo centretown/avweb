@@ -109,7 +109,7 @@
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
     {{template "layout.content.head" .Action }}
     <div class="content">
-        {{range $cam := .Data.Items}}
+        {{range $index, $cam := .Data.Items}}
         <div class="form-entry">
             <span class="symbols-small">videocam</span>
             {{if eq $cam.IsOpened true}}
@@ -126,13 +126,13 @@
                 hx-swap="outerHTML"
                 hx-select="#camera_list_status"
                 hx-select-oob="#source"
-                hx-vals='{"path": "{{$cam.Url}}"}'
+                hx-vals='{"path": "{{$cam.Url}}", "index": {{$index}}}'
             >
                 <span class="symbols-form">background_replace</span>
             </button>
             <button
                 class="action"
-                hx-put="/resetcontrols"
+                hx-put="/reset"
                 hx-swap="none"
                 hx-vals='{"source": "{{$cam.Url}}"}'
             >

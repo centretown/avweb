@@ -1,12 +1,11 @@
 {{ define "layout.controls" }}
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
-    {{template "layout.content.head" .Action }} {{$avitem := index .Data.Items
-    0}}
+    {{template "layout.content.head" .Action }}
     <div class="content">
         {{range .Codes}} {{range .}}
         <button
             class="action"
-            hx-put="{{$avitem.Url}}{{.Url}}"
+            hx-put="/camera_control{{.Url}}"
             hx-swap="outerHTML"
             hx-target="#response-div"
             hx-vals="js:{source: currentSource()}"

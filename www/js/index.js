@@ -132,6 +132,22 @@ window.addEventListener("htmx:load", function (evt) {
   addDragHandlers(id);
 });
 
+function showGraph(canvas, color, readings) {
+  let canv = document.getElementById(canvas);
+  let ctx = canv.getContext("2d");
+  let xinc = canv.width / (readings.length - 1);
+  let height = canv.height;
+  let x = 0;
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.moveTo(0, 0);
+  for (let y of readings) {
+    ctx.lineTo(x, height - (y * height) / 10);
+    x += xinc;
+  }
+  ctx.stroke();
+}
+
 const gamepads = {};
 
 function gamepadHandler(event, connected) {

@@ -30,6 +30,31 @@ type WeatherDaily struct {
 	DailyUnits DailyUnits `json:"daily_units"`
 	Daily      Daily      `json:"daily"`
 }
+type WeatherMinutely struct {
+	WeatherCommon
+	MinutelyUnits MinutelyUnits `json:"minutely_units"`
+	Minutely      Minutely      `json:"minutely"`
+}
+
+type MinutelyUnits struct {
+	Time          string `json:"time"`
+	Temperature   string `json:"temperature_2m"`
+	FeelsLike     string `json:"apparent_temperature"`
+	Probability   string `json:"precipitation_probability"`
+	Precipitation string `json:"precipitation"`
+	WindSpeed     string `json:"wind_speed_10m"`
+	Code          string `json:"weather_code"`
+}
+
+type Minutely struct {
+	Time          string  `json:"time"`
+	Temperature   float32 `json:"temperature_2m"`
+	FeelsLike     float32 `json:"apparent_temperature"`
+	Probability   int32   `json:"precipitation_probability"`
+	Precipitation float32 `json:"precipitation"`
+	WindSpeed     float32 `json:"wind_speed_10m"`
+	Code          int32   `json:"weather_code"`
+}
 
 type HourlyUnits struct {
 	Time          string `json:"time"`

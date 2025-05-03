@@ -41,11 +41,30 @@
 </div>
 
 {{ end }} {{ define "weather.daily" }}
+<script>
+    var readings = [
+        [4.5, 3.3, 6.6, 2.1, 5.5, 6.6, 2.1],
+        [4.5, 3.3, 6.6, 2.1, 5.5, 6.6, 2.1],
+        [4.5, 3.3, 6.6, 2.1, 5.5, 6.6, 2.1],
+    ];
+    console.log("readings");
+</script>
+
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
     {{template "layout.content.head" .Action }}{{$codes := .Codes}}
     <div class="content scroll">
-        {{range $location := .Data}}
+        {{range $loc, $location := .Data}}
         <div class="title">{{$location.City}}</div>
+        <canvas
+            id="weather_canvas{{$loc}}"
+            width="300"
+            height="60"
+            style="border: 1px solid green"
+        ></canvas>
+        <script>
+            showGraph("weather_canvas"+{{$loc}}, "red", readings[{{$loc}}]);
+            console.log("weather_canvas");
+        </script>
         <div class="grid-daily">
             <div class="grid-label"></div>
             <div class="grid-label">Day</div>
@@ -120,5 +139,10 @@
         </div>
         {{end}}
     </div>
+</div>
+{{ end }} {{ define "weather.current" }}
+<div id="slot-{{.Action.Name}}" class="slot" draggable="false">
+    {{template "layout.content.head" .Action }}
+    <div class="content"></div>
 </div>
 {{ end }}

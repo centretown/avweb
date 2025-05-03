@@ -3,8 +3,10 @@ package runtime
 import (
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/centretown/avcamx"
 	"github.com/centretown/avweb/socket"
@@ -13,7 +15,9 @@ import (
 type Runtime struct {
 	Location      *Location
 	Locations     []*Location
+	LocationIndex int
 	WebcamUrl     string
+	WebcamIndex   int
 	ActionsCamera []*Action
 	ActionsHome   []*Action
 	ActionsChat   []*Action
@@ -39,11 +43,12 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 		WebcamUrl: webcamUrl,
 		ActionsCamera: []*Action{
 			{Name: "camera", Title: "Camera Settings", Icon: "settings_video_camera", Group: Camera},
-			{Name: "cameraadd", Title: "Add Camera", Icon: "linked_camera", Group: Camera},
+			// {Name: "cameraadd", Title: "Add Camera", Icon: "linked_camera", Group: Camera},
 			{Name: "camera_list", Title: "List Cameras", Icon: "view_list", Group: Camera},
 		},
 		ActionsHome: []*Action{
 			// {Name: "sun", Title: "Next Sun", Icon: "wb_twilight", Group: Home},
+			{Name: "weather_current", Title: "Current Readings", Icon: "thunderstorm", Group: Home},
 			{Name: "weather_hourly", Title: "Hourly Forecast", Icon: "thermometer", Group: Home},
 			{Name: "weather_daily", Title: "Daily Forecast", Icon: "calendar_view_week", Group: Home},
 			{Name: "weather_sun", Title: "Sun", Icon: "wb_twilight", Group: Home},
@@ -86,9 +91,10 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 }
 
 type FormData struct {
-	Action *Action
-	Data   any
-	Codes  any
+	Action  *Action
+	Data    any
+	Codes   any
+	Runtime *Runtime
 }
 
 func (rt *Runtime) HandleAction(path string, templ string, data *FormData) {
@@ -123,25 +129,66 @@ func (rt *Runtime) HandleWeather() {
 	}
 
 	data := &FormData{
-		Codes: WeatherCodes,
-		Data:  rt.Locations}
+		Codes:   WeatherCodes,
+		Data:    rt.Locations,
+		Runtime: rt}
 
+	rt.HandleAction("/weather_current", "weather.current", data)
 	rt.HandleAction("/weather_sun", "weather.sun", data)
 	rt.HandleAction("/weather_daily", "weather.daily", data)
 	rt.HandleAction("/weather_hourly", "weather.hourly", data)
 
 }
 
-func (rt *Runtime) HandleCameras() {
-	data := &FormData{
-		Codes: avcamx.AvControllers["uvcvideo"],
-		Data:  rt.Host}
+func (rt *Runtime) HandleCameraAction(path string, templ string) {
 
-	rt.HandleAction("/camera", "layout.controls", data)
-	// rt.HandleAction("/cameraadd", "layout.camera.add", data)
-	rt.HandleAction("/camera_list", "layout.camera.list", data)
+	rt.Host.Mux().HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+		if len(path) < 2 {
+			return
+		}
+
+		w.Header().Add("Cache-Control", "no-cache")
+		data := &FormData{
+			Codes:   avcamx.AvControllers["uvcvideo"],
+			Runtime: rt,
+			Data:    rt.Host}
+
+		data.Action = rt.ActionMap[path[1:]]
+
+		err := rt.Temp.Lookup(templ).Execute(w, data)
+		if err != nil {
+			log.Fatal(path, err)
+		}
+	})
+
+}
+
+func (rt *Runtime) handleControl(w http.ResponseWriter, r *http.Request) {
+	url := r.URL.String()
+	r.ParseForm()
+	defer r.Body.Close()
+	source := r.FormValue("source")
+	req := strings.Replace(url, "/camera_control", source, 1)
+	resp, err := http.Get(req)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer resp.Body.Close()
+	buf, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	w.Write(buf)
+}
+
+func (rt *Runtime) HandleCameras() {
+	rt.HandleCameraAction("/camera", "layout.controls")
+	rt.HandleCameraAction("/camera_list", "layout.camera.list")
 	rt.Host.Mux().HandleFunc("/camera_primary", rt.setPrimaryCamera())
 	rt.Host.Mux().HandleFunc("/record", rt.handleRecord())
+	rt.Host.Mux().HandleFunc("/camera_control/", rt.handleControl)
 
 }
 
@@ -154,12 +201,15 @@ func (rt *Runtime) setPrimaryCamera() func(w http.ResponseWriter, r *http.Reques
 			return []byte(fmt.Sprintf(`<img id="%s" src="%s">`, id, src))
 		}
 
-		cam, path, err := rt.parseCameraPath(r)
+		cam, path, index, err := rt.parseCameraPath(r)
 		if err != nil {
 			msg := fmt.Sprintf("Error occured.<br>  %v", err)
 			w.Write(wrapStatus(statusID, msg))
 			return
 		}
+
+		rt.WebcamIndex = index
+		rt.WebcamUrl = rt.Host.Items[index].Url
 
 		if !cam.IsOpened() {
 			msg := fmt.Sprintf("%s as %s is not connected", path, cam.Url)
@@ -167,7 +217,7 @@ func (rt *Runtime) setPrimaryCamera() func(w http.ResponseWriter, r *http.Reques
 			return
 		}
 
-		msg := fmt.Sprintf("%s is connected as %s", path, cam.Url)
+		msg := fmt.Sprintf("%s is connected as %s (%d)", path, cam.Url, index)
 		w.Write(wrapStatus(statusID, msg))
 		w.Write(wrapSource(sourceID, cam.Url))
 
@@ -181,7 +231,7 @@ func wrapStatus(id, msg string) []byte {
 }
 
 func (rt *Runtime) parseCameraPath(r *http.Request) (cam *avcamx.AvItem,
-	path string, err error) {
+	path string, index int, err error) {
 	var (
 		ok bool
 	)
@@ -192,28 +242,34 @@ func (rt *Runtime) parseCameraPath(r *http.Request) (cam *avcamx.AvItem,
 	}
 
 	path = r.FormValue("path")
+	indexstr := r.FormValue("index")
+	fmt.Sscanf(indexstr, "%d", &index)
 	cam, ok = rt.Webcams[path]
 	if !ok {
 		err = fmt.Errorf("path not found: %s", path)
 		return
 	}
+	log.Println("parseCameraPath", path, indexstr, index)
 	return
 }
 
 func (rt *Runtime) handleRecord() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		avitem, err := rt.parseSourceId(r)
+		// avitem, err := rt.parseSourceId(r)
+		_, err := rt.parseSourceId(r)
 		if err != nil {
+			log.Println("handleRecord", err)
 			return
 		}
+		log.Println("handleRecord", r.URL)
 
-		if !avitem.IsRecording() {
-			log.Printf("recording...")
-			avitem.RecordCmd(300)
-		} else {
-			log.Printf("stop recording...")
-			avitem.StopRecordCmd()
-		}
+		// 	if !avitem.IsRecording() {
+		// 		log.Printf("recording...")
+		// 		avitem.RecordCmd(300)
+		// 	} else {
+		// 		log.Printf("stop recording...")
+		// 		avitem.StopRecordCmd()
+		// 	}
 	}
 }
 

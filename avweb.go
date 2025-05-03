@@ -71,7 +71,7 @@ func main() {
 		if err != nil {
 			log.Fatalln("ParseGlob", pattern, err)
 		}
-
+		rt.WebSocket.UpdateTemplate(rt.Temp)
 		rt.Temp.ExecuteTemplate(w, "index.html", rt)
 	})
 

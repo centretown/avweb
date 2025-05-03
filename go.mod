@@ -3,7 +3,7 @@ module github.com/centretown/avweb
 go 1.24.0
 
 require (
-	github.com/centretown/avcamx v0.0.0-20250424133549-cd0517acc41f
+	github.com/centretown/avcamx v0.0.0-20250428013103-b766ebf74a61
 	github.com/gorilla/websocket v1.5.3
 )
 

@@ -35,6 +35,11 @@ func NewServer(t *template.Template) *Server {
 	return s
 }
 
+func (s *Server) UpdateTemplate(t *template.Template) {
+	s.statusLayout = t.Lookup("layout.wsstatus")
+	s.messageLayout = t.Lookup("layout.wsmessage")
+}
+
 func (s *Server) Run() {
 	go s.hub.Run()
 }
