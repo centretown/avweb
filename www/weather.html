@@ -70,18 +70,18 @@
         <script>
             hideDaily.push(true);
             var val = minMax({{$daily.Daily.Low}},{{$daily.Daily.High}});
-            var rdDaily = [];
-            {{range $daily.Daily.Low}}rdDaily.push({{.}});{{end}}
+            // var rdDaily = [];
+            // {{range $daily.Daily.Low}}rdDaily.push({{.}});{{end}}
             showGraph("weather_canvas{{$loc}}", "cyan",
-              rdDaily, val.min, val.max);
-            rdDaily = [];
-            {{range $daily.Daily.High}}rdDaily.push({{.}});{{end}}
+              {{$daily.Daily.Low}}, val.min, val.max);
+            // rdDaily = [];
+            // {{range $daily.Daily.High}}rdDaily.push({{.}});{{end}}
             showGraph("weather_canvas{{$loc}}", "red",
-              rdDaily, val.min, val.max);
-            showMinMax("weather_canvas{{$loc}}", val.min, val.max);
-            rdDaily = [];
-            {{range $daily.Daily.Time}}rdDaily.push({{.}});{{end}}
-            showDays("weather_canvas{{$loc}}", rdDaily);
+              {{$daily.Daily.High}}, val.min, val.max);
+            showMinMax("weather_canvas{{$loc}}", val.min, val.max, {{$daily.DailyUnits.Low}});
+            // rdDaily = [];
+            // {{range $daily.Daily.Time}}rdDaily.push({{.}});{{end}}
+            showDays("weather_canvas{{$loc}}", {{$daily.Daily.Time}});
         </script>
         <button class="action" hx-on:click="toggleDaily({{$loc}})">
             <span class="symbols-small">more_horiz</span>
@@ -143,12 +143,12 @@
         ></canvas>
         <script>
             hideHourly.push(true);
-            var rdHourly = [];
-            var val = minMax({{$hourly.Hourly.Temperature}},{{$hourly.Hourly.Temperature}});
-            {{range $hourly.Hourly.Temperature}}rdHourly.push({{.}});{{end}}
-            showGraph("hourly_canvas"+{{$loc}}, "cyan",
-              rdHourly, val.min, val.max);
-            showMinMax("hourly_canvas"+{{$loc}}, val.min, val.max);
+            // var rdHourly = [];
+            var val = minMax({{$hourly.Hourly.Temperature}},{{$hourly.Hourly.FeelsLike}});
+            // {{range $hourly.Hourly.Temperature}}rdHourly.push({{.}});{{end}}
+            showGraph("hourly_canvas"+{{$loc}}, "cyan", {{$hourly.Hourly.Temperature}}, val.min, val.max);
+            showGraph("hourly_canvas"+{{$loc}}, "red", {{$hourly.Hourly.FeelsLike}}, val.min, val.max);
+            showMinMax("hourly_canvas"+{{$loc}}, val.min, val.max, {{$hourly.HourlyUnits.Temperature}});
             showHours("hourly_canvas"+{{$loc}}, {{$hourly.Hourly.Time}});
         </script>
         <button class="action" hx-on:click="toggleHourly({{$loc}})">

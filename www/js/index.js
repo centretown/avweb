@@ -132,10 +132,14 @@ window.addEventListener("htmx:load", function (evt) {
   addDragHandlers(id);
 });
 
-function minMax(lows, highs) {
-  var val = { min: lows[0], max: highs[0] };
-  for (let x of highs) if (val.max < x) val.max = x;
-  for (let x of lows) if (val.min > x) val.min = x;
+function minMax(...lists) {
+  var val = { min: 64000, max: -64000 };
+  for (let list of lists) {
+    for (let x of list) {
+      if (val.max < x) val.max = x;
+      if (val.min > x) val.min = x;
+    }
+  }
   return val;
 }
 
@@ -151,7 +155,7 @@ function showGraph(canvasId, color, values, min, max) {
 
   ctx.beginPath();
   ctx.strokeStyle = color;
-  let x = chartMargin;
+  let x = 0;
   let y = height;
   ctx.font = "10px sans-serif";
   for (let val of values) {
@@ -167,12 +171,13 @@ function showGraph(canvasId, color, values, min, max) {
 function showTimes(canvasId, times, options) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");
-  let xStep = (canvas.width - chartMargin) / (times.length - 1);
+  let xStep = canvas.width / times.length;
   let x = 0;
   let fmt = new Intl.DateTimeFormat("en-US", options);
+  ctx.fillStyle = `rgba(255,255,0,255)`;
   for (let t of times) {
     let day = new Date(t);
-    console.log(fmt.format(day));
+    console.log(t, day);
     ctx.fillText(fmt.format(day), x, 12);
     x += xStep;
   }
@@ -191,7 +196,6 @@ function showHours(canvasId, times) {
         intervals.push(times[i]);
       }
     }
-    intervals.push(times[times.length - 1]);
   }
   showTimes(canvasId, intervals, options);
 }
@@ -199,25 +203,38 @@ function showHours(canvasId, times) {
 function showDays(canvasId, times) {
   let options = {
     weekday: "short",
+    timeZone: "America/New_York",
   };
-  showTimes(canvasId, times, options);
+  let intervals = [];
+  for (let t of times) intervals.push(t + " GMT-0400");
+  showTimes(canvasId, intervals, options);
 }
 
-function showMinMax(canvasId, min, max, times) {
+function showMinMax(canvasId, min, max, units) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");
   let height = canvas.height - 2 * chartPadding;
   ctx.beginPath();
+  ctx.strokeStyle = `rgba(64,172,64,255)`;
   ctx.setLineDash([5, 10]);
   ctx.moveTo(0, chartPadding);
   ctx.lineTo(canvas.width, chartPadding);
-  ctx.fillStyle = "white";
-  ctx.fillText(max, canvas.width / 2 - 10, chartPadding + 10 - 1);
   ctx.moveTo(0, height + chartPadding);
   ctx.lineTo(canvas.width, height + chartPadding);
-  ctx.fillText(min, canvas.width / 2 - 10, height + chartPadding + 10 - 1);
-  ctx.strokeStyle = "grey";
   ctx.stroke();
+
+  let text = max + units;
+  let metric = ctx.measureText(text);
+  ctx.fillStyle = "yellow";
+  ctx.fillText(text, (canvas.width - metric.width) / 2, chartPadding + 10 - 1);
+
+  text = min + units;
+  metric = ctx.measureText(text);
+  ctx.fillText(
+    text,
+    (canvas.width - metric.width) / 2,
+    height + chartPadding - 2,
+  );
 }
 
 const gamepads = {};
