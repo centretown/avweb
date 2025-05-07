@@ -30,7 +30,7 @@ func (loc *Location) QueryDaily() (err error) {
 
 func (loc *Location) QueryHourly() (err error) {
 	var (
-		trailer = "&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m&forecast_hours=25&past_hours=12"
+		trailer = "&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m&forecast_hours=24"
 	)
 	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, trailer)
 	return loc.WeatherHourly.Get(q)
@@ -38,7 +38,7 @@ func (loc *Location) QueryHourly() (err error) {
 
 func (loc *Location) QueryMinutely() (err error) {
 	var (
-		trailer = "&minutely_15=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m&forecast_hours=4&past_hours=2"
+		trailer = "&minutely_15=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m&forecast_hours=3"
 	)
 	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, trailer)
 	return loc.WeatherHourly.Get(q)

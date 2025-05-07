@@ -1,5 +1,5 @@
 :root {
-    --bgOpaque: rgba(0, 0, 0, 0.6);
+    --bgOpaque: rgba(0, 0, 0, 0.75);
     --bgTransparent: rgba(0, 0, 0, 0.15);
     --bgH3: rgba(0, 127, 255, 0.15);
     --fgBright: rgba(0, 255, 255, 1);
@@ -60,6 +60,12 @@
 
 .streaming {
     color: red;
+}
+
+.chart {
+    opacity: 1;
+    background-color: #111;
+    color: green;
 }
 
 body {

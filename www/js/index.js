@@ -132,19 +132,91 @@ window.addEventListener("htmx:load", function (evt) {
   addDragHandlers(id);
 });
 
-function showGraph(canvas, color, readings) {
-  let canv = document.getElementById(canvas);
-  let ctx = canv.getContext("2d");
-  let xinc = canv.width / (readings.length - 1);
-  let height = canv.height;
-  let x = 0;
+function minMax(lows, highs) {
+  var val = { min: lows[0], max: highs[0] };
+  for (let x of highs) if (val.max < x) val.max = x;
+  for (let x of lows) if (val.min > x) val.min = x;
+  return val;
+}
+
+let chartPadding = 20;
+let chartMargin = 26;
+
+function showGraph(canvasId, color, values, min, max) {
+  let canvas = document.getElementById(canvasId);
+  let ctx = canvas.getContext("2d");
+  let xStep = canvas.width / (values.length - 1);
+  let height = canvas.height - 2 * chartPadding;
+  let yStep = height / (max - min);
+
   ctx.beginPath();
   ctx.strokeStyle = color;
-  ctx.moveTo(0, 0);
-  for (let y of readings) {
-    ctx.lineTo(x, height - (y * height) / 10);
-    x += xinc;
+  let x = chartMargin;
+  let y = height;
+  ctx.font = "10px sans-serif";
+  for (let val of values) {
+    y = (max - val) * yStep;
+    if (x == 0) ctx.moveTo(x, y + chartPadding);
+    else ctx.lineTo(x, y + chartPadding);
+    x += xStep;
   }
+  ctx.setLineDash([]);
+  ctx.stroke();
+}
+
+function showTimes(canvasId, times, options) {
+  let canvas = document.getElementById(canvasId);
+  let ctx = canvas.getContext("2d");
+  let xStep = (canvas.width - chartMargin) / (times.length - 1);
+  let x = 0;
+  let fmt = new Intl.DateTimeFormat("en-US", options);
+  for (let t of times) {
+    let day = new Date(t);
+    console.log(fmt.format(day));
+    ctx.fillText(fmt.format(day), x, 12);
+    x += xStep;
+  }
+}
+
+function showHours(canvasId, times) {
+  let options = {
+    hour: "numeric",
+  };
+  let intervals = [];
+  let interval = times.length / 6;
+  if (interval <= 1) intervals = times;
+  else {
+    for (let i = 0; i < times.length; i++) {
+      if (i % interval == 0) {
+        intervals.push(times[i]);
+      }
+    }
+    intervals.push(times[times.length - 1]);
+  }
+  showTimes(canvasId, intervals, options);
+}
+
+function showDays(canvasId, times) {
+  let options = {
+    weekday: "short",
+  };
+  showTimes(canvasId, times, options);
+}
+
+function showMinMax(canvasId, min, max, times) {
+  let canvas = document.getElementById(canvasId);
+  let ctx = canvas.getContext("2d");
+  let height = canvas.height - 2 * chartPadding;
+  ctx.beginPath();
+  ctx.setLineDash([5, 10]);
+  ctx.moveTo(0, chartPadding);
+  ctx.lineTo(canvas.width, chartPadding);
+  ctx.fillStyle = "white";
+  ctx.fillText(max, canvas.width / 2 - 10, chartPadding + 10 - 1);
+  ctx.moveTo(0, height + chartPadding);
+  ctx.lineTo(canvas.width, height + chartPadding);
+  ctx.fillText(min, canvas.width / 2 - 10, height + chartPadding + 10 - 1);
+  ctx.strokeStyle = "grey";
   ctx.stroke();
 }
 

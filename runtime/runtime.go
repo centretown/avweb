@@ -81,10 +81,12 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 	//45.40608984676536, -75.68631292544273
 	//48.485340413458964, -81.33687676821839
 	//49.77255342394314, -94.48309874840045
+	//53.529490711683785, -113.50925706225637
 	rt.Locations = []*Location{
 		{City: "Ottawa", Latitude: 45.40608984676536, Longitude: -75.68631292544273, Zone: "America%2FNew_York"},
 		{City: "Timmins", Latitude: 48.485340413458964, Longitude: -81.33687676821839, Zone: "America%2FNew_York"},
 		{City: "Kenora", Latitude: 49.77255342394314, Longitude: -94.48309874840045, Zone: "America%2FNew_York"},
+		{City: "Edmonton", Latitude: 53.529490711683785, Longitude: -113.50925706225637, Zone: "America%2FNew_York"},
 	}
 	rt.Location = rt.Locations[0]
 	return
