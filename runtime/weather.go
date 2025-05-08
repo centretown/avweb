@@ -17,6 +17,28 @@ type WeatherCommon struct {
 	Timezone             string  `json:"timezone"`
 	TimezoneAbbreviation string  `json:"timezone_abbreviation"`
 	Elevation            float64 `json:"elevation"`
+	Min                  float64 `json:"-"`
+	Max                  float64 `json:"-"`
+}
+
+func (w *WeatherCommon) FormatHour(hour time.Time) string {
+	return hour.Format("3PM")
+}
+
+func (w *WeatherCommon) MinMax(args ...[]float64) int {
+	count := 0
+	for _, values := range args {
+		for _, value := range values {
+			if w.Max < value {
+				w.Max = value
+			}
+			if w.Min > value {
+				w.Min = value
+			}
+			count++
+		}
+	}
+	return count
 }
 
 type WeatherHourly struct {
@@ -68,11 +90,11 @@ type HourlyUnits struct {
 
 type Hourly struct {
 	Time          []string  `json:"time"`
-	Temperature   []float32 `json:"temperature_2m"`
-	FeelsLike     []float32 `json:"apparent_temperature"`
+	Temperature   []float64 `json:"temperature_2m"`
+	FeelsLike     []float64 `json:"apparent_temperature"`
 	Probability   []int32   `json:"precipitation_probability"`
-	Precipitation []float32 `json:"precipitation"`
-	WindSpeed     []float32 `json:"wind_speed_10m"`
+	Precipitation []float64 `json:"precipitation"`
+	WindSpeed     []float64 `json:"wind_speed_10m"`
 	Code          []int32   `json:"weather_code"`
 }
 
@@ -82,6 +104,26 @@ func (w *WeatherHourly) FormatTime(index int) string {
 		log.Printf("FormatTime: %v\n", err)
 	}
 	return t.Format("3:04PM")
+}
+func (w *WeatherHourly) Hours() (hours []time.Time) {
+	hours = make([]time.Time, 0, len(w.Hourly.Time)/4)
+	for i := range w.Hourly.Time {
+		if i%4 == 0 {
+			t, _ := time.Parse("2006-01-02T15:04", w.Hourly.Time[i])
+			hours = append(hours, t)
+		}
+	}
+	return
+}
+
+func (w *WeatherHourly) Icons() (icons []string) {
+	icons = make([]string, 0, len(w.Hourly.Time)/4)
+	for i := range w.Hourly.Time {
+		if i%4 == 0 {
+			icons = append(icons, WeatherCodes[int(w.Hourly.Code[i])].Icon)
+		}
+	}
+	return
 }
 
 func (w *WeatherHourly) FormatTemperature(index int) string {
@@ -160,6 +202,11 @@ func (w *WeatherDaily) FormatSunrise(index int) string {
 		log.Printf("FormatSunrise: %v\n", err)
 	}
 	return t.Format("3:04PM")
+}
+
+func (w *WeatherDaily) FormatDayShort(index int) string {
+	t, _ := time.Parse("2006-01-02", w.Daily.Time[index])
+	return t.Format("Mon")
 }
 
 func toHours(fsec float64) string {
@@ -243,9 +290,47 @@ func LoadWeather(r io.Reader, w any) (err error) {
 	return
 }
 
+type WeatherEffects struct {
+	Token     string
+	Class     string
+	Intensity int
+}
+
 type WeatherCode struct {
-	Code int
-	Icon string
+	Code   int
+	Icon   string
+	Tokens []string
+}
+
+var WeatherCodes = map[int]*WeatherCode{
+	0:  {Code: 0, Icon: "clear_day", Tokens: []string{"clear", "sky"}},
+	1:  {Code: 1, Icon: "clear_day", Tokens: []string{"mainly", "clear"}},
+	2:  {Code: 2, Icon: "partly_cloudy_day", Tokens: []string{"partly", "cloudy"}},
+	3:  {Code: 3, Icon: "cloud", Tokens: []string{"overcast", ""}},
+	45: {Code: 45, Icon: "foggy", Tokens: []string{"fog", ""}},
+	48: {Code: 48, Icon: "mist", Tokens: []string{"rime", "fog"}},
+	51: {Code: 51, Icon: "rainy_light", Tokens: []string{"light", "drizzle"}},
+	53: {Code: 53, Icon: "rainy_light", Tokens: []string{"moderate", "drizzle"}},
+	55: {Code: 55, Icon: "rainy_light", Tokens: []string{"dense", "drizzle"}},
+	56: {Code: 56, Icon: "rainy_snow", Tokens: []string{"light", "freezing", "drizzle"}},
+	57: {Code: 57, Icon: "rainy_snow", Tokens: []string{"dense", "freezing", "drizzle"}},
+	61: {Code: 61, Icon: "rainy_light", Tokens: []string{"slight", "rain"}},
+	63: {Code: 63, Icon: "rainy", Tokens: []string{"moderate", "rain"}},
+	65: {Code: 65, Icon: "rainy_heavy", Tokens: []string{"heavy", "rain"}},
+	66: {Code: 66, Icon: "rainy_heavy", Tokens: []string{"light", "freezing", "rain"}},
+	67: {Code: 67, Icon: "rainy_heavy", Tokens: []string{"heavy", "freezing", "rain"}},
+	71: {Code: 71, Icon: "snowing", Tokens: []string{"slight", "snow"}},
+	73: {Code: 73, Icon: "snowing", Tokens: []string{"moderate", "snow"}},
+	75: {Code: 75, Icon: "snowing_heavy", Tokens: []string{"heavy", "snow"}},
+	77: {Code: 77, Icon: "snowing", Tokens: []string{"snow", "grains"}},
+	80: {Code: 80, Icon: "rainy_light", Tokens: []string{"slight", "rain", "showers"}},
+	81: {Code: 81, Icon: "rainy", Tokens: []string{"moderate", "rain", "showers"}},
+	82: {Code: 82, Icon: "rainy_heavy", Tokens: []string{"violent", "rain", "showers"}},
+	85: {Code: 85, Icon: "snowing", Tokens: []string{"slight", "snow", "showers"}},
+	86: {Code: 86, Icon: "snowing_heavy", Tokens: []string{"heavy", "snow", "showers"}},
+	95: {Code: 95, Icon: "thunderstorm", Tokens: []string{"thunderstorm"}},
+	96: {Code: 96, Icon: "weather_hail", Tokens: []string{"slight", "hail", "thunderstorm"}},
+	99: {Code: 99, Icon: "weather_hail", Tokens: []string{"heavy", "hail", "thunderstorm"}},
 }
 
 /*
@@ -263,31 +348,3 @@ type WeatherCode struct {
 95 *	Thunderstorm: Slight or moderate
 96, 99 *	Thunderstorm with slight and heavy hail
 */
-var WeatherCodes = map[int]string{
-	0:  "clear_day",
-	1:  "clear_day",
-	2:  "partly_cloudy_day",
-	3:  "cloud",
-	45: "foggy",
-	48: "mist",
-	51: "rainy_light",
-	53: "rainy_light",
-	55: "rainy_light",
-	56: "rainy_snow",
-	57: "rainy_snow",
-	61: "rainy_light",
-	63: "rainy",
-	65: "rainy_heavy",
-	71: "snowing",
-	73: "snowing",
-	75: "snowing_heavy",
-	77: "snowing",
-	80: "rainy_light",
-	81: "rainy",
-	82: "rainy_heavy",
-	85: "snowing",
-	86: "snowing_heavy",
-	95: "thunderstorm",
-	96: "weather_hail",
-	99: "weather_hail",
-}

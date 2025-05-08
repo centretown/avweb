@@ -27,7 +27,7 @@
         <div class="grid-sun">
             {{$daily := $location.WeatherDaily}} {{range $index, $time :=
             $daily.Daily.Time}}{{$code := index $daily.Daily.Code $index}}
-            {{$icon := index $codes $code}}
+            {{$wcode := index $codes $code}} {{$icon := $wcode.Icon}}
             <span class="symbols-small">{{$icon}}</span>
             <div class="grid-data">{{$daily.FormatDay $index}}</div>
             <div class="grid-data">{{$daily.FormatDaylight $index}}</div>
@@ -60,28 +60,19 @@
     <div class="content scroll">
         {{range $loc, $location := .Data}}{{$daily := $location.WeatherDaily}}
         <div class="title">{{$location.City}}</div>
-        <canvas
-            class="chart"
-            id="weather_canvas{{$loc}}"
-            width="320"
-            height="100"
-            style="border: 1px solid yellow"
-        ></canvas>
+        <div class="grid-day">
+            {{range $i,$t := $daily.Daily.Time}}
+            <span class="grid-data">{{$daily.FormatDayShort $i}}</span>
+            {{end}}
+        </div>
+        <canvas class="chart" id="daily_canvas{{$loc}}"></canvas>
         <script>
             hideDaily.push(true);
-            var val = minMax({{$daily.Daily.Low}},{{$daily.Daily.High}});
-            // var rdDaily = [];
-            // {{range $daily.Daily.Low}}rdDaily.push({{.}});{{end}}
-            showGraph("weather_canvas{{$loc}}", "cyan",
-              {{$daily.Daily.Low}}, val.min, val.max);
-            // rdDaily = [];
-            // {{range $daily.Daily.High}}rdDaily.push({{.}});{{end}}
-            showGraph("weather_canvas{{$loc}}", "red",
-              {{$daily.Daily.High}}, val.min, val.max);
-            showMinMax("weather_canvas{{$loc}}", val.min, val.max, {{$daily.DailyUnits.Low}});
-            // rdDaily = [];
-            // {{range $daily.Daily.Time}}rdDaily.push({{.}});{{end}}
-            showDays("weather_canvas{{$loc}}", {{$daily.Daily.Time}});
+            {{$daily.MinMax $daily.Daily.Low $daily.Daily.High}}
+            var id = "daily_canvas"+{{$loc}};
+            showGraph(id, "cyan", {{$daily.Min}}, {{$daily.Max}}, {{$daily.Daily.Low}});
+            showGraph(id, "red",  {{$daily.Min}}, {{$daily.Max}}, {{$daily.Daily.High}});
+            showMinMax(id, {{$daily.Min}}, {{$daily.Max}}, {{$daily.DailyUnits.Low}});
         </script>
         <button class="action" hx-on:click="toggleDaily({{$loc}})">
             <span class="symbols-small">more_horiz</span>
@@ -98,7 +89,8 @@
 
             <div class="grid-daily">
                 {{range $index, $time := $daily.Daily.Time}}{{$code := index
-                $daily.Daily.Code $index}} {{$icon := index $codes $code}}
+                $daily.Daily.Code $index}} {{$wcode := index $codes $code}}
+                {{$icon := $wcode.Icon}}
                 <span class="symbols-small">{{$icon}}</span>
                 <div class="grid-data">{{$daily.FormatDay $index}}</div>
                 <div class="grid-data">{{$daily.FormatHigh $index}}</div>
@@ -132,24 +124,27 @@
     {{template "layout.content.head" .Action }}{{$codes := .Codes}}
     <div class="content scroll">
         {{range $loc, $location := .Data}} {{$hourly :=
-        $location.WeatherHourly}}
+        $location.WeatherHourly}}{{$canvasId := "hourly_canvas{{$loc}}"}}
         <div class="title">{{$location.City}}</div>
-        <canvas
-            class="chart"
-            id="hourly_canvas{{$loc}}"
-            width="320"
-            height="100"
-            style="border: 1px solid yellow"
-        ></canvas>
+        <div class="grid-hour">
+            {{$hours:=$hourly.Hours}} {{range $t := $hours}}
+            <span class="grid-data">{{$hourly.FormatHour $t}}</span>
+            {{end}}
+        </div>
+        <div class="grid-hour">
+            {{$icons:=$hourly.Icons}} {{range $icon := $icons}}
+            <span class="grid-data symbols-small">{{$icon}}</span>
+            {{end}}
+        </div>
+        <canvas class="chart-hourly" id="hourly_canvas{{$loc}}"></canvas>
         <script>
             hideHourly.push(true);
-            // var rdHourly = [];
-            var val = minMax({{$hourly.Hourly.Temperature}},{{$hourly.Hourly.FeelsLike}});
-            // {{range $hourly.Hourly.Temperature}}rdHourly.push({{.}});{{end}}
-            showGraph("hourly_canvas"+{{$loc}}, "cyan", {{$hourly.Hourly.Temperature}}, val.min, val.max);
-            showGraph("hourly_canvas"+{{$loc}}, "red", {{$hourly.Hourly.FeelsLike}}, val.min, val.max);
-            showMinMax("hourly_canvas"+{{$loc}}, val.min, val.max, {{$hourly.HourlyUnits.Temperature}});
-            showHours("hourly_canvas"+{{$loc}}, {{$hourly.Hourly.Time}});
+            {{$hourly.MinMax $hourly.Hourly.Temperature $hourly.Hourly.FeelsLike}}
+            var id = "hourly_canvas"+{{$loc}};
+            // var val = minMax({{$hourly.Hourly.Temperature}},{{$hourly.Hourly.FeelsLike}});
+            showGraph(id, "cyan", {{$hourly.Min}}, {{$hourly.Max}}, {{$hourly.Hourly.Temperature}});
+            showGraph(id, "red", {{$hourly.Min}}, {{$hourly.Max}}, {{$hourly.Hourly.FeelsLike}});
+            showMinMax(id, {{$hourly.Min}}, {{$hourly.Max}}, {{$hourly.HourlyUnits.Temperature}});
         </script>
         <button class="action" hx-on:click="toggleHourly({{$loc}})">
             <span class="symbols-small">more_horiz</span>
@@ -182,7 +177,8 @@
 
             <div class="grid-hourly">
                 {{range $index, $time :=$hourly.Hourly.Time}} {{$code := index
-                $hourly.Hourly.Code $index}} {{$icon := index $codes $code}}
+                $hourly.Hourly.Code $index}} {{$wcode := index $codes $code}}
+                {{$icon := $wcode.Icon}}
                 <span class="symbols-small">{{$icon}}</span>
                 <div class="grid-data">{{$hourly.FormatTime $index}}</div>
                 <div class="grid-data">

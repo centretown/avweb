@@ -143,14 +143,11 @@ function minMax(...lists) {
   return val;
 }
 
-let chartPadding = 20;
-let chartMargin = 26;
-
-function showGraph(canvasId, color, values, min, max) {
+function showGraph(canvasId, color, min, max, values) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");
   let xStep = canvas.width / (values.length - 1);
-  let height = canvas.height - 2 * chartPadding;
+  let height = canvas.height;
   let yStep = height / (max - min);
 
   ctx.beginPath();
@@ -160,8 +157,8 @@ function showGraph(canvasId, color, values, min, max) {
   ctx.font = "10px sans-serif";
   for (let val of values) {
     y = (max - val) * yStep;
-    if (x == 0) ctx.moveTo(x, y + chartPadding);
-    else ctx.lineTo(x, y + chartPadding);
+    if (x == 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
     x += xStep;
   }
   ctx.setLineDash([]);
@@ -177,7 +174,7 @@ function showTimes(canvasId, times, options) {
   ctx.fillStyle = `rgba(255,255,0,255)`;
   for (let t of times) {
     let day = new Date(t);
-    console.log(t, day);
+    // console.log(t, day);
     ctx.fillText(fmt.format(day), x, 12);
     x += xStep;
   }
@@ -213,28 +210,16 @@ function showDays(canvasId, times) {
 function showMinMax(canvasId, min, max, units) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");
-  let height = canvas.height - 2 * chartPadding;
+  let height = canvas.height;
+
   ctx.beginPath();
   ctx.strokeStyle = `rgba(64,172,64,255)`;
-  ctx.setLineDash([5, 10]);
-  ctx.moveTo(0, chartPadding);
-  ctx.lineTo(canvas.width, chartPadding);
-  ctx.moveTo(0, height + chartPadding);
-  ctx.lineTo(canvas.width, height + chartPadding);
+  ctx.setLineDash([2, 2]);
+  ctx.moveTo(0, 0);
+  ctx.lineTo(canvas.width, 0);
+  ctx.moveTo(0, canvas.height - 1);
+  ctx.lineTo(canvas.width, canvas.height - 1);
   ctx.stroke();
-
-  let text = max + units;
-  let metric = ctx.measureText(text);
-  ctx.fillStyle = "yellow";
-  ctx.fillText(text, (canvas.width - metric.width) / 2, chartPadding + 10 - 1);
-
-  text = min + units;
-  metric = ctx.measureText(text);
-  ctx.fillText(
-    text,
-    (canvas.width - metric.width) / 2,
-    height + chartPadding - 2,
-  );
 }
 
 const gamepads = {};

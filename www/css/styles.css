@@ -12,6 +12,9 @@
     --slotWidth: 23rem;
     --slotImageWidth: 18rem;
     --inputWidth: 8rem;
+    --chartWidth: 322px;
+    --chartWidthHourly: 324px;
+    --chartHeight: 60px;
 }
 
 /* fallback */
@@ -62,10 +65,17 @@
     color: red;
 }
 
-.chart {
+.chart,
+.chart-hourly {
     opacity: 1;
-    background-color: #111;
     color: green;
+    width: var(--chartWidth);
+    height: var(--chartHeight);
+    padding-top: 8;
+    padding-bottom: 8;
+}
+.chart-hourly {
+    width: var(--chartWidthHourly);
 }
 
 body {
@@ -326,6 +336,8 @@ h3 {
 }
 
 .grid-container,
+.grid-day,
+.grid-hour,
 .grid-sun,
 .grid-hourly,
 .grid-daily {
@@ -334,6 +346,17 @@ h3 {
     display: grid;
     grid-template-columns: 4rem 4rem 8rem 3rem;
     justify-content: center;
+}
+
+.grid-day {
+    padding-bottom: 2px;
+    justify-content: left;
+    grid-template-columns: 46px 46px 46px 46px 46px 46px 46px;
+}
+.grid-hour {
+    padding-bottom: 2px;
+    justify-content: left;
+    grid-template-columns: 54px 54px 54px 54px 54px 54px;
 }
 
 .grid-hourly {

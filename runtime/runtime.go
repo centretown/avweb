@@ -49,8 +49,8 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 		ActionsHome: []*Action{
 			// {Name: "sun", Title: "Next Sun", Icon: "wb_twilight", Group: Home},
 			{Name: "weather_current", Title: "Current Readings", Icon: "thunderstorm", Group: Home},
-			{Name: "weather_hourly", Title: "Hourly Forecast", Icon: "thermometer", Group: Home},
-			{Name: "weather_daily", Title: "Daily Forecast", Icon: "calendar_view_week", Group: Home},
+			{Name: "weather_hourly", Title: "24 Hour Forecast", Icon: "thermometer", Group: Home},
+			{Name: "weather_daily", Title: "7 Day Forecast", Icon: "calendar_view_week", Group: Home},
 			{Name: "weather_sun", Title: "Sun", Icon: "wb_twilight", Group: Home},
 			// {Name: "wifi", Title: "WIFI Signals", Icon: "network_wifi", Group: Home},
 			// {Name: "lights", Title: "LED Lights", Icon: "backlight_high", Group: Home},
@@ -99,7 +99,14 @@ type FormData struct {
 	Runtime *Runtime
 }
 
-func (rt *Runtime) HandleAction(path string, templ string, data *FormData) {
+type WeatherFormData struct {
+	Action  *Action
+	Data    any
+	Codes   map[int]*WeatherCode
+	Runtime *Runtime
+}
+
+func (rt *Runtime) HandleAction(path string, templ string, data *WeatherFormData) {
 
 	rt.Host.Mux().HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		if len(path) < 2 {
@@ -130,7 +137,7 @@ func (rt *Runtime) HandleWeather() {
 		}
 	}
 
-	data := &FormData{
+	data := &WeatherFormData{
 		Codes:   WeatherCodes,
 		Data:    rt.Locations,
 		Runtime: rt}
