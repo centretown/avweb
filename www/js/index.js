@@ -207,13 +207,13 @@ function showDays(canvasId, times) {
   showTimes(canvasId, intervals, options);
 }
 
-function showMinMax(canvasId, min, max, units) {
+function showMinMax(canvasId, min, max) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");
   let height = canvas.height;
 
   ctx.beginPath();
-  ctx.strokeStyle = `rgba(64,172,64,255)`;
+  ctx.strokeStyle = "yellow";
   ctx.setLineDash([2, 2]);
   ctx.moveTo(0, 0);
   ctx.lineTo(canvas.width, 0);

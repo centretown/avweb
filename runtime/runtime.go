@@ -28,11 +28,7 @@ type Runtime struct {
 	Temp          *template.Template
 }
 
-// 45.41653080618134, -75.69649537375025
-// https://api.open-meteo.com/v1/forecast?latitude=45.42&longitude=-75.70&hourly=temperature_2m
-// "https://api.open-meteo.com/v1/forecast?latitude=45.42&longitude=-75.7&daily=sunrise,sunset&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m&timezone=America%2FNew_York"
-
-func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
+func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
 	var webcamUrl = ""
 	if len(host.Items) > 0 {
 		webcamUrl = host.Items[0].Url
@@ -42,52 +38,29 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 		Host:      host,
 		WebcamUrl: webcamUrl,
 		ActionsCamera: []*Action{
-			{Name: "camera", Title: "Camera Settings", Icon: "settings_video_camera", Group: Camera},
-			// {Name: "cameraadd", Title: "Add Camera", Icon: "linked_camera", Group: Camera},
-			{Name: "camera_list", Title: "List Cameras", Icon: "view_list", Group: Camera},
+			config.Actions["camera"],
+			config.Actions["camera_list"],
 		},
 		ActionsHome: []*Action{
-			// {Name: "sun", Title: "Next Sun", Icon: "wb_twilight", Group: Home},
-			{Name: "weather_current", Title: "Current Readings", Icon: "thunderstorm", Group: Home},
-			{Name: "weather_hourly", Title: "24 Hour Forecast", Icon: "thermometer", Group: Home},
-			{Name: "weather_daily", Title: "7 Day Forecast", Icon: "calendar_view_week", Group: Home},
-			{Name: "weather_sun", Title: "Sun", Icon: "wb_twilight", Group: Home},
-			// {Name: "wifi", Title: "WIFI Signals", Icon: "network_wifi", Group: Home},
-			// {Name: "lights", Title: "LED Lights", Icon: "backlight_high", Group: Home},
+			config.Actions["weather_current"],
+			config.Actions["weather_hourly"],
+			config.Actions["weather_daily"],
+			config.Actions["weather_sun"],
 		},
 		ActionsChat: []*Action{
-			// {Name: "chat", Title: "Chat", Icon: "chat", Group: Chat},
-			{Name: "resetcontrols", Title: "Reset Camera", Icon: "reset_settings", Group: Chat},
-			{Name: "record", Title: "Record", Icon: "radio_button_checked", Group: Chat},
+			config.Actions["resetcontrols"],
+			config.Actions["record"],
 		},
 
-		ActionMap: make(map[string]*Action),
+		ActionMap: config.Actions,
 		Webcams:   make(map[string]*avcamx.AvItem),
 	}
 
-	for _, action := range rt.ActionsCamera {
-		rt.ActionMap[action.Name] = action
-	}
-	for _, action := range rt.ActionsHome {
-		rt.ActionMap[action.Name] = action
-	}
-	for _, action := range rt.ActionsChat {
-		rt.ActionMap[action.Name] = action
-	}
-	for _, item := range rt.Host.Items {
+	for _, item := range host.Items {
 		rt.Webcams[item.Url] = item
 	}
 
-	//45.40608984676536, -75.68631292544273
-	//48.485340413458964, -81.33687676821839
-	//49.77255342394314, -94.48309874840045
-	//53.529490711683785, -113.50925706225637
-	rt.Locations = []*Location{
-		{City: "Ottawa", Latitude: 45.40608984676536, Longitude: -75.68631292544273, Zone: "America%2FNew_York"},
-		{City: "Timmins", Latitude: 48.485340413458964, Longitude: -81.33687676821839, Zone: "America%2FNew_York"},
-		{City: "Kenora", Latitude: 49.77255342394314, Longitude: -94.48309874840045, Zone: "America%2FNew_York"},
-		{City: "Edmonton", Latitude: 53.529490711683785, Longitude: -113.50925706225637, Zone: "America%2FNew_York"},
-	}
+	rt.Locations = config.Locations
 	rt.Location = rt.Locations[0]
 	return
 }

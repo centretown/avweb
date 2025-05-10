@@ -3,12 +3,12 @@ package runtime
 import "fmt"
 
 type Location struct {
-	City          string
-	Latitude      float64
-	Longitude     float64
-	Zone          string
-	WeatherDaily  WeatherDaily
-	WeatherHourly WeatherHourly
+	City          string        `json:"city"`
+	Latitude      float64       `json:"latitude"`
+	Longitude     float64       `json:"longitude"`
+	Zone          string        `json:"zone"`
+	WeatherDaily  WeatherDaily  `json:"-"`
+	WeatherHourly WeatherHourly `json:"-"`
 }
 
 // "https://api.open-meteo.com/v1/forecast?latitude=45.42&longitude=-75.7&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,precipitation_sum,weather_code,uv_index_max&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m&timezone=America%2FNew_York"

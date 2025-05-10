@@ -25,8 +25,9 @@ func (w *WeatherCommon) FormatHour(hour time.Time) string {
 	return hour.Format("3PM")
 }
 
-func (w *WeatherCommon) MinMax(args ...[]float64) int {
-	count := 0
+func (w *WeatherCommon) MinMax(args ...[]float64) float64 {
+	w.Min = 65000
+	w.Max = -65000
 	for _, values := range args {
 		for _, value := range values {
 			if w.Max < value {
@@ -35,10 +36,9 @@ func (w *WeatherCommon) MinMax(args ...[]float64) int {
 			if w.Min > value {
 				w.Min = value
 			}
-			count++
 		}
 	}
-	return count
+	return w.Max
 }
 
 type WeatherHourly struct {
@@ -116,11 +116,11 @@ func (w *WeatherHourly) Hours() (hours []time.Time) {
 	return
 }
 
-func (w *WeatherHourly) Icons() (icons []string) {
-	icons = make([]string, 0, len(w.Hourly.Time)/4)
-	for i := range w.Hourly.Time {
-		if i%4 == 0 {
-			icons = append(icons, WeatherCodes[int(w.Hourly.Code[i])].Icon)
+func (w *WeatherCommon) Icons(codes []int32, div int) (icons []string) {
+	icons = make([]string, 0, len(codes)/int(div))
+	for i := range codes {
+		if i%div == 0 {
+			icons = append(icons, WeatherCodes[int(codes[i])].Icon)
 		}
 	}
 	return
@@ -164,7 +164,7 @@ type Daily struct {
 	Daylight      []float64 `json:"daylight_duration"`
 	Sunshine      []float64 `json:"sunshine_duration"`
 	Precipitation []float64 `json:"precipitation_sum"`
-	Code          []int     `json:"weather_code"`
+	Code          []int32   `json:"weather_code"`
 	UvIndex       []float64 `json:"uv_index_max"`
 }
 

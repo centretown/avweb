@@ -10,8 +10,8 @@ const (
 )
 
 type Action struct {
-	Name  string
-	Title string
-	Icon  string
-	Group ActionGroup
+	Name  string      `json:"name"`
+	Title string      `json:"title"`
+	Icon  string      `json:"icon"`
+	Group ActionGroup `json:"group"`
 }

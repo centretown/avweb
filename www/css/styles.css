@@ -9,6 +9,7 @@
     --fgClock: rgba(127, 168, 158, 0.5);
     --fgStatus: rgba(255, 255, 0, 0.9);
     --fgIcon: rgba(120, 184, 244, 1);
+    --fgWeatherIcon: rgba(0, 0, 255, 1);
     --slotWidth: 23rem;
     --slotImageWidth: 18rem;
     --inputWidth: 8rem;
@@ -27,6 +28,7 @@
 
 .material-symbols-outlined,
 .symbols,
+.symbols-weather,
 .symbols-small,
 .symbols-form {
     font-family: "Material Symbols Outlined";
@@ -49,12 +51,18 @@
     font-size: 2.25rem;
 }
 
+.symbols-weather,
 .symbols-small {
     color: var(--fgIcon);
     margin-right: 0.5rem;
     font-size: 1rem;
 }
-
+.symbols-weather {
+    font-size: 0.75rem;
+    margin-right: 0rem;
+    color: var(--fgIcon);
+    /* color: var(--fgWeatherIcon); */
+}
 .symbols-form {
     color: var(--fgIcon);
     font-size: 1.5rem;
@@ -203,6 +211,16 @@ h3 {
     color: var(--fgBright);
 }
 
+.more {
+    padding: 2px;
+    margin: 2px;
+    margin-bottom: 8px;
+    background-color: var(--bgOpaque);
+    color: var(--fgDim);
+    border-radius: 0.35rem;
+    width: 99%;
+}
+
 .close-slot {
     position: absolute;
     top: 0.5rem;
@@ -335,14 +353,23 @@ h3 {
     color: var(--fgOut);
 }
 
+.grid-minmax {
+    font-size: 0.6rem;
+    padding-bottom: 2px;
+    width: 100%;
+    text-align: center;
+}
+
 .grid-container,
 .grid-day,
 .grid-hour,
+.grid-icon,
+.grid-icon24,
 .grid-sun,
 .grid-hourly,
 .grid-daily {
     padding-bottom: 1rem;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     display: grid;
     grid-template-columns: 4rem 4rem 8rem 3rem;
     justify-content: center;
@@ -351,12 +378,19 @@ h3 {
 .grid-day {
     padding-bottom: 2px;
     justify-content: left;
-    grid-template-columns: 46px 46px 46px 46px 46px 46px 46px;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
 }
+
+.grid-icon,
+.grid-icon24,
 .grid-hour {
     padding-bottom: 2px;
     justify-content: left;
-    grid-template-columns: 54px 54px 54px 54px 54px 54px;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.grid-icon24 {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
 }
 
 .grid-hourly {
@@ -373,11 +407,11 @@ h3 {
 }
 
 .grid-label {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
     background-color: var(--bgTransparent);
 }
 .grid-data {
-    font-size: 0.75rem;
+    font-size: 0.6rem;
     background-color: var(--bgTransparent);
     color: var(--fgOut);
 }
