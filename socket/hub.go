@@ -33,6 +33,8 @@ type Hub struct {
 
 	// Notify channel
 	updateList chan struct{}
+
+	Done chan bool
 }
 
 // NewHub creates new Hub
@@ -43,6 +45,8 @@ func NewHub() *Hub {
 		Unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
 		updateList: make(chan struct{}),
+
+		Done: make(chan bool),
 	}
 }
 
@@ -55,6 +59,9 @@ func (h *Hub) Run() {
 	log.Println("HUB RUNNING")
 	for {
 		select {
+		case <-h.Done:
+			log.Println("HUB Done")
+			return
 		case client := <-h.Register:
 			log.Printf("Registering client %s", client.name)
 

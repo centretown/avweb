@@ -113,7 +113,7 @@ func (s *Server) Broadcast(message string) {
 	s.hub.Broadcast(message)
 }
 
-func (s *Server) Webhook(w http.ResponseWriter, r *http.Request) {
+func (s *Server) MessageHook(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		log.Printf("Failed to parse body: %v", err)
@@ -171,6 +171,10 @@ func (s *Server) Events(w http.ResponseWriter, r *http.Request) {
 
 	go client.WritePump()
 	go client.ReadPump()
+}
+
+func (s *Server) Done() {
+	s.hub.Done <- true
 }
 
 // func (s *SockServer) Status(w http.ResponseWriter, r *http.Request) {

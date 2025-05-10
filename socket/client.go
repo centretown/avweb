@@ -41,6 +41,7 @@ type Client struct {
 	send   chan []byte
 	name   string
 	active bool
+	done   chan bool
 }
 
 // NewClient creates new Client

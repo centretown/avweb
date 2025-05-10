@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/centretown/avcamx"
 	"github.com/centretown/avweb/socket"
@@ -26,6 +27,10 @@ type Runtime struct {
 	Host          *avcamx.AvHost
 	Webcams       map[string]*avcamx.AvItem
 	Temp          *template.Template
+
+	monitor *time.Ticker
+	done    chan bool
+	TickCmd chan int
 }
 
 func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
@@ -33,6 +38,9 @@ func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
 	if len(host.Items) > 0 {
 		webcamUrl = host.Items[0].Url
 	}
+
+	t := time.Now()
+	nextHour := t.Minute() % 60
 
 	rt = &Runtime{
 		Host:      host,
@@ -54,6 +62,11 @@ func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
 
 		ActionMap: config.Actions,
 		Webcams:   make(map[string]*avcamx.AvItem),
+
+		monitor: time.NewTicker(time.Minute * time.Duration(nextHour)),
+
+		done:    make(chan bool),
+		TickCmd: make(chan int),
 	}
 
 	for _, item := range host.Items {
@@ -62,7 +75,78 @@ func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
 
 	rt.Locations = config.Locations
 	rt.Location = rt.Locations[0]
+
 	return
+}
+
+func (rt *Runtime) Done() {
+	// rt.WebSocket.Done()
+	// rt.done <- true
+}
+
+func (rt *Runtime) Monitor() {
+	const (
+		NEXT_DAY = iota
+		NEXT_HOUR
+		NEXT_MINUTE
+	)
+	var (
+		nextDaily    = time.Now()
+		nextHourly   = time.Now()
+		nextMinutely = time.Now()
+		counter      = 0
+	)
+
+	log.Println("start Monitoring")
+	defer func() {
+		log.Println("stop Monitoring")
+	}()
+
+	for {
+		select {
+		case <-rt.done:
+			log.Println("Done!")
+			return
+
+		case cmd := <-rt.TickCmd:
+			switch cmd {
+			case NEXT_DAY:
+				nextDaily = nextDaily.Add(24 * time.Hour)
+			case NEXT_HOUR:
+				nextHourly = nextHourly.Add(2 * time.Hour)
+			case NEXT_MINUTE:
+				nextMinutely = nextMinutely.Add(15 * time.Minute)
+			}
+			message := `<span id="clock-temp" hx-swap-oob="outerHTML">` +
+				fmt.Sprintf("%d C", counter) + `</span>`
+			log.Println(message)
+
+		case <-rt.monitor.C:
+			rt.QueryHourly()
+			rt.BroadcastTemperature()
+			if counter == 0 {
+				rt.monitor.Reset(time.Hour)
+			}
+			counter++
+		}
+
+		time.Sleep(time.Millisecond)
+	}
+}
+
+func (rt *Runtime) CurrentTemperature() string {
+	hourly := &rt.Location.WeatherHourly
+	if len(hourly.Hourly.Temperature) == 0 {
+		return "99.9 ?"
+	}
+	return fmt.Sprintf("%2.1f%s",
+		hourly.Hourly.Temperature[0],
+		hourly.HourlyUnits.Temperature)
+}
+
+func (rt *Runtime) BroadcastTemperature() {
+	message := `<span id="clock-temp" hx-swap-oob="outerHTML">` + rt.CurrentTemperature() + `</span>`
+	rt.WebSocket.Broadcast(message)
 }
 
 type FormData struct {
@@ -97,19 +181,25 @@ func (rt *Runtime) HandleAction(path string, templ string, data *WeatherFormData
 
 }
 
-func (rt *Runtime) HandleWeather() {
-
+func (rt *Runtime) QueryDaily() {
 	for _, location := range rt.Locations {
 		err := location.QueryDaily()
 		if err != nil {
 			log.Printf("WeatherDaily: %v", err)
 		}
-		err = location.QueryHourly()
+	}
+}
+
+func (rt *Runtime) QueryHourly() {
+	for _, location := range rt.Locations {
+		err := location.QueryHourly()
 		if err != nil {
 			log.Printf("WeatherHourly: %v", err)
 		}
 	}
+}
 
+func (rt *Runtime) HandleWeather() {
 	data := &WeatherFormData{
 		Codes:   WeatherCodes,
 		Data:    rt.Locations,

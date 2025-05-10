@@ -2,7 +2,6 @@ package runtime
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"testing"
 )
@@ -47,7 +46,7 @@ func testFile(t *testing.T, filename string, weather any) {
 func TestMinutely(t *testing.T) {
 
 	var (
-		trailer   = "&minutely_15=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m"
+		// trailer   = "&minutely_15=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m"
 		Locations = []*Location{
 			{City: "Ottawa", Latitude: 45.40608984676536, Longitude: -75.68631292544273, Zone: "America%2FNew_York"},
 			{City: "Timmins", Latitude: 48.485340413458964, Longitude: -81.33687676821839, Zone: "America%2FNew_York"},
@@ -55,6 +54,14 @@ func TestMinutely(t *testing.T) {
 		}
 		loc = Locations[0]
 	)
-	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, trailer)
-	t.Log(q)
+	err := loc.QueryMinutely()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	buf, err := json.Marshal(&loc.WeatherMinutely)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(string(buf))
 }

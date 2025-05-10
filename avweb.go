@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/centretown/avcamx"
 	"github.com/centretown/avweb/runtime"
@@ -33,10 +35,11 @@ func main() {
 	flag.StringVar(&remoteAddr, "r", remoteAddr, remoteAddrUsage)
 	flag.Parse()
 
+	filename := "config.json"
 	config := runtime.NewConfig()
-	err := config.Read("config.json")
+	err := config.Read(filename)
 	if err != nil {
-		log.Fatalln("Read Configuration", err)
+		log.Fatalln("Read Configuration", filename, err)
 	}
 
 	host = avcamx.NewAvHost(hostAddr, hostPort)
@@ -53,6 +56,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	log.Print("MakeProxy")
 	host.MakeProxy(remote, sockServer)
 
@@ -81,9 +85,15 @@ func main() {
 	})
 
 	mux.HandleFunc("/events", rt.WebSocket.Events)
+	mux.HandleFunc("/msghook", rt.WebSocket.MessageHook)
+
+	rt.QueryDaily()
+	rt.QueryHourly()
 
 	rt.HandleWeather()
 	rt.HandleCameras()
+
+	go rt.Monitor()
 
 	httpErr := make(chan error, 1)
 	go func() {
@@ -99,5 +109,14 @@ func main() {
 		log.Printf("terminating: %v", sig)
 	}
 
+	rt.WebSocket.SaveMessages()
+
+	ctx, cancel := context.WithTimeout(context.Background(),
+		time.Second)
+	defer cancel()
+
 	host.Quit()
+	host.Server.Shutdown(ctx)
+
+	rt.Done()
 }

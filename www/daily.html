@@ -1,0 +1,77 @@
+{{ define "weather.daily" }}
+
+<div id="slot-{{.Action.Name}}" class="slot" draggable="false">
+    <script>
+        var hideDaily = [];
+        function toggleDaily(index) {
+            let id = "daily" + index;
+            if (hideDaily[index]) {
+                hideDaily[index] = false;
+                htmx.removeClass("#" + id, "hide");
+            } else {
+                hideDaily[index] = true;
+                htmx.addClass("#" + id, "hide");
+            }
+        }
+    </script>
+    {{template "layout.content.head" .Action }}{{$codes := .Codes}}
+    <div class="content scroll">
+        {{range $loc, $location := .Data}}{{$daily := $location.WeatherDaily}}
+        <div class="title">{{$location.City}}</div>
+        <div class="grid-day">
+            {{$icons:=$daily.Icons $daily.Daily.Code 1}} {{range $icon :=
+            $icons}}
+            <span class="symbols-weather">{{$icon}}</span>
+            {{end}}
+        </div>
+        <div class="grid-day">
+            {{range $i,$t := $daily.Daily.Time}}
+            <span class="grid-data">{{$daily.FormatDayShort $i}}</span>
+            {{end}}
+        </div>
+        <div class="grid-minmax">
+            {{$daily.MinMax $daily.Daily.Low
+            $daily.Daily.High}}{{$daily.DailyUnits.High}}
+        </div>
+        <canvas class="chart" id="daily_canvas{{$loc}}"></canvas>
+        <div class="grid-minmax">{{$daily.Min}}{{$daily.DailyUnits.Low}}</div>
+        <script>
+            hideDaily.push(true);
+            var id = "daily_canvas"+{{$loc}};
+            showGraph(id, "cyan", {{$daily.Min}}, {{$daily.Max}}, {{$daily.Daily.Low}});
+            showGraph(id, "red",  {{$daily.Min}}, {{$daily.Max}}, {{$daily.Daily.High}});
+            showMinMax(id, {{$daily.Min}}, {{$daily.Max}});
+        </script>
+        <button class="more" hx-on:click="toggleDaily({{$loc}})">
+            <span class="symbols-small">more_horiz</span>
+        </button>
+        <div id="daily{{$loc}}" class="hide">
+            <div class="grid-daily">
+                <div class="grid-label"></div>
+                <div class="grid-label">Day</div>
+                <div class="grid-label">High</div>
+                <div class="grid-label">Low</div>
+                <div class="grid-label">Precip</div>
+                <div class="grid-label">UV</div>
+            </div>
+
+            <div class="grid-daily">
+                {{range $index, $time := $daily.Daily.Time}}{{$code := index
+                $daily.Daily.Code $index}} {{$wcode := index $codes $code}}
+                {{$icon := $wcode.Icon}}
+                <span class="symbols-small">{{$icon}}</span>
+                <div class="grid-data">{{$daily.FormatDay $index}}</div>
+                <div class="grid-data">{{$daily.FormatHigh $index}}</div>
+                <div class="grid-data">{{$daily.FormatLow $index}}</div>
+                <div class="grid-data">
+                    {{$daily.FormatPrecipitation $index}}
+                </div>
+                <div class="grid-data">{{$daily.FormatUvIndex $index}}</div>
+                {{end}}
+            </div>
+        </div>
+        {{end}}
+    </div>
+</div>
+
+{{ end }}
