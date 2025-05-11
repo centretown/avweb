@@ -17,7 +17,7 @@
     <div class="content scroll">
         {{range $loc, $location := .Data}} {{$hourly :=
         $location.WeatherHourly}}{{$canvasId := "hourly_canvas{{$loc}}"}}
-        <div class="title">{{$location.City}}</div>
+        <div><span class="title">{{$location.City}}</span></div>
         <div class="grid-icon24">
             {{$icons:=$hourly.Icons $hourly.Hourly.Code 1}} {{range $icon :=
             $icons}}
@@ -29,20 +29,37 @@
             <span class="grid-data">{{$hourly.FormatHour $t}}</span>
             {{end}}
         </div>
+        {{$limit := $hourly.MinMax $hourly.Hourly.Temperature
+        $hourly.Hourly.FeelsLike}} {{$wind := $hourly.MinMax
+        $hourly.Hourly.WindSpeed}}
         <div class="grid-minmax">
-            {{$hourly.MinMax $hourly.Hourly.Temperature
-            $hourly.Hourly.FeelsLike}}{{$hourly.HourlyUnits.Temperature}}
+            <span class="temperature"
+                >{{$limit.Max}}{{$hourly.HourlyUnits.Temperature}}</span
+            >
+            <span class="windspeed"
+                >{{$wind.Max}} {{$hourly.HourlyUnits.WindSpeed}}</span
+            >
         </div>
-        <canvas class="chart-hourly" id="hourly_canvas{{$loc}}"></canvas>
+        <canvas
+            class="chart-hourly unfade-it"
+            id="hourly_canvas{{$loc}}"
+        ></canvas>
         <div class="grid-minmax">
-            {{$hourly.Min}}{{$hourly.HourlyUnits.Temperature}}
+            <span class="temperature"
+                >{{$limit.Min}}{{$hourly.HourlyUnits.Temperature}}</span
+            >
+            <span class="windspeed"
+                >{{$wind.Min}} {{$hourly.HourlyUnits.WindSpeed}}</span
+            >
         </div>
         <script>
             hideHourly.push(true);
             var id = "hourly_canvas"+{{$loc}};
-            showGraph(id, "green", {{$hourly.Min}}, {{$hourly.Max}}, {{$hourly.Hourly.Temperature}});
-            showGraph(id, "orange", {{$hourly.Min}}, {{$hourly.Max}}, {{$hourly.Hourly.FeelsLike}});
-            showMinMax(id, {{$hourly.Min}}, {{$hourly.Max}});
+            showGraph(id, "yellow", {{$wind.Min}}, {{$wind.Max}}, {{$hourly.Hourly.WindSpeed}});
+            showGraph(id, "orange", {{$limit.Min}}, {{$limit.Max}}, {{$hourly.Hourly.Temperature}});
+            showGraph(id, "green", {{$limit.Min}}, {{$limit.Max}}, {{$hourly.Hourly.FeelsLike}});
+            showPrecipitation(id, "royalblue", .05, {{$hourly.Hourly.Precipitation}});
+            showMinMax(id);
         </script>
         <button class="more" hx-on:click="toggleHourly({{$loc}})">
             <span class="symbols-small">more_horiz</span>
@@ -87,11 +104,11 @@
                     {{index $hourly.Hourly.FeelsLike $index | printf "%6.1f" }}
                 </div>
                 <div class="grid-data">
-                    {{index $hourly.Hourly.Probability $index | printf "%6d" }}
-                </div>
-                <div class="grid-data">
                     {{index $hourly.Hourly.Precipitation $index | printf "%6.2f"
                     }}
+                </div>
+                <div class="grid-data">
+                    {{index $hourly.Hourly.Probability $index | printf "%6d" }}
                 </div>
                 <div class="grid-data">
                     {{index $hourly.Hourly.WindSpeed $index | printf "%6.2f" }}

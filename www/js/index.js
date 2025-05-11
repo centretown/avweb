@@ -34,12 +34,14 @@ function toggleChat(id) {
   }
 }
 
+let timeFmt = new Intl.DateTimeFormat("en-US", {
+  timeStyle: "short",
+  timeZone: "America/New_York",
+});
+
 function startTime() {
   const today = new Date();
-  const h = today.getHours();
-  let m = today.getMinutes();
-  m = m < 10 ? "0" + m : m;
-  document.getElementById("clock").innerHTML = h + ":" + m;
+  document.getElementById("clock").innerHTML = timeFmt.format(today);
   setTimeout(startTime, 1000 * (60 - today.getSeconds()));
 }
 
@@ -143,15 +145,41 @@ function minMax(...lists) {
   return val;
 }
 
+function showPrecipitation(canvasId, color, unit, values, codes) {
+  let canvas = document.getElementById(canvasId);
+  let ctx = canvas.getContext("2d");
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1;
+  let xStep = canvas.width / (values.length - 1);
+  let yStep = 3;
+  for (let i = 0; i < values.length; i++) {
+    let x = i * xStep;
+    let y = 0;
+    let z = values[i];
+    while (z > 0.0) {
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + xStep, y);
+      z = z - unit;
+      x = i * xStep;
+      y += yStep;
+    }
+  }
+  ctx.setLineDash([]);
+  ctx.stroke();
+}
+
 function showGraph(canvasId, color, min, max, values) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");
   let xStep = canvas.width / (values.length - 1);
   let height = canvas.height;
-  let yStep = height / (max - min);
+  let yStep = height / values.length;
+  if (max > min) yStep = height / (max - min);
 
   ctx.beginPath();
   ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
   let x = 0;
   let y = height;
   ctx.font = "10px sans-serif";
@@ -207,16 +235,17 @@ function showDays(canvasId, times) {
   showTimes(canvasId, intervals, options);
 }
 
-function showMinMax(canvasId, min, max) {
+function showMinMax(canvasId) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");
   let height = canvas.height;
 
   ctx.beginPath();
+  ctx.lineWidth = 2;
   ctx.strokeStyle = "yellow";
   ctx.setLineDash([2, 2]);
-  ctx.moveTo(0, 0);
-  ctx.lineTo(canvas.width, 0);
+  ctx.moveTo(0, 1);
+  ctx.lineTo(canvas.width, 1);
   ctx.moveTo(0, canvas.height - 1);
   ctx.lineTo(canvas.width, canvas.height - 1);
   ctx.stroke();

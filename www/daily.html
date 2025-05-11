@@ -24,23 +24,40 @@
             <span class="symbols-weather">{{$icon}}</span>
             {{end}}
         </div>
+
         <div class="grid-day">
             {{range $i,$t := $daily.Daily.Time}}
             <span class="grid-data">{{$daily.FormatDayShort $i}}</span>
             {{end}}
         </div>
+        {{$limit := $daily.MinMax $daily.Daily.Low $daily.Daily.High}} {{$uv :=
+        $daily.MinMax $daily.Daily.UvIndex}}{{$prec := $daily.MinMax
+        $daily.Daily.Precipitation}}
         <div class="grid-minmax">
-            {{$daily.MinMax $daily.Daily.Low
-            $daily.Daily.High}}{{$daily.DailyUnits.High}}
+            <span class="temperature-high"
+                >High {{$limit.Max}}{{$daily.DailyUnits.High}}</span
+            >
+            <span class="temperature-uvindex"
+                >UV {{$uv.Max}}{{$daily.DailyUnits.UvIndex}}</span
+            >
         </div>
-        <canvas class="chart" id="daily_canvas{{$loc}}"></canvas>
-        <div class="grid-minmax">{{$daily.Min}}{{$daily.DailyUnits.Low}}</div>
+        <canvas class="chart unfade-it" id="daily_canvas{{$loc}}"></canvas>
+        <div class="grid-minmax">
+            <span class="temperature-low"
+                >Low {{$limit.Min}}{{$daily.DailyUnits.Low}}</span
+            >
+            <span class="temperature-uvindex"
+                >UV {{$uv.Min}}{{$daily.DailyUnits.UvIndex}}</span
+            >
+        </div>
         <script>
             hideDaily.push(true);
             var id = "daily_canvas"+{{$loc}};
-            showGraph(id, "cyan", {{$daily.Min}}, {{$daily.Max}}, {{$daily.Daily.Low}});
-            showGraph(id, "red",  {{$daily.Min}}, {{$daily.Max}}, {{$daily.Daily.High}});
-            showMinMax(id, {{$daily.Min}}, {{$daily.Max}});
+            showGraph(id, "darkviolet",  {{$uv.Min}}, {{$uv.Max}}, {{$daily.Daily.UvIndex}});
+            showGraph(id, "dodgerblue", {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.Low}});
+            showGraph(id, "orangered",  {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.High}});
+            showPrecipitation(id, "royalblue", 0.2, {{$daily.Daily.Precipitation}});
+            showMinMax(id);
         </script>
         <button class="more" hx-on:click="toggleDaily({{$loc}})">
             <span class="symbols-small">more_horiz</span>

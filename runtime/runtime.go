@@ -28,7 +28,7 @@ type Runtime struct {
 	Webcams       map[string]*avcamx.AvItem
 	Temp          *template.Template
 
-	monitor *time.Ticker
+	ticker  *time.Ticker
 	done    chan bool
 	TickCmd chan int
 }
@@ -38,9 +38,6 @@ func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
 	if len(host.Items) > 0 {
 		webcamUrl = host.Items[0].Url
 	}
-
-	t := time.Now()
-	nextHour := t.Minute() % 60
 
 	rt = &Runtime{
 		Host:      host,
@@ -63,11 +60,15 @@ func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
 		ActionMap: config.Actions,
 		Webcams:   make(map[string]*avcamx.AvItem),
 
-		monitor: time.NewTicker(time.Minute * time.Duration(nextHour)),
-
 		done:    make(chan bool),
 		TickCmd: make(chan int),
 	}
+
+	now := time.Now()
+	next := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
+	next = next.Add(time.Hour)
+	nextTick := next.Sub(now)
+	rt.ticker = time.NewTicker(nextTick)
 
 	for _, item := range host.Items {
 		rt.Webcams[item.Url] = item
@@ -91,10 +92,7 @@ func (rt *Runtime) Monitor() {
 		NEXT_MINUTE
 	)
 	var (
-		nextDaily    = time.Now()
-		nextHourly   = time.Now()
-		nextMinutely = time.Now()
-		counter      = 0
+		initialRun = true
 	)
 
 	log.Println("start Monitoring")
@@ -111,23 +109,25 @@ func (rt *Runtime) Monitor() {
 		case cmd := <-rt.TickCmd:
 			switch cmd {
 			case NEXT_DAY:
-				nextDaily = nextDaily.Add(24 * time.Hour)
+				rt.QueryDaily()
 			case NEXT_HOUR:
-				nextHourly = nextHourly.Add(2 * time.Hour)
+				rt.QueryHourly()
+				rt.BroadcastTemperature()
 			case NEXT_MINUTE:
-				nextMinutely = nextMinutely.Add(15 * time.Minute)
 			}
-			message := `<span id="clock-temp" hx-swap-oob="outerHTML">` +
-				fmt.Sprintf("%d C", counter) + `</span>`
-			log.Println(message)
 
-		case <-rt.monitor.C:
+		case now := <-rt.ticker.C:
+			if initialRun {
+				rt.ticker.Reset(time.Hour)
+			}
+			initialRun = false
 			rt.QueryHourly()
 			rt.BroadcastTemperature()
-			if counter == 0 {
-				rt.monitor.Reset(time.Hour)
+
+			// update daily every 12 hours
+			if now.Hour()%12 == 0 {
+				rt.QueryDaily()
 			}
-			counter++
 		}
 
 		time.Sleep(time.Millisecond)
@@ -145,7 +145,8 @@ func (rt *Runtime) CurrentTemperature() string {
 }
 
 func (rt *Runtime) BroadcastTemperature() {
-	message := `<span id="clock-temp" hx-swap-oob="outerHTML">` + rt.CurrentTemperature() + `</span>`
+	message := `<span id="clock-temp" class="temp-current" hx-swap-oob="outerHTML">` +
+		rt.CurrentTemperature() + `</span>`
 	rt.WebSocket.Broadcast(message)
 }
 
@@ -321,7 +322,6 @@ func (rt *Runtime) parseCameraPath(r *http.Request) (cam *avcamx.AvItem,
 		err = fmt.Errorf("path not found: %s", path)
 		return
 	}
-	log.Println("parseCameraPath", path, indexstr, index)
 	return
 }
 

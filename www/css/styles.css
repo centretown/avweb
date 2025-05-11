@@ -6,7 +6,8 @@
     --fgDim: rgba(72, 168, 158, 0.8);
     --fgOut: rgba(128, 255, 0, 1);
     --fgIn: rgba(255, 255, 255, 1);
-    --fgClock: rgba(127, 168, 158, 0.5);
+    --fgClock: rgba(90, 155, 240, 0.75);
+    --fgClockBright: rgba(240, 155, 90, 1);
     --fgStatus: rgba(255, 255, 0, 0.9);
     --fgIcon: rgba(120, 184, 244, 1);
     --fgWeatherIcon: rgba(0, 0, 255, 1);
@@ -16,6 +17,7 @@
     --chartWidth: 322px;
     --chartWidthHourly: 324px;
     --chartHeight: 60px;
+    --chartBarHeight: 28px;
 }
 
 /* fallback */
@@ -73,6 +75,7 @@
     color: red;
 }
 
+.chart-bar,
 .chart,
 .chart-hourly {
     opacity: 1;
@@ -84,6 +87,9 @@
 }
 .chart-hourly {
     width: var(--chartWidthHourly);
+}
+.chart-bar {
+    height: var(--chartBarHeight);
 }
 
 body {
@@ -272,21 +278,20 @@ h3 {
     font-size: 0.75rem;
 }
 
-.timestamp {
-    color: grey;
+.temp-current {
 }
 
 .clock {
     position: fixed;
     bottom: 1rem;
-    color: var(--fgDim);
+    color: var(--fgClock);
     text-align: center;
     width: 100%;
     font-size: 2.5rem;
 }
 
 .clock:hover {
-    color: var(--fgBright);
+    color: var(--fgClockBright);
 }
 
 .name-item {
@@ -354,10 +359,34 @@ h3 {
 }
 
 .grid-minmax {
+    display: grid;
     font-size: 0.6rem;
     padding-bottom: 2px;
     width: 100%;
     text-align: center;
+    grid-template-columns: auto auto;
+}
+
+.windspeed {
+    color: yellow;
+}
+.temperature {
+    color: orange;
+}
+.temperature-feels {
+    color: green;
+}
+.temperature-high {
+    color: orangered;
+}
+.temperature-low {
+    color: dodgerblue;
+}
+.temperature-uvindex {
+    color: darkviolet;
+}
+.precipitation {
+    color: royalblue;
 }
 
 .grid-container,
@@ -368,7 +397,6 @@ h3 {
 .grid-sun,
 .grid-hourly,
 .grid-daily {
-    padding-bottom: 1rem;
     font-size: 0.7rem;
     display: grid;
     grid-template-columns: 4rem 4rem 8rem 3rem;
@@ -376,7 +404,6 @@ h3 {
 }
 
 .grid-day {
-    padding-bottom: 2px;
     justify-content: left;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
 }
@@ -445,8 +472,38 @@ h3 {
     }
 }
 
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    75% {
+        opacity: 0.6;
+    }
+    85% {
+        opacity: 0.7;
+    }
+    90% {
+        opacity: 0.8;
+    }
+    95% {
+        opacity: 0.9;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
 .fade-it {
     animation-name: fade-out;
+    animation-timing-function: linear;
+    animation-duration: 2500ms;
+    animation-fill-mode: forwards;
+}
+.unfade-it {
+    animation-name: fade-in;
     animation-timing-function: linear;
     animation-duration: 2500ms;
     animation-fill-mode: forwards;

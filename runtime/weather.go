@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+type Limits struct {
+	Min float64
+	Max float64
+}
+
 type WeatherCommon struct {
 	Latitude             float64 `json:"latitude"`
 	Longitude            float64 `json:"longitude"`
@@ -25,20 +30,20 @@ func (w *WeatherCommon) FormatHour(hour time.Time) string {
 	return hour.Format("3PM")
 }
 
-func (w *WeatherCommon) MinMax(args ...[]float64) float64 {
-	w.Min = 65000
-	w.Max = -65000
+func (w *WeatherCommon) MinMax(args ...[]float64) (limits Limits) {
+	limits.Min = 65000
+	limits.Max = -65000
 	for _, values := range args {
 		for _, value := range values {
-			if w.Max < value {
-				w.Max = value
+			if limits.Max < value {
+				limits.Max = value
 			}
-			if w.Min > value {
-				w.Min = value
+			if limits.Min > value {
+				limits.Min = value
 			}
 		}
 	}
-	return w.Max
+	return limits
 }
 
 type WeatherHourly struct {
@@ -105,6 +110,7 @@ func (w *WeatherHourly) FormatTime(index int) string {
 	}
 	return t.Format("3:04PM")
 }
+
 func (w *WeatherHourly) Hours() (hours []time.Time) {
 	hours = make([]time.Time, 0, len(w.Hourly.Time)/4)
 	for i := range w.Hourly.Time {
