@@ -13,82 +13,103 @@
                 htmx.addClass("#" + id, "hide");
             }
         }
+        document.getElementById("daily-date").innerHTML = showFullDate();
     </script>
     {{template "layout.content.head" .Action }}{{$codes := .Codes}}
-    <div class="content scroll">
-        {{range $loc, $location := .Data}}{{$daily := $location.WeatherDaily}}
-        <div class="title">{{$location.City}}</div>
-        <div class="grid-day">
-            {{$icons:=$daily.Icons $daily.Daily.Code 1}} {{range $icon :=
-            $icons}}
-            <span class="symbols-weather">{{$icon}}</span>
-            {{end}}
-        </div>
-
-        <div class="grid-day">
-            {{range $i,$t := $daily.Daily.Time}}
-            <span class="grid-data">{{$daily.FormatDayShort $i}}</span>
-            {{end}}
-        </div>
-        {{$limit := $daily.MinMax $daily.Daily.Low $daily.Daily.High}} {{$uv :=
-        $daily.MinMax $daily.Daily.UvIndex}}{{$prec := $daily.MinMax
-        $daily.Daily.Precipitation}}
-        <div class="grid-minmax">
-            <span class="temperature-high"
-                >High {{$limit.Max}}{{$daily.DailyUnits.High}}</span
-            >
-            <span class="temperature-uvindex"
-                >UV {{$uv.Max}}{{$daily.DailyUnits.UvIndex}}</span
-            >
-        </div>
-        <canvas class="chart unfade-it" id="daily_canvas{{$loc}}"></canvas>
-        <div class="grid-minmax">
-            <span class="temperature-low"
-                >Low {{$limit.Min}}{{$daily.DailyUnits.Low}}</span
-            >
-            <span class="temperature-uvindex"
-                >UV {{$uv.Min}}{{$daily.DailyUnits.UvIndex}}</span
-            >
-        </div>
-        <script>
-            hideDaily.push(true);
-            var id = "daily_canvas"+{{$loc}};
-            showGraph(id, "darkviolet",  {{$uv.Min}}, {{$uv.Max}}, {{$daily.Daily.UvIndex}});
-            showGraph(id, "dodgerblue", {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.Low}});
-            showGraph(id, "orangered",  {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.High}});
-            showPrecipitation(id, "royalblue", 0.2, {{$daily.Daily.Precipitation}});
-            showMinMax(id);
-        </script>
-        <button class="more" hx-on:click="toggleDaily({{$loc}})">
-            <span class="symbols-small">more_horiz</span>
-        </button>
-        <div id="daily{{$loc}}" class="hide">
-            <div class="grid-daily">
-                <div class="grid-label"></div>
-                <div class="grid-label">Day</div>
-                <div class="grid-label">High</div>
-                <div class="grid-label">Low</div>
-                <div class="grid-label">Precip</div>
-                <div class="grid-label">UV</div>
+    <span>
+        <div id="daily-date" class="title-date"></div>
+        <div class="content scroll">
+            {{$rt := .Runtime}} {{range $loc, $location := .Data}}{{$daily :=
+            $location.WeatherDaily}} {{$fmt := $rt.CurrentWeatherDaily $loc}}
+            <div class="title">
+                <span class="title-left temperature-high"
+                    >High {{$fmt.High}}</span
+                >
+                <span class="title-city">{{$location.City}}</span>
+                <span class="title-right temperature-low"
+                    >Low {{$fmt.Low}}</span
+                >
+                <span class="title-left precipitation">
+                    Precipitation {{$fmt.Precipitation}}
+                    ({{$fmt.Probability}})</span
+                >
+                <span class="title-center"></span>
+                <span class="title-right temperature-uvindex"
+                    >UV Index {{$fmt.UvIndex}}</span
+                >
             </div>
-
-            <div class="grid-daily">
-                {{range $index, $time := $daily.Daily.Time}}{{$code := index
-                $daily.Daily.Code $index}} {{$wcode := index $codes $code}}
-                {{$icon := $wcode.Icon}}
-                <span class="symbols-small">{{$icon}}</span>
-                <div class="grid-data">{{$daily.FormatDay $index}}</div>
-                <div class="grid-data">{{$daily.FormatHigh $index}}</div>
-                <div class="grid-data">{{$daily.FormatLow $index}}</div>
-                <div class="grid-data">
-                    {{$daily.FormatPrecipitation $index}}
-                </div>
-                <div class="grid-data">{{$daily.FormatUvIndex $index}}</div>
+            <div class="grid-day">
+                {{$icons:=$daily.Icons $daily.Daily.Code 1}} {{range $icon :=
+                $icons}}
+                <span class="symbols-weather">{{$icon}}</span>
                 {{end}}
             </div>
+
+            <div class="grid-day">
+                {{range $i,$t := $daily.Daily.Time}}
+                <span class="grid-data">{{$daily.FormatDayShort $i}}</span>
+                {{end}}
+            </div>
+            {{$limit := $daily.MinMax $daily.Daily.Low $daily.Daily.High}} {{$uv
+            := $daily.MinMax $daily.Daily.UvIndex}}{{$prec := $daily.MinMax
+            $daily.Daily.Precipitation}}
+            <div class="grid-minmax">
+                <span class="temperature-high"
+                    >High {{$limit.Max}}{{$daily.DailyUnits.High}}</span
+                >
+                <span class="temperature-uvindex"
+                    >UV {{$uv.Max}}{{$daily.DailyUnits.UvIndex}}</span
+                >
+            </div>
+            <canvas class="chart unfade-it" id="daily_canvas{{$loc}}"></canvas>
+            <div class="grid-minmax">
+                <span class="temperature-low"
+                    >Low {{$limit.Min}}{{$daily.DailyUnits.Low}}</span
+                >
+                <span class="temperature-uvindex"
+                    >UV {{$uv.Min}}{{$daily.DailyUnits.UvIndex}}</span
+                >
+            </div>
+            <script>
+                hideDaily.push(true);
+                var id = "daily_canvas"+{{$loc}};
+                showBars(id, {{$daily.Daily.Precipitation}}, {{$daily.Daily.Code}});
+                showGraph(id, "darkviolet", {{$uv.Min}}, {{$uv.Max}}, {{$daily.Daily.UvIndex}});
+                showGraph(id, "dodgerblue", {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.Low}});
+                showGraph(id, "orangered",  {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.High}});
+                showMinMax(id);
+            </script>
+            <button class="more" hx-on:click="toggleDaily({{$loc}})">
+                <span class="symbols-small">more_horiz</span>
+            </button>
+            <div id="daily{{$loc}}" class="hide">
+                <div class="grid-daily">
+                    <div class="grid-label"></div>
+                    <div class="grid-label">Day</div>
+                    <div class="grid-label">High</div>
+                    <div class="grid-label">Low</div>
+                    <div class="grid-label">Precip</div>
+                    <div class="grid-label">UV</div>
+                </div>
+
+                <div class="grid-daily">
+                    {{range $index, $time := $daily.Daily.Time}}{{$code := index
+                    $daily.Daily.Code $index}} {{$wcode := index $codes $code}}
+                    {{$icon := $wcode.Icon}}
+                    <span class="symbols-small">{{$icon}}</span>
+                    <div class="grid-data">{{$daily.FormatDay $index}}</div>
+                    <div class="grid-data">{{$daily.FormatHigh $index}}</div>
+                    <div class="grid-data">{{$daily.FormatLow $index}}</div>
+                    <div class="grid-data">
+                        {{$daily.FormatPrecipitation $index}}
+                    </div>
+                    <div class="grid-data">{{$daily.FormatUvIndex $index}}</div>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
         </div>
-        {{end}}
-    </div>
+    </span>
 </div>
 
 {{ end }}

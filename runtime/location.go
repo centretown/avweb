@@ -23,7 +23,7 @@ var (
 func (loc *Location) QueryDaily() (err error) {
 	var (
 		// trailer = "&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min"
-		trailer = "&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,precipitation_sum,weather_code,uv_index_max"
+		trailer = "&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,precipitation_sum,precipitation_probability_max,weather_code,uv_index_max"
 	)
 	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, trailer)
 	return loc.WeatherDaily.Get(q)

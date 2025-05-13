@@ -125,13 +125,91 @@ func (rt *Runtime) Monitor() {
 			rt.BroadcastTemperature()
 
 			// update daily every 12 hours
-			if now.Hour()%12 == 0 {
+			if now.Hour()%4 == 0 {
 				rt.QueryDaily()
 			}
 		}
 
 		time.Sleep(time.Millisecond)
 	}
+}
+
+type DailySummary struct {
+	High          string
+	Low           string
+	Precipitation string
+	Probability   string
+	UvIndex       string
+	Code          string
+}
+
+func (rt *Runtime) CurrentWeatherDaily(index int) (hs DailySummary) {
+	if index > len(rt.Locations) {
+		return
+	}
+
+	loc := rt.Locations[index]
+	daily := &loc.WeatherDaily
+	if len(daily.Daily.Time) < 1 {
+		return
+	}
+
+	hs.High = fmt.Sprintf("%4.1f %s",
+		daily.Daily.High[0],
+		daily.DailyUnits.High)
+	hs.Low = fmt.Sprintf("%4.1f %s",
+		daily.Daily.Low[0],
+		daily.DailyUnits.Low)
+	hs.Precipitation = fmt.Sprintf("%4.1f %s",
+		daily.Daily.Precipitation[0],
+		daily.DailyUnits.Precipitation)
+	hs.Probability = fmt.Sprintf("%d%s",
+		daily.Daily.Probability[0],
+		daily.DailyUnits.Probability)
+	hs.UvIndex = fmt.Sprintf("%4.1f %s",
+		daily.Daily.UvIndex[0],
+		daily.DailyUnits.UvIndex)
+	hs.Code = WeatherCodes[int(daily.Daily.Code[0])].Icon
+	return
+}
+
+type HourlySummary struct {
+	Temperature   string
+	FeelsLike     string
+	Precipitation string
+	Probability   string
+	WindSpeed     string
+	Code          string
+}
+
+func (rt *Runtime) CurrentWeatherHourly(index int) (hs HourlySummary) {
+	if index > len(rt.Locations) {
+		return
+	}
+
+	loc := rt.Locations[index]
+	hourly := &loc.WeatherHourly
+	if len(hourly.Hourly.Time) < 1 {
+		return
+	}
+
+	hs.Temperature = fmt.Sprintf("%4.1f %s",
+		hourly.Hourly.Temperature[0],
+		hourly.HourlyUnits.Temperature)
+	hs.FeelsLike = fmt.Sprintf("%4.1f %s",
+		hourly.Hourly.FeelsLike[0],
+		hourly.HourlyUnits.Temperature)
+	hs.Precipitation = fmt.Sprintf("%4.1f %s",
+		hourly.Hourly.Precipitation[0],
+		hourly.HourlyUnits.Precipitation)
+	hs.Probability = fmt.Sprintf("%d%s",
+		hourly.Hourly.Probability[0],
+		hourly.HourlyUnits.Probability)
+	hs.WindSpeed = fmt.Sprintf("%4.1f %s",
+		hourly.Hourly.WindSpeed[0],
+		hourly.HourlyUnits.WindSpeed)
+	hs.Code = WeatherCodes[int(hourly.Hourly.Code[0])].Icon
+	return
 }
 
 func (rt *Runtime) CurrentTemperature() string {

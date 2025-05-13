@@ -67,8 +67,8 @@ type MinutelyUnits struct {
 	Time          string `json:"time"`
 	Temperature   string `json:"temperature_2m"`
 	FeelsLike     string `json:"apparent_temperature"`
-	Probability   string `json:"precipitation_probability"`
 	Precipitation string `json:"precipitation"`
+	Probability   string `json:"precipitation_probability"`
 	WindSpeed     string `json:"wind_speed_10m"`
 	Code          string `json:"weather_code"`
 }
@@ -77,8 +77,8 @@ type Minutely struct {
 	Time          string  `json:"time"`
 	Temperature   float32 `json:"temperature_2m"`
 	FeelsLike     float32 `json:"apparent_temperature"`
-	Probability   int32   `json:"precipitation_probability"`
 	Precipitation float32 `json:"precipitation"`
+	Probability   int32   `json:"precipitation_probability"`
 	WindSpeed     float32 `json:"wind_speed_10m"`
 	Code          int32   `json:"weather_code"`
 }
@@ -157,6 +157,7 @@ type DailyUnits struct {
 	Daylight      string `json:"daylight_duration"`
 	Sunshine      string `json:"sunshine_duration"`
 	Precipitation string `json:"precipitation_sum"`
+	Probability   string `json:"precipitation_probability_max"`
 	Code          string `json:"weather_code"`
 	UvIndex       string `json:"uv_index_max"`
 }
@@ -170,6 +171,7 @@ type Daily struct {
 	Daylight      []float64 `json:"daylight_duration"`
 	Sunshine      []float64 `json:"sunshine_duration"`
 	Precipitation []float64 `json:"precipitation_sum"`
+	Probability   []int32   `json:"precipitation_probability_max"`
 	Code          []int32   `json:"weather_code"`
 	UvIndex       []float64 `json:"uv_index_max"`
 }

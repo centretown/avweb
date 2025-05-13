@@ -145,28 +145,45 @@ function minMax(...lists) {
   return val;
 }
 
-function showPrecipitation(canvasId, color, unit, values, codes) {
+const rain = "rgba(31, 144, 255, 255)";
+const snow = "rgba(255, 255, 255, 255)";
+
+function codeToColor(code) {
+  if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) {
+    return snow;
+  }
+  return rain;
+}
+
+function showBars(canvasId, values, codes) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");
-  ctx.beginPath();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1;
-  let xStep = canvas.width / (values.length - 1);
-  let yStep = 3;
+  let xStep = canvas.width / values.length;
+  let yStep = 4;
+  let yStart = 0;
+  let precision = (7 * 0.1) / values.length;
+
   for (let i = 0; i < values.length; i++) {
     let x = i * xStep;
-    let y = 0;
-    let z = values[i];
-    while (z > 0.0) {
+    let y = yStart;
+    ctx.beginPath();
+    ctx.strokeStyle = codeToColor(codes[i]);
+
+    for (let value = values[i]; value > 0.0; value = value - precision) {
       ctx.moveTo(x, y);
-      ctx.lineTo(x + xStep, y);
-      z = z - unit;
+      ctx.setLineDash([1, 2]);
+      ctx.lineWidth = 1;
+      ctx.lineTo(x + xStep - 2, y);
       x = i * xStep;
       y += yStep;
+      if (y >= canvas.height) {
+        yStart++;
+        y = yStart;
+      }
     }
+
+    ctx.stroke();
   }
-  ctx.setLineDash([]);
-  ctx.stroke();
 }
 
 function showGraph(canvasId, color, min, max, values) {
@@ -191,6 +208,17 @@ function showGraph(canvasId, color, min, max, values) {
   }
   ctx.setLineDash([]);
   ctx.stroke();
+}
+
+function showFullDate() {
+  let now = new Date();
+  let options = {
+    timeStyle: "short",
+    dateStyle: "full",
+    timeZone: "America/New_York",
+  };
+  let fmt = new Intl.DateTimeFormat("en-US", options);
+  return fmt.format(now);
 }
 
 function showTimes(canvasId, times, options) {

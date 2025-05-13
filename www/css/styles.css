@@ -18,6 +18,7 @@
     --chartWidthHourly: 324px;
     --chartHeight: 60px;
     --chartBarHeight: 28px;
+    --dateColor: rgba(240, 155, 90, 1);
 }
 
 /* fallback */
@@ -218,13 +219,9 @@ h3 {
 }
 
 .more {
-    padding: 2px;
-    margin: 2px;
-    margin-bottom: 8px;
     background-color: var(--bgOpaque);
     color: var(--fgDim);
     border-radius: 0.35rem;
-    width: 99%;
 }
 
 .close-slot {
@@ -242,11 +239,41 @@ h3 {
     font-weight: bold;
 }
 
+.title-date {
+    padding-left: 1rem;
+    font-size: 0.8rem;
+    /* font-weight: bold; */
+}
+
 .title {
-    font-size: 1rem;
+    display: grid;
+    font-size: 0.9rem;
     font-weight: bold;
+    grid-template-columns: 5fr min-content 5fr;
+    margin-bottom: 0.5rem;
+}
+.title-left {
+    font-weight: normal;
+    font-size: 0.65rem;
     width: 100%;
+}
+.title-right {
+    font-weight: normal;
+    font-size: 0.65rem;
+    text-align: right;
+    width: 100%;
+}
+.title-center {
+    font-weight: normal;
+    font-size: 0.65rem;
     text-align: center;
+    width: 100%;
+}
+.title-city {
+    font-weight: bolder;
+    font-size: 0.7rem;
+    text-align: center;
+    width: 100%;
 }
 
 .text-input {
@@ -386,7 +413,7 @@ h3 {
     color: darkviolet;
 }
 .precipitation {
-    color: royalblue;
+    color: rgba(31, 144, 255, 255);
 }
 
 .grid-container,
