@@ -6,7 +6,7 @@
     --fgDim: rgba(72, 168, 158, 0.8);
     --fgOut: rgba(128, 255, 0, 1);
     --fgIn: rgba(255, 255, 255, 1);
-    --fgClock: rgba(90, 155, 240, 0.75);
+    --fgClock: lime;
     --fgClockBright: rgba(240, 155, 90, 1);
     --fgStatus: rgba(255, 255, 0, 0.9);
     --fgIcon: rgba(120, 184, 244, 1);
@@ -252,26 +252,26 @@ h3 {
     grid-template-columns: 5fr min-content 5fr;
     margin-bottom: 0.5rem;
 }
+
+.title-center,
+.title-right,
 .title-left {
     font-weight: normal;
-    font-size: 0.65rem;
+    font-size: 0.8rem;
     width: 100%;
+}
+
+.title-left {
 }
 .title-right {
-    font-weight: normal;
-    font-size: 0.65rem;
     text-align: right;
-    width: 100%;
 }
 .title-center {
-    font-weight: normal;
-    font-size: 0.65rem;
     text-align: center;
-    width: 100%;
 }
 .title-city {
     font-weight: bolder;
-    font-size: 0.7rem;
+    font-size: 1rem;
     text-align: center;
     width: 100%;
 }
@@ -305,20 +305,30 @@ h3 {
     font-size: 0.75rem;
 }
 
-.temp-current {
+.clock:hover {
+    opacity: 1;
+}
+
+@keyframes fade-clock {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.4;
+    }
 }
 
 .clock {
+    display: grid;
     position: fixed;
     bottom: 1rem;
     color: var(--fgClock);
     text-align: center;
     width: 100%;
-    font-size: 2.5rem;
-}
-
-.clock:hover {
-    color: var(--fgClockBright);
+    font-size: 2.2rem;
+    font-style: bolder;
+    opacity: 0.4;
+    grid-template-columns: auto auto auto auto;
 }
 
 .name-item {
@@ -335,30 +345,6 @@ h3 {
 .user-inactive {
     font-weight: lighter;
     font-style: italic;
-}
-
-@keyframes fade-in-slow {
-    0% {
-        opacity: 0.1;
-    }
-    70% {
-        opacity: 0.5;
-    }
-    75% {
-        opacity: 0.55;
-    }
-    80% {
-        opacity: 0.6;
-    }
-    85% {
-        opacity: 0.65;
-    }
-    90% {
-        opacity: 0.7;
-    }
-    100% {
-        opacity: 0.75;
-    }
 }
 
 .header {
@@ -401,16 +387,16 @@ h3 {
     color: orange;
 }
 .temperature-feels {
-    color: green;
+    color: rgba(255, 150, 255, 255);
 }
 .temperature-high {
-    color: orangered;
+    color: rgba(255, 100, 0, 255);
 }
 .temperature-low {
-    color: dodgerblue;
+    color: rgba(255, 200, 100, 255);
 }
 .temperature-uvindex {
-    color: darkviolet;
+    color: violet;
 }
 .precipitation {
     color: rgba(31, 144, 255, 255);

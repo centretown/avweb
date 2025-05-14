@@ -34,14 +34,18 @@ function toggleChat(id) {
   }
 }
 
-let timeFmt = new Intl.DateTimeFormat("en-US", {
-  timeStyle: "short",
-  timeZone: "America/New_York",
-});
-
 function startTime() {
   const today = new Date();
-  document.getElementById("clock").innerHTML = timeFmt.format(today);
+  let clockFmt = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric", // dateStyle: "full",
+    hour: "numeric",
+    minute: "numeric",
+    timeZone: "America/New_York",
+  });
+
+  document.getElementById("clock").innerHTML = clockFmt.format(today);
   setTimeout(startTime, 1000 * (60 - today.getSeconds()));
 }
 
@@ -159,19 +163,18 @@ function showBars(canvasId, values, codes) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");
   let xStep = canvas.width / values.length;
-  let yStep = 4;
-  let yStart = 0;
-  let precision = (7 * 0.1) / values.length;
-
+  let yStep = 5;
+  let precision = (7 * 0.08) / values.length;
   for (let i = 0; i < values.length; i++) {
     let x = i * xStep;
+    let yStart = 0;
     let y = yStart;
     ctx.beginPath();
     ctx.strokeStyle = codeToColor(codes[i]);
 
     for (let value = values[i]; value > 0.0; value = value - precision) {
       ctx.moveTo(x, y);
-      ctx.setLineDash([1, 2]);
+      ctx.setLineDash([1, 1]);
       ctx.lineWidth = 1;
       ctx.lineTo(x + xStep - 2, y);
       x = i * xStep;
@@ -186,7 +189,7 @@ function showBars(canvasId, values, codes) {
   }
 }
 
-function showGraph(canvasId, color, min, max, values) {
+function showGraph(canvasId, color, min, max, values, lineWidth = 2) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");
   let xStep = canvas.width / (values.length - 1);
@@ -196,7 +199,7 @@ function showGraph(canvasId, color, min, max, values) {
 
   ctx.beginPath();
   ctx.strokeStyle = color;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = lineWidth;
   let x = 0;
   let y = height;
   ctx.font = "10px sans-serif";

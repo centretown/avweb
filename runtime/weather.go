@@ -122,14 +122,8 @@ func (w *WeatherHourly) Hours() (hours []time.Time) {
 	return
 }
 
-func (w *WeatherCommon) Icons(codes []int32, div int) (icons []string) {
-	icons = make([]string, 0, len(codes)/int(div))
-	for i := range codes {
-		if i%div == 0 {
-			icons = append(icons, WeatherCodes[int(codes[i])].Icon)
-		}
-	}
-	return
+func (w *WeatherCommon) WeatherCode(codes int32) (wcode *WeatherCode) {
+	return WeatherCodes[codes]
 }
 
 func (w *WeatherHourly) FormatTemperature(index int) string {
@@ -306,45 +300,45 @@ type WeatherEffects struct {
 
 type WeatherCode struct {
 	Code   int
+	Color  string
 	Icon   string
 	Tokens []string
 }
 
-var WeatherCodes = map[int]*WeatherCode{
-	0:  {Code: 0, Icon: "clear_day", Tokens: []string{"clear", "sky"}},
-	1:  {Code: 1, Icon: "clear_day", Tokens: []string{"mainly", "clear"}},
-	2:  {Code: 2, Icon: "partly_cloudy_day", Tokens: []string{"partly", "cloudy"}},
-	3:  {Code: 3, Icon: "cloud", Tokens: []string{"overcast", ""}},
-	45: {Code: 45, Icon: "foggy", Tokens: []string{"fog", ""}},
-	48: {Code: 48, Icon: "mist", Tokens: []string{"rime", "fog"}},
-	51: {Code: 51, Icon: "rainy_light", Tokens: []string{"light", "drizzle"}},
-	53: {Code: 53, Icon: "rainy_light", Tokens: []string{"moderate", "drizzle"}},
-	55: {Code: 55, Icon: "rainy_light", Tokens: []string{"dense", "drizzle"}},
-	56: {Code: 56, Icon: "rainy_snow", Tokens: []string{"light", "freezing", "drizzle"}},
-	57: {Code: 57, Icon: "rainy_snow", Tokens: []string{"dense", "freezing", "drizzle"}},
-	61: {Code: 61, Icon: "rainy_light", Tokens: []string{"slight", "rain"}},
-	63: {Code: 63, Icon: "rainy", Tokens: []string{"moderate", "rain"}},
-	65: {Code: 65, Icon: "rainy_heavy", Tokens: []string{"heavy", "rain"}},
-	66: {Code: 66, Icon: "rainy_heavy", Tokens: []string{"light", "freezing", "rain"}},
-	67: {Code: 67, Icon: "rainy_heavy", Tokens: []string{"heavy", "freezing", "rain"}},
-	71: {Code: 71, Icon: "snowing", Tokens: []string{"slight", "snow"}},
-	73: {Code: 73, Icon: "snowing", Tokens: []string{"moderate", "snow"}},
-	75: {Code: 75, Icon: "snowing_heavy", Tokens: []string{"heavy", "snow"}},
-	77: {Code: 77, Icon: "snowing", Tokens: []string{"snow", "grains"}},
-	80: {Code: 80, Icon: "rainy_light", Tokens: []string{"slight", "rain", "showers"}},
-	81: {Code: 81, Icon: "rainy", Tokens: []string{"moderate", "rain", "showers"}},
-	82: {Code: 82, Icon: "rainy_heavy", Tokens: []string{"violent", "rain", "showers"}},
-	85: {Code: 85, Icon: "snowing", Tokens: []string{"slight", "snow", "showers"}},
-	86: {Code: 86, Icon: "snowing_heavy", Tokens: []string{"heavy", "snow", "showers"}},
-	95: {Code: 95, Icon: "thunderstorm", Tokens: []string{"thunderstorm"}},
-	96: {Code: 96, Icon: "weather_hail", Tokens: []string{"slight", "hail", "thunderstorm"}},
-	99: {Code: 99, Icon: "weather_hail", Tokens: []string{"heavy", "hail", "thunderstorm"}},
+var WeatherCodes = map[int32]*WeatherCode{
+	0:  {Code: 0, Color: "yellow", Icon: "clear_day", Tokens: []string{"clear", "sky"}},
+	1:  {Code: 1, Color: "lightyellow", Icon: "clear_day", Tokens: []string{"mainly", "clear"}},
+	2:  {Code: 2, Color: "lightblue", Icon: "partly_cloudy_day", Tokens: []string{"partly", "cloudy"}},
+	3:  {Code: 3, Color: "darkgray", Icon: "cloud", Tokens: []string{"overcast", ""}},
+	45: {Code: 45, Color: "dimgray", Icon: "foggy", Tokens: []string{"fog", ""}},
+	48: {Code: 48, Color: "gray", Icon: "mist", Tokens: []string{"rime", "fog"}},
+	51: {Code: 51, Color: "darkslateblue", Icon: "rainy_light", Tokens: []string{"light", "drizzle"}},
+	53: {Code: 53, Color: "darkslateblue", Icon: "rainy_light", Tokens: []string{"moderate", "drizzle"}},
+	55: {Code: 55, Color: "darkslateblue", Icon: "rainy_light", Tokens: []string{"dense", "drizzle"}},
+	56: {Code: 56, Color: "lightblue", Icon: "rainy_snow", Tokens: []string{"light", "freezing", "drizzle"}},
+	57: {Code: 57, Color: "lightblue", Icon: "rainy_snow", Tokens: []string{"dense", "freezing", "drizzle"}},
+	61: {Code: 61, Color: "royalblue", Icon: "rainy_light", Tokens: []string{"slight", "rain"}},
+	63: {Code: 63, Color: "royalblue", Icon: "rainy", Tokens: []string{"moderate", "rain"}},
+	65: {Code: 65, Color: "royalblue", Icon: "rainy_heavy", Tokens: []string{"heavy", "rain"}},
+	66: {Code: 66, Color: "slateblue", Icon: "rainy_heavy", Tokens: []string{"light", "freezing", "rain"}},
+	67: {Code: 67, Color: "slateblue", Icon: "rainy_heavy", Tokens: []string{"heavy", "freezing", "rain"}},
+	71: {Code: 71, Color: "white", Icon: "snowing", Tokens: []string{"slight", "snow"}},
+	73: {Code: 73, Color: "white", Icon: "snowing", Tokens: []string{"moderate", "snow"}},
+	75: {Code: 75, Color: "white", Icon: "snowing_heavy", Tokens: []string{"heavy", "snow"}},
+	77: {Code: 77, Color: "white", Icon: "snowing", Tokens: []string{"snow", "grains"}},
+	80: {Code: 80, Color: "dodgerblue", Icon: "rainy_light", Tokens: []string{"slight", "rain", "showers"}},
+	81: {Code: 81, Color: "dodgerblue", Icon: "rainy", Tokens: []string{"moderate", "rain", "showers"}},
+	82: {Code: 82, Color: "red", Icon: "rainy_heavy", Tokens: []string{"violent", "rain", "showers"}},
+	85: {Code: 85, Color: "whitesmoke", Icon: "snowing", Tokens: []string{"slight", "snow", "showers"}},
+	86: {Code: 86, Color: "white", Icon: "snowing_heavy", Tokens: []string{"heavy", "snow", "showers"}},
+	95: {Code: 95, Color: "red", Icon: "thunderstorm", Tokens: []string{"thunderstorm"}},
+	96: {Code: 96, Color: "pink", Icon: "weather_hail", Tokens: []string{"slight", "hail", "thunderstorm"}},
+	99: {Code: 99, Color: "red", Icon: "weather_hail", Tokens: []string{"heavy", "hail", "thunderstorm"}},
 }
 
 /*
 0	Clear sky
-1, 2, 3	Mainly clear, partly cloudy, and overcast
-45, 48	Fog and depositing rime fog
+1, 2, 3	Mainly cleargreyand depositing rime fog
 51, 53, 55	Drizzle: Light, moderate, and dense intensity
 56, 57	Freezing Drizzle: Light and dense intensity
 61, 63, 65	Rain: Slight, moderate and heavy intensity

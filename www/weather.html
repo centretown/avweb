@@ -40,9 +40,19 @@
     </div>
 </div>
 
-{{ end }} {{ define "weather.current" }}
-<div id="slot-{{.Action.Name}}" class="slot" draggable="false">
-    {{template "layout.content.head" .Action }}
-    <div class="content"></div>
-</div>
-{{ end }}{{ define "weather.readings" }} {{ end }}
+{{ end }} {{ define "weather.clock" }} {{$cw := .CurrentWeatherHourly 0}}
+<span id="current-temperature" hx-swap-oob="outerHTML">
+    <span class="symbols" style="color:{{$cw.Color}}">{{$cw.Code}}</span>
+    <span class="temperature">{{$cw.Temperature}}</span>
+</span>
+<span>
+    <span class="symbols precipitation">weather_mix</span>
+    <span class="precipitation"
+        >{{$cw.Precipitation}} ({{$cw.Probability}})</span
+    >
+</span>
+<span>
+    <span class="symbols windspeed">air</span>
+    <span class="windspeed">{{$cw.WindSpeed}}</span>
+</span>
+{{ end }}

@@ -22,27 +22,42 @@
             $location.WeatherHourly}}{{$canvasId :=
             "hourly_canvas{{$loc}}"}}{{$fmt := $rt.CurrentWeatherHourly $loc}}
             <div class="title">
-                <span class="title-left temperature"
-                    >Temperature {{$fmt.Temperature}}</span
+                <span class="title-left">
+                    <span class="symbols-weather" style="color:{{$fmt.Color}}"
+                        >{{$fmt.Code}}</span
+                    >
+                    <span class="temperature">{{$fmt.Temperature}}</span></span
                 >
                 <span class="title-city">{{$location.City}}</span>
-                <span class="title-right temperature-feels"
-                    >Feels Like {{$fmt.FeelsLike}}</span
+                <span class="title-right">
+                    <span class="symbols-weather temperature-feels"
+                        >airwave</span
+                    >
+                    <span class="temperature-feels"
+                        >Feels {{$fmt.FeelsLike}}</span
+                    ></span
                 >
-                <span class="title-left precipitation">
-                    Precipitation {{$fmt.Precipitation}}
-                    ({{$fmt.Probability}})</span
+                <span class="title-left">
+                    <span class="symbols-weather precipitation"
+                        >weather_mix</span
+                    >
+                    <span class="precipitation">
+                        {{$fmt.Precipitation}} ({{$fmt.Probability}})</span
+                    ></span
                 >
                 <span class="title-center"></span>
-                <span class="title-right windspeed"
-                    >Wind {{$fmt.WindSpeed}}</span
+                <span class="title-right">
+                    <span class="symbols-weather windspeed">air</span>
+                    <span class="windspeed">{{$fmt.WindSpeed}}</span></span
                 >
             </div>
 
             <div class="grid-icon24">
-                {{$icons:=$hourly.Icons $hourly.Hourly.Code 1}} {{range $icon :=
-                $icons}}
-                <span class="symbols-weather">{{$icon}}</span>
+                {{range $code := $hourly.Hourly.Code}} {{$wcode :=
+                $hourly.WeatherCode $code}}
+                <span class="symbols-weather" style="color:{{$wcode.Color}}"
+                    >{{$wcode.Icon}}</span
+                >
                 {{end}}
             </div>
             <div class="grid-hour">
@@ -78,8 +93,8 @@
                 var id = "hourly_canvas"+{{$loc}};
                 showBars(id, {{$hourly.Hourly.Precipitation}},{{$hourly.Hourly.Code}});
                 showGraph(id, "yellow", {{$wind.Min}}, {{$wind.Max}}, {{$hourly.Hourly.WindSpeed}});
-                showGraph(id, "orange", {{$limit.Min}}, {{$limit.Max}}, {{$hourly.Hourly.Temperature}});
-                showGraph(id, "green", {{$limit.Min}}, {{$limit.Max}}, {{$hourly.Hourly.FeelsLike}});
+                showGraph(id, "rgba(255, 150, 255, 255)", {{$limit.Min}}, {{$limit.Max}}, {{$hourly.Hourly.FeelsLike}});
+                showGraph(id, "orange", {{$limit.Min}}, {{$limit.Max}}, {{$hourly.Hourly.Temperature}}, 3);
                 showMinMax(id);
             </script>
             <button class="more" hx-on:click="toggleHourly({{$loc}})">

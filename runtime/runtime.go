@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"io"
@@ -47,7 +48,6 @@ func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
 			config.Actions["camera_list"],
 		},
 		ActionsHome: []*Action{
-			config.Actions["weather_current"],
 			config.Actions["weather_hourly"],
 			config.Actions["weather_daily"],
 			config.Actions["weather_sun"],
@@ -119,12 +119,11 @@ func (rt *Runtime) Monitor() {
 		case now := <-rt.ticker.C:
 			if initialRun {
 				rt.ticker.Reset(time.Hour)
+				initialRun = false
 			}
-			initialRun = false
 			rt.QueryHourly()
 			rt.BroadcastTemperature()
 
-			// update daily every 12 hours
 			if now.Hour()%4 == 0 {
 				rt.QueryDaily()
 			}
@@ -141,6 +140,7 @@ type DailySummary struct {
 	Probability   string
 	UvIndex       string
 	Code          string
+	Color         string
 }
 
 func (rt *Runtime) CurrentWeatherDaily(index int) (hs DailySummary) {
@@ -169,7 +169,9 @@ func (rt *Runtime) CurrentWeatherDaily(index int) (hs DailySummary) {
 	hs.UvIndex = fmt.Sprintf("%4.1f %s",
 		daily.Daily.UvIndex[0],
 		daily.DailyUnits.UvIndex)
-	hs.Code = WeatherCodes[int(daily.Daily.Code[0])].Icon
+	code := WeatherCodes[daily.Daily.Code[0]]
+	hs.Code = code.Icon
+	hs.Color = code.Color
 	return
 }
 
@@ -180,9 +182,11 @@ type HourlySummary struct {
 	Probability   string
 	WindSpeed     string
 	Code          string
+	Color         string
 }
 
-func (rt *Runtime) CurrentWeatherHourly(index int) (hs HourlySummary) {
+func (rt *Runtime) CurrentWeatherHourly(index int) (hs *HourlySummary) {
+	hs = &HourlySummary{}
 	if index > len(rt.Locations) {
 		return
 	}
@@ -193,10 +197,10 @@ func (rt *Runtime) CurrentWeatherHourly(index int) (hs HourlySummary) {
 		return
 	}
 
-	hs.Temperature = fmt.Sprintf("%4.1f %s",
+	hs.Temperature = fmt.Sprintf("%4.1f%s",
 		hourly.Hourly.Temperature[0],
 		hourly.HourlyUnits.Temperature)
-	hs.FeelsLike = fmt.Sprintf("%4.1f %s",
+	hs.FeelsLike = fmt.Sprintf("%4.1f%s",
 		hourly.Hourly.FeelsLike[0],
 		hourly.HourlyUnits.Temperature)
 	hs.Precipitation = fmt.Sprintf("%4.1f %s",
@@ -208,7 +212,9 @@ func (rt *Runtime) CurrentWeatherHourly(index int) (hs HourlySummary) {
 	hs.WindSpeed = fmt.Sprintf("%4.1f %s",
 		hourly.Hourly.WindSpeed[0],
 		hourly.HourlyUnits.WindSpeed)
-	hs.Code = WeatherCodes[int(hourly.Hourly.Code[0])].Icon
+	code := WeatherCodes[hourly.Hourly.Code[0]]
+	hs.Code = code.Icon
+	hs.Color = code.Color
 	return
 }
 
@@ -223,9 +229,10 @@ func (rt *Runtime) CurrentTemperature() string {
 }
 
 func (rt *Runtime) BroadcastTemperature() {
-	message := `<span id="clock-temp" class="temp-current" hx-swap-oob="outerHTML">` +
-		rt.CurrentTemperature() + `</span>`
-	rt.WebSocket.Broadcast(message)
+	buf := bytes.Buffer{}
+	t := rt.Temp.Lookup("weather.clock")
+	t.Execute(&buf, rt)
+	rt.WebSocket.Broadcast(buf.String())
 }
 
 type FormData struct {
@@ -238,7 +245,7 @@ type FormData struct {
 type WeatherFormData struct {
 	Action  *Action
 	Data    any
-	Codes   map[int]*WeatherCode
+	Codes   map[int32]*WeatherCode
 	Runtime *Runtime
 }
 
@@ -284,7 +291,6 @@ func (rt *Runtime) HandleWeather() {
 		Data:    rt.Locations,
 		Runtime: rt}
 
-	rt.HandleAction("/weather_current", "weather.current", data)
 	rt.HandleAction("/weather_sun", "weather.sun", data)
 	rt.HandleAction("/weather_daily", "weather.daily", data)
 	rt.HandleAction("/weather_hourly", "weather.hourly", data)

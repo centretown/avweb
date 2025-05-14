@@ -22,26 +22,39 @@
             {{$rt := .Runtime}} {{range $loc, $location := .Data}}{{$daily :=
             $location.WeatherDaily}} {{$fmt := $rt.CurrentWeatherDaily $loc}}
             <div class="title">
-                <span class="title-left temperature-high"
-                    >High {{$fmt.High}}</span
+                <span class="title-left">
+                    <span class="symbols-weather temperature-high"
+                        >arrow_upward</span
+                    >
+                    <span class="temperature-high">{{$fmt.High}}</span></span
                 >
                 <span class="title-city">{{$location.City}}</span>
-                <span class="title-right temperature-low"
-                    >Low {{$fmt.Low}}</span
+                <span class="title-right">
+                    <span class="symbols-weather temperature-low"
+                        >arrow_downward</span
+                    >
+                    <span class="temperature-low">{{$fmt.Low}}</span></span
                 >
-                <span class="title-left precipitation">
-                    Precipitation {{$fmt.Precipitation}}
-                    ({{$fmt.Probability}})</span
+                <span class="title-left">
+                    <span class="symbols-weather precipitation"
+                        >weather_mix</span
+                    >
+                    <span class="precipitation">
+                        {{$fmt.Precipitation}} ({{$fmt.Probability}})</span
+                    ></span
                 >
+
                 <span class="title-center"></span>
                 <span class="title-right temperature-uvindex"
-                    >UV Index {{$fmt.UvIndex}}</span
+                    >UV {{$fmt.UvIndex}}</span
                 >
             </div>
             <div class="grid-day">
-                {{$icons:=$daily.Icons $daily.Daily.Code 1}} {{range $icon :=
-                $icons}}
-                <span class="symbols-weather">{{$icon}}</span>
+                {{range $code := $daily.Daily.Code}} {{$wcode :=
+                $daily.WeatherCode $code}}
+                <span class="symbols-weather" style="color:{{$wcode.Color}}"
+                    >{{$wcode.Icon}}</span
+                >
                 {{end}}
             </div>
 
@@ -74,9 +87,9 @@
                 hideDaily.push(true);
                 var id = "daily_canvas"+{{$loc}};
                 showBars(id, {{$daily.Daily.Precipitation}}, {{$daily.Daily.Code}});
-                showGraph(id, "darkviolet", {{$uv.Min}}, {{$uv.Max}}, {{$daily.Daily.UvIndex}});
-                showGraph(id, "dodgerblue", {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.Low}});
-                showGraph(id, "orangered",  {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.High}});
+                showGraph(id, "violet", {{$uv.Min}}, {{$uv.Max}}, {{$daily.Daily.UvIndex}});
+                showGraph(id, "rgba(255, 200, 100, 255)", {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.Low}}, 3);
+                showGraph(id, "rgba(255, 100, 0, 255)",  {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.High}}, 3);
                 showMinMax(id);
             </script>
             <button class="more" hx-on:click="toggleDaily({{$loc}})">

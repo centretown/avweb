@@ -13,7 +13,6 @@ var ActionsCamera = []*runtime.Action{
 }
 var ActionsHome = []*runtime.Action{
 	// {Name: "sun", Title: "Next Sun", Icon: "wb_twilight", Group: Home},
-	{Name: "weather_current", Title: "Current Readings", Icon: "thunderstorm", Group: runtime.Home},
 	{Name: "weather_hourly", Title: "24 Hour Forecast", Icon: "schedule", Group: runtime.Home},
 	{Name: "weather_daily", Title: "7 Day Forecast", Icon: "calendar_view_week", Group: runtime.Home},
 	{Name: "weather_sun", Title: "Sun", Icon: "wb_twilight", Group: runtime.Home},
