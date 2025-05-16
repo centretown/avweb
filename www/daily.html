@@ -45,9 +45,6 @@
                 >
 
                 <span class="title-center"></span>
-                <span class="title-right temperature-uvindex"
-                    >UV {{$fmt.UvIndex}}</span
-                >
             </div>
             <div class="grid-day">
                 {{range $code := $daily.Daily.Code}} {{$wcode :=
@@ -63,15 +60,11 @@
                 <span class="grid-data">{{$daily.FormatDayShort $i}}</span>
                 {{end}}
             </div>
-            {{$limit := $daily.MinMax $daily.Daily.Low $daily.Daily.High}} {{$uv
-            := $daily.MinMax $daily.Daily.UvIndex}}{{$prec := $daily.MinMax
-            $daily.Daily.Precipitation}}
+            {{$limit := $daily.MinMax $daily.Daily.Low $daily.Daily.High}}
+            {{$prec := $daily.MinMax $daily.Daily.Precipitation}}
             <div class="grid-minmax">
                 <span class="temperature-high"
                     >High {{$limit.Max}}{{$daily.DailyUnits.High}}</span
-                >
-                <span class="temperature-uvindex"
-                    >UV {{$uv.Max}}{{$daily.DailyUnits.UvIndex}}</span
                 >
             </div>
             <canvas class="chart unfade-it" id="daily_canvas{{$loc}}"></canvas>
@@ -79,15 +72,11 @@
                 <span class="temperature-low"
                     >Low {{$limit.Min}}{{$daily.DailyUnits.Low}}</span
                 >
-                <span class="temperature-uvindex"
-                    >UV {{$uv.Min}}{{$daily.DailyUnits.UvIndex}}</span
-                >
             </div>
             <script>
                 hideDaily.push(true);
                 var id = "daily_canvas"+{{$loc}};
                 showBars(id, {{$daily.Daily.Precipitation}}, {{$daily.Daily.Code}});
-                showGraph(id, "violet", {{$uv.Min}}, {{$uv.Max}}, {{$daily.Daily.UvIndex}});
                 showGraph(id, "rgba(255, 200, 100, 255)", {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.Low}}, 3);
                 showGraph(id, "rgba(255, 100, 0, 255)",  {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.High}}, 3);
                 showMinMax(id);
@@ -102,7 +91,6 @@
                     <div class="grid-label">High</div>
                     <div class="grid-label">Low</div>
                     <div class="grid-label">Precip</div>
-                    <div class="grid-label">UV</div>
                 </div>
 
                 <div class="grid-daily">
@@ -116,7 +104,6 @@
                     <div class="grid-data">
                         {{$daily.FormatPrecipitation $index}}
                     </div>
-                    <div class="grid-data">{{$daily.FormatUvIndex $index}}</div>
                     {{end}}
                 </div>
             </div>

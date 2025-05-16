@@ -219,7 +219,9 @@ h3 {
 }
 
 .more {
-    background-color: var(--bgOpaque);
+    margin-top: 0.3rem;
+    margin-bottom: 0.6rem;
+    background-color: var(--bgTransparent);
     color: var(--fgDim);
     border-radius: 0.35rem;
 }
@@ -245,6 +247,18 @@ h3 {
     /* font-weight: bold; */
 }
 
+.title-weather {
+    display: grid;
+    font-size: 0.9rem;
+    font-weight: bold;
+    grid-template-areas:
+        ". city ."
+        ". city ."
+        ". city ."
+        ". . .";
+    margin-bottom: 0.5rem;
+}
+
 .title {
     display: grid;
     font-size: 0.9rem;
@@ -257,8 +271,7 @@ h3 {
 .title-right,
 .title-left {
     font-weight: normal;
-    font-size: 0.8rem;
-    width: 100%;
+    font-size: 0.7rem;
 }
 
 .title-left {
@@ -273,7 +286,10 @@ h3 {
     font-weight: bolder;
     font-size: 1rem;
     text-align: center;
-    width: 100%;
+    align-content: center;
+}
+.item-city {
+    grid-area: city;
 }
 
 .text-input {
@@ -377,29 +393,38 @@ h3 {
     padding-bottom: 2px;
     width: 100%;
     text-align: center;
-    grid-template-columns: auto auto;
+    grid-template-columns: auto auto auto auto auto auto auto auto;
 }
 
 .windspeed {
     color: yellow;
 }
+.humidity {
+    color: rgba(192, 63, 255, 255);
+}
+.pressure {
+    color: rgba(31, 255, 31, 255);
+}
+.precipitation {
+    color: rgba(31, 144, 255, 255);
+}
+.rain {
+    color: rgba(31, 144, 255, 255);
+}
+.snow {
+    color: rgba(255, 255, 255, 255);
+}
 .temperature {
-    color: orange;
+    color: rgba(255, 150, 0, 255);
 }
 .temperature-feels {
-    color: rgba(255, 150, 255, 255);
+    color: rgba(255, 200, 150, 255);
 }
 .temperature-high {
     color: rgba(255, 100, 0, 255);
 }
 .temperature-low {
     color: rgba(255, 200, 100, 255);
-}
-.temperature-uvindex {
-    color: violet;
-}
-.precipitation {
-    color: rgba(31, 144, 255, 255);
 }
 
 .grid-container,
@@ -439,11 +464,12 @@ h3 {
 }
 .grid-daily {
     padding-bottom: 0.2rem;
-    grid-template-columns: 1.5rem 4.5rem 3.6rem 4rem 3.6rem 3.6rem;
+    grid-template-columns: 1.5rem 4.5rem 3.6rem 4rem 3.6rem;
+    grid-template-columns: 1fr 3fr 2fr 2fr 2fr;
 }
 .grid-sun {
     padding-bottom: 0.2rem;
-    grid-template-columns: 1.5rem 4.5rem 4rem 4rem 3.6rem 3.6rem;
+    grid-template-columns: 1.5rem 4.5rem 4rem 4rem 3.6rem;
 }
 
 .grid-label {

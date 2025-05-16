@@ -16,7 +16,7 @@
         <link rel="stylesheet" href="static/css/styles.css" />
     </head>
 
-    <body onload="startTime()">
+    <body>
         <span id="events" hx-ext="ws" ws-connect="/events">
             <div class="cameras"></div>
             <div class="source">
@@ -26,11 +26,8 @@
                 {{ template "layout.actions" . }} {{ template "layout.chat"
                 .WebSocket }}
                 <span id="slots" class="slots"></span>
-
-                <span class="clock">
-                    <span id="clock"></span>
-                    {{ template "weather.clock" . }}
-                </span>
+                {{$cw := .CurrentWeatherHourly 0}} {{ template "weather.clock"
+                $cw }}
             </span>
         </span>
         <script src="/static/js/wsstatus.js" defer></script>

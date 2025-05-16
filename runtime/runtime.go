@@ -134,13 +134,16 @@ func (rt *Runtime) Monitor() {
 }
 
 type DailySummary struct {
-	High          string
-	Low           string
-	Precipitation string
-	Probability   string
-	UvIndex       string
-	Code          string
-	Color         string
+	City            string
+	High            string
+	Low             string
+	Precipitation   string
+	Probability     string
+	WindSpeed       string
+	WindDirecection string
+	WindGusts       string
+	Code            string
+	Color           string
 }
 
 func (rt *Runtime) CurrentWeatherDaily(index int) (hs DailySummary) {
@@ -149,11 +152,11 @@ func (rt *Runtime) CurrentWeatherDaily(index int) (hs DailySummary) {
 	}
 
 	loc := rt.Locations[index]
-	daily := &loc.WeatherDaily
+	daily := loc.WeatherDaily
 	if len(daily.Daily.Time) < 1 {
 		return
 	}
-
+	hs.City = loc.City
 	hs.High = fmt.Sprintf("%4.1f %s",
 		daily.Daily.High[0],
 		daily.DailyUnits.High)
@@ -166,9 +169,6 @@ func (rt *Runtime) CurrentWeatherDaily(index int) (hs DailySummary) {
 	hs.Probability = fmt.Sprintf("%d%s",
 		daily.Daily.Probability[0],
 		daily.DailyUnits.Probability)
-	hs.UvIndex = fmt.Sprintf("%4.1f %s",
-		daily.Daily.UvIndex[0],
-		daily.DailyUnits.UvIndex)
 	code := WeatherCodes[daily.Daily.Code[0]]
 	hs.Code = code.Icon
 	hs.Color = code.Color
@@ -176,11 +176,16 @@ func (rt *Runtime) CurrentWeatherDaily(index int) (hs DailySummary) {
 }
 
 type HourlySummary struct {
+	City          string
 	Temperature   string
 	FeelsLike     string
 	Precipitation string
 	Probability   string
 	WindSpeed     string
+	WindDirection string
+	WindGusts     string
+	Humidity      string
+	Pressure      string
 	Code          string
 	Color         string
 }
@@ -192,11 +197,12 @@ func (rt *Runtime) CurrentWeatherHourly(index int) (hs *HourlySummary) {
 	}
 
 	loc := rt.Locations[index]
-	hourly := &loc.WeatherHourly
+	hourly := loc.WeatherHourly
 	if len(hourly.Hourly.Time) < 1 {
 		return
 	}
 
+	hs.City = loc.City
 	hs.Temperature = fmt.Sprintf("%4.1f%s",
 		hourly.Hourly.Temperature[0],
 		hourly.HourlyUnits.Temperature)
@@ -209,9 +215,9 @@ func (rt *Runtime) CurrentWeatherHourly(index int) (hs *HourlySummary) {
 	hs.Probability = fmt.Sprintf("%d%s",
 		hourly.Hourly.Probability[0],
 		hourly.HourlyUnits.Probability)
-	hs.WindSpeed = fmt.Sprintf("%4.1f %s",
+	hs.WindSpeed = fmt.Sprintf("%4.1f %s %3.0f%s",
 		hourly.Hourly.WindSpeed[0],
-		hourly.HourlyUnits.WindSpeed)
+		hourly.HourlyUnits.WindSpeed, hourly.Hourly.WindDirection[0], hourly.HourlyUnits.WindDirection)
 	code := WeatherCodes[hourly.Hourly.Code[0]]
 	hs.Code = code.Icon
 	hs.Color = code.Color
@@ -219,7 +225,7 @@ func (rt *Runtime) CurrentWeatherHourly(index int) (hs *HourlySummary) {
 }
 
 func (rt *Runtime) CurrentTemperature() string {
-	hourly := &rt.Location.WeatherHourly
+	hourly := rt.Location.WeatherHourly
 	if len(hourly.Hourly.Temperature) == 0 {
 		return "99.9 ?"
 	}
@@ -231,7 +237,8 @@ func (rt *Runtime) CurrentTemperature() string {
 func (rt *Runtime) BroadcastTemperature() {
 	buf := bytes.Buffer{}
 	t := rt.Temp.Lookup("weather.clock")
-	t.Execute(&buf, rt)
+	cw := rt.CurrentWeatherHourly(0)
+	t.Execute(&buf, cw)
 	rt.WebSocket.Broadcast(buf.String())
 }
 

@@ -9,7 +9,7 @@
     "camera_list": {
       "name": "camera_list",
       "title": "List Cameras",
-      "icon": "view_list",
+      "icon": "replace_video",
       "group": 0
     },
     "record": {

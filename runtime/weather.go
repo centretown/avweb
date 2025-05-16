@@ -1,11 +1,8 @@
 package runtime
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"time"
 )
 
@@ -26,8 +23,139 @@ type WeatherCommon struct {
 	Max                  float64 `json:"-"`
 }
 
+type WeatherHourly struct {
+	WeatherCommon
+	HourlyUnits HourlyUnits `json:"hourly_units"`
+	Hourly      Hourly      `json:"hourly"`
+}
+
+type WeatherDaily struct {
+	WeatherCommon
+	DailyUnits DailyUnits `json:"daily_units"`
+	Daily      Daily      `json:"daily"`
+}
+type WeatherCurrent struct {
+	WeatherCommon
+	CurrentUnits CurrentUnits `json:"current_units"`
+	Current      Current      `json:"current"`
+}
+type CurrentUnits struct {
+	Time            string `json:"time"`
+	Interval        string `json:"interval"`
+	Temperature     string `json:"temperature_2m"`
+	Precipitation   string `json:"precipitation"`
+	Humidity        string `json:"relative_humidity_2m"`
+	FeelsLike       string `json:"apparent_temperature"`
+	IsDay           string `json:"is_day"`
+	Code            string `json:"weather_code"`
+	WindSpeed       string `json:"wind_speed_10m"`
+	WindDirection   string `json:"wind_direction_10m"`
+	WindGusts       string `json:"wind_gusts_10m"`
+	Rain            string `json:"rain"`
+	Showers         string `json:"showers"`
+	Snowfall        string `json:"cloud_cover"`
+	CloudCover      string `json:"pressure_msl"`
+	PressureMSL     string `json:"surface_pressure"`
+	SurfacePressure string `json:"snowfall"`
+}
+
+type Current struct {
+	Time            string  `json:"time"`
+	Interval        int32   `json:"interval"`
+	Temperature     float64 `json:"temperature_2m"`
+	Precipitation   float64 `json:"precipitation"`
+	Humidity        int32   `json:"relative_humidity_2m"`
+	FeelsLike       float64 `json:"apparent_temperature"`
+	IsDay           int8    `json:"is_day"`
+	Code            int32   `json:"weather_code"`
+	WindSpeed       float64 `json:"wind_speed_10m"`
+	WindDirection   float64 `json:"wind_direction_10m"`
+	WindGusts       float64 `json:"wind_gusts_10m"`
+	Rain            float64 `json:"rain"`
+	Showers         float64 `json:"showers"`
+	Snowfall        float64 `json:"snowfall"`
+	CloudCover      float64 `json:"cloud_cover"`
+	PressureMSL     float64 `json:"pressure_msl"`
+	SurfacePressure float64 `json:"surface_pressure"`
+}
+
+type HourlyUnits struct {
+	Time          string `json:"time"`
+	Temperature   string `json:"temperature_2m"`
+	FeelsLike     string `json:"apparent_temperature"`
+	Probability   string `json:"precipitation_probability"`
+	Precipitation string `json:"precipitation"`
+	WindSpeed     string `json:"wind_speed_10m"`
+	WindDirection string `json:"wind_direction_10m"`
+	WindGusts     string `json:"wind_gusts_10m"`
+	Humidity      string `json:"relative_humidity_2m"`
+	Pressure      string `json:"surface_pressure"`
+	Code          string `json:"weather_code"`
+}
+
+type Hourly struct {
+	Time          []string  `json:"time"`
+	Temperature   []float64 `json:"temperature_2m"`
+	FeelsLike     []float64 `json:"apparent_temperature"`
+	Probability   []int32   `json:"precipitation_probability"`
+	Precipitation []float64 `json:"precipitation"`
+	WindSpeed     []float64 `json:"wind_speed_10m"`
+	WindDirection []float64 `json:"wind_direction_10m"`
+	WindGusts     []float64 `json:"wind_gusts_10m"`
+	Humidity      []float64 `json:"relative_humidity_2m"`
+	Pressure      []float64 `json:"surface_pressure"`
+	Code          []int32   `json:"weather_code"`
+}
+
+type DailyUnits struct {
+	Time          string `json:"time"`
+	Sunrise       string `json:"sunrise"`
+	Sunset        string `json:"sunset"`
+	High          string `json:"temperature_2m_max"`
+	Low           string `json:"temperature_2m_min"`
+	Daylight      string `json:"daylight_duration"`
+	Sunshine      string `json:"sunshine_duration"`
+	Precipitation string `json:"precipitation_sum"`
+	Probability   string `json:"precipitation_probability_max"`
+	WindSpeed     string `json:"wind_speed_10m_max"`
+	WindDirection string `json:"wind_direction_10m_dominant"`
+	WindGusts     string `json:"wind_gusts_10m_max"`
+	Code          string `json:"weather_code"`
+}
+
+type Daily struct {
+	Time          []string  `json:"time"`
+	Sunrise       []string  `json:"sunrise"`
+	Sunset        []string  `json:"sunset"`
+	High          []float64 `json:"temperature_2m_max"`
+	Low           []float64 `json:"temperature_2m_min"`
+	Daylight      []float64 `json:"daylight_duration"`
+	Sunshine      []float64 `json:"sunshine_duration"`
+	Precipitation []float64 `json:"precipitation_sum"`
+	Probability   []int32   `json:"precipitation_probability_max"`
+	WindSpeed     []float64 `json:"wind_speed_10m_max"`
+	WindDirection []float64 `json:"wind_direction_10m_dominant"`
+	WindGusts     []float64 `json:"wind_gusts_10m_max"`
+	Code          []int32   `json:"weather_code"`
+}
+
+func (c *WeatherCommon) LogCommon() {
+	log.Printf("latitude: %f longitude: %f \ngenerationtime_ms: %f utc_offset_seconds: %d \ntimezone: %s (%s) \nelevation %f\n",
+		c.Latitude,
+		c.Longitude,
+		c.GenerationtimeMs,
+		c.UtcOffsetSeconds,
+		c.Timezone,
+		c.TimezoneAbbreviation,
+		c.Elevation)
+}
+
 func (w *WeatherCommon) FormatHour(hour time.Time) string {
 	return hour.Format("3PM")
+}
+
+func (w *WeatherCommon) WeatherCode(codes int32) (wcode *WeatherCode) {
+	return WeatherCodes[codes]
 }
 
 func (w *WeatherCommon) MinMax(args ...[]float64) (limits Limits) {
@@ -44,63 +172,6 @@ func (w *WeatherCommon) MinMax(args ...[]float64) (limits Limits) {
 		}
 	}
 	return limits
-}
-
-type WeatherHourly struct {
-	WeatherCommon
-	HourlyUnits HourlyUnits `json:"hourly_units"`
-	Hourly      Hourly      `json:"hourly"`
-}
-
-type WeatherDaily struct {
-	WeatherCommon
-	DailyUnits DailyUnits `json:"daily_units"`
-	Daily      Daily      `json:"daily"`
-}
-type WeatherMinutely struct {
-	WeatherCommon
-	MinutelyUnits MinutelyUnits `json:"minutely_units"`
-	Minutely      Minutely      `json:"minutely"`
-}
-
-type MinutelyUnits struct {
-	Time          string `json:"time"`
-	Temperature   string `json:"temperature_2m"`
-	FeelsLike     string `json:"apparent_temperature"`
-	Precipitation string `json:"precipitation"`
-	Probability   string `json:"precipitation_probability"`
-	WindSpeed     string `json:"wind_speed_10m"`
-	Code          string `json:"weather_code"`
-}
-
-type Minutely struct {
-	Time          string  `json:"time"`
-	Temperature   float32 `json:"temperature_2m"`
-	FeelsLike     float32 `json:"apparent_temperature"`
-	Precipitation float32 `json:"precipitation"`
-	Probability   int32   `json:"precipitation_probability"`
-	WindSpeed     float32 `json:"wind_speed_10m"`
-	Code          int32   `json:"weather_code"`
-}
-
-type HourlyUnits struct {
-	Time          string `json:"time"`
-	Temperature   string `json:"temperature_2m"`
-	FeelsLike     string `json:"apparent_temperature"`
-	Probability   string `json:"precipitation_probability"`
-	Precipitation string `json:"precipitation"`
-	WindSpeed     string `json:"wind_speed_10m"`
-	Code          string `json:"weather_code"`
-}
-
-type Hourly struct {
-	Time          []string  `json:"time"`
-	Temperature   []float64 `json:"temperature_2m"`
-	FeelsLike     []float64 `json:"apparent_temperature"`
-	Probability   []int32   `json:"precipitation_probability"`
-	Precipitation []float64 `json:"precipitation"`
-	WindSpeed     []float64 `json:"wind_speed_10m"`
-	Code          []int32   `json:"weather_code"`
 }
 
 func (w *WeatherHourly) FormatTime(index int) string {
@@ -122,10 +193,6 @@ func (w *WeatherHourly) Hours() (hours []time.Time) {
 	return
 }
 
-func (w *WeatherCommon) WeatherCode(codes int32) (wcode *WeatherCode) {
-	return WeatherCodes[codes]
-}
-
 func (w *WeatherHourly) FormatTemperature(index int) string {
 	return fmt.Sprintf("%6.1f", w.Hourly.Temperature[index])
 }
@@ -140,34 +207,6 @@ func (w *WeatherHourly) FormatProbability(index int) string {
 }
 func (w *WeatherHourly) FormatWindSpeed(index int) string {
 	return fmt.Sprintf("%6.2f", w.Hourly.WindSpeed[index])
-}
-
-type DailyUnits struct {
-	Time          string `json:"time"`
-	Sunrise       string `json:"sunrise"`
-	Sunset        string `json:"sunset"`
-	High          string `json:"temperature_2m_max"`
-	Low           string `json:"temperature_2m_min"`
-	Daylight      string `json:"daylight_duration"`
-	Sunshine      string `json:"sunshine_duration"`
-	Precipitation string `json:"precipitation_sum"`
-	Probability   string `json:"precipitation_probability_max"`
-	Code          string `json:"weather_code"`
-	UvIndex       string `json:"uv_index_max"`
-}
-
-type Daily struct {
-	Time          []string  `json:"time"`
-	Sunrise       []string  `json:"sunrise"`
-	Sunset        []string  `json:"sunset"`
-	High          []float64 `json:"temperature_2m_max"`
-	Low           []float64 `json:"temperature_2m_min"`
-	Daylight      []float64 `json:"daylight_duration"`
-	Sunshine      []float64 `json:"sunshine_duration"`
-	Precipitation []float64 `json:"precipitation_sum"`
-	Probability   []int32   `json:"precipitation_probability_max"`
-	Code          []int32   `json:"weather_code"`
-	UvIndex       []float64 `json:"uv_index_max"`
 }
 
 func (w *WeatherDaily) ReadingsHigh() string {
@@ -185,9 +224,7 @@ func (w *WeatherDaily) FormatHigh(index int) string {
 func (w *WeatherDaily) FormatPrecipitation(index int) string {
 	return fmt.Sprintf("%4.2f %s", w.Daily.Precipitation[index], w.DailyUnits.Precipitation)
 }
-func (w *WeatherDaily) FormatUvIndex(index int) string {
-	return fmt.Sprintf("%4.2f %s", w.Daily.UvIndex[index], w.DailyUnits.UvIndex)
-}
+
 func (w *WeatherDaily) FormatLow(index int) string {
 	return fmt.Sprintf("%4.0f %s", w.Daily.Low[index], w.DailyUnits.Low)
 }
@@ -227,17 +264,6 @@ func (w *WeatherDaily) FormatSunshine(index int) string {
 	return toHours(w.Daily.Sunshine[index])
 }
 
-func (c *WeatherCommon) LogCommon() {
-	log.Printf("latitude: %f longitude: %f \ngenerationtime_ms: %f utc_offset_seconds: %d \ntimezone: %s (%s) \nelevation %f\n",
-		c.Latitude,
-		c.Longitude,
-		c.GenerationtimeMs,
-		c.UtcOffsetSeconds,
-		c.Timezone,
-		c.TimezoneAbbreviation,
-		c.Elevation)
-}
-
 func (w *WeatherDaily) Log() {
 	w.LogCommon()
 	for i := range w.Daily.Time {
@@ -246,50 +272,8 @@ func (w *WeatherDaily) Log() {
 	}
 }
 
-func (daily *WeatherDaily) Get(query string) (err error) {
-	return GetWeather(query, daily)
-}
-
 func (hourly *WeatherHourly) Log() {
 	hourly.LogCommon()
-}
-
-func (hourly *WeatherHourly) Get(query string) (err error) {
-	return GetWeather(query, hourly)
-}
-
-func GetWeather(query string, w any) (err error) {
-	var (
-		resp *http.Response
-	)
-
-	resp, err = http.Get(query)
-	if err != nil {
-		err = fmt.Errorf("weather Get: %v", err)
-		return
-	}
-	defer resp.Body.Close()
-	err = LoadWeather(resp.Body, w)
-	return
-}
-
-func LoadWeather(r io.Reader, w any) (err error) {
-	var (
-		buf []byte
-	)
-
-	buf, err = io.ReadAll(r)
-	if err != nil {
-		err = fmt.Errorf("LoadWeather ReadAll: %v", err)
-		return
-	}
-
-	err = json.Unmarshal(buf, w)
-	if err != nil {
-		err = fmt.Errorf("LoadWeather Unmarshal: %v", err)
-		return
-	}
-	return
 }
 
 type WeatherEffects struct {
@@ -312,9 +296,9 @@ var WeatherCodes = map[int32]*WeatherCode{
 	3:  {Code: 3, Color: "darkgray", Icon: "cloud", Tokens: []string{"overcast", ""}},
 	45: {Code: 45, Color: "dimgray", Icon: "foggy", Tokens: []string{"fog", ""}},
 	48: {Code: 48, Color: "gray", Icon: "mist", Tokens: []string{"rime", "fog"}},
-	51: {Code: 51, Color: "darkslateblue", Icon: "rainy_light", Tokens: []string{"light", "drizzle"}},
-	53: {Code: 53, Color: "darkslateblue", Icon: "rainy_light", Tokens: []string{"moderate", "drizzle"}},
-	55: {Code: 55, Color: "darkslateblue", Icon: "rainy_light", Tokens: []string{"dense", "drizzle"}},
+	51: {Code: 51, Color: "dodgerblue", Icon: "rainy_light", Tokens: []string{"light", "drizzle"}},
+	53: {Code: 53, Color: "dodgerblue", Icon: "rainy_light", Tokens: []string{"moderate", "drizzle"}},
+	55: {Code: 55, Color: "dodgerblue", Icon: "rainy_light", Tokens: []string{"dense", "drizzle"}},
 	56: {Code: 56, Color: "lightblue", Icon: "rainy_snow", Tokens: []string{"light", "freezing", "drizzle"}},
 	57: {Code: 57, Color: "lightblue", Icon: "rainy_snow", Tokens: []string{"dense", "freezing", "drizzle"}},
 	61: {Code: 61, Color: "royalblue", Icon: "rainy_light", Tokens: []string{"slight", "rain"}},

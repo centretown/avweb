@@ -39,20 +39,23 @@
         {{end}}
     </div>
 </div>
-
-{{ end }} {{ define "weather.clock" }} {{$cw := .CurrentWeatherHourly 0}}
-<span id="current-temperature" hx-swap-oob="outerHTML">
-    <span class="symbols" style="color:{{$cw.Color}}">{{$cw.Code}}</span>
-    <span class="temperature">{{$cw.Temperature}}</span>
-</span>
-<span>
-    <span class="symbols precipitation">weather_mix</span>
-    <span class="precipitation"
-        >{{$cw.Precipitation}} ({{$cw.Probability}})</span
-    >
-</span>
-<span>
-    <span class="symbols windspeed">air</span>
-    <span class="windspeed">{{$cw.WindSpeed}}</span>
+{{ end }} {{ define "weather.clock" }}
+<span id="current-temperature" class="clock" hx-swap-oob="outerHTML">
+    <span id="clock"></span>
+    <span>
+        <span class="symbols" style="color:{{.Color}}">{{.Code}}</span>
+        <span class="temperature">{{.Temperature}}</span>
+    </span>
+    <span>
+        <span class="symbols precipitation">weather_mix</span>
+        <span class="precipitation">{{.Precipitation}} ({{.Probability}})</span>
+    </span>
+    <span>
+        <span class="symbols windspeed">air</span>
+        <span class="windspeed">{{.WindSpeed}}</span>
+    </span>
+    <script>
+        startTime();
+    </script>
 </span>
 {{ end }}

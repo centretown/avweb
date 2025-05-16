@@ -9,7 +9,7 @@ import (
 var ActionsCamera = []*runtime.Action{
 	{Name: "camera", Title: "Camera Settings", Icon: "settings_video_camera", Group: runtime.Camera},
 	// {Name: "cameraadd", Title: "Add Camera", Icon: "linked_camera", Group: runtime.Camera},
-	{Name: "camera_list", Title: "List Cameras", Icon: "view_list", Group: runtime.Camera},
+	{Name: "camera_list", Title: "List Cameras", Icon: "replace_video", Group: runtime.Camera},
 }
 var ActionsHome = []*runtime.Action{
 	// {Name: "sun", Title: "Next Sun", Icon: "wb_twilight", Group: Home},

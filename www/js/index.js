@@ -164,10 +164,10 @@ function showBars(canvasId, values, codes) {
   let ctx = canvas.getContext("2d");
   let xStep = canvas.width / values.length;
   let yStep = 5;
-  let precision = (7 * 0.08) / values.length;
+  let precision = (7 * 0.1) / values.length;
   for (let i = 0; i < values.length; i++) {
     let x = i * xStep;
-    let yStart = 0;
+    let yStart = 1;
     let y = yStart;
     ctx.beginPath();
     ctx.strokeStyle = codeToColor(codes[i]);

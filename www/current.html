@@ -1,0 +1,65 @@
+{{ define "weather.current" }}
+<!--  -->
+{{$rt := .}}
+<!--  -->
+{{range $loc, $location := $rt.Locations}}
+<div class="content scroll">
+    <!--  -->
+</div>
+<!--  -->
+{{end}}
+<!--  -->
+{{end}}
+<!--  -->
+<!--  -->
+{{ define "weather.current.titles" }}
+<!--  -->
+{{$w:=.WeatherCurrent}}{{$cur:=$w.Current}}{{$units:=$w.CurrentUnits}}
+<!--  -->
+{{$code:=$w.WeatherCode $cur.Code}}
+<!--  -->
+<span class="title-left">
+    <span class="symbols-weather" style="color:{{$code.Color}}"
+        >{{$code.Icon}}</span
+    >
+    <span class="temperature"
+        >{{$cur.Temperature}}{{$units.Temperature}}</span
+    ></span
+>
+
+<span class="title-city">{{.City}}</span>
+
+<span class="title-right">
+    <span class="symbols-weather temperature-feels">airwave</span>
+    <span class="temperature-feels"
+        >Feels {{$cur.FeelsLike}}{{$units.FeelsLike}}</span
+    ></span
+>
+
+<span class="title-left">
+    <span class="symbols-weather precipitation">weather_mix</span>
+    <span class="precipitation">
+        {{$cur.Precipitation}}{{$units.Precipitation}}
+    </span></span
+>
+<span class="title-center"></span>
+<span class="title-right">
+    <span class="symbols-weather windspeed">air</span>
+    <span class="windspeed"
+        >{{$cur.WindSpeed}}{{$units.WindSpeed}}
+        {{$cur.WindDirection}}{{$units.WindDirection}}</span
+    ></span
+>
+<span class="title-left">
+    <span class="symbols-weather humidity">humidity_mid</span>
+    <span class="humidity">{{$cur.Humidity}}{{$units.Humidity}}</span></span
+>
+<span class="title-center"></span>
+
+<span class="title-right">
+    <span class="symbols-weather pressure">compress</span>
+    <span class="pressure"
+        >{{$cur.SurfacePressure}} {{$units.SurfacePressure}}
+    </span>
+</span>
+{{end}}
