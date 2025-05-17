@@ -1,16 +1,24 @@
-{{ define "weather.current" }}
-<!--  -->
-{{$rt := .}}
-<!--  -->
-{{range $loc, $location := $rt.Locations}}
-<div class="content scroll">
+{{ define "weather.current" }} {{$rt := .Runtime}}
+<div id="slot-{{.Action.Name}}" class="slot" draggable="false">
+    <script>
+        document.getElementById("current-date").innerHTML = showFullDate();
+    </script>
+    {{template "layout.content.head" .Action }}
+    <!--  -->
+    <span>
+        <div id="current-date" class="title-date"></div>
+        <div class="content scroll">
+            {{range $loc, $location := $rt.Locations}} {{template
+            "weather.current.titles" $location}}
+            <!--  -->
+            {{end}}
+        </div>
+    </span>
     <!--  -->
 </div>
 <!--  -->
 {{end}}
-<!--  -->
-{{end}}
-<!--  -->
+
 <!--  -->
 {{ define "weather.current.titles" }}
 <!--  -->
@@ -18,48 +26,59 @@
 <!--  -->
 {{$code:=$w.WeatherCode $cur.Code}}
 <!--  -->
-<span class="title-left">
-    <span class="symbols-weather" style="color:{{$code.Color}}"
-        >{{$code.Icon}}</span
-    >
-    <span class="temperature"
-        >{{$cur.Temperature}}{{$units.Temperature}}</span
-    ></span
->
-
-<span class="title-city">{{.City}}</span>
-
-<span class="title-right">
-    <span class="symbols-weather temperature-feels">airwave</span>
-    <span class="temperature-feels"
-        >Feels {{$cur.FeelsLike}}{{$units.FeelsLike}}</span
-    ></span
->
-
-<span class="title-left">
-    <span class="symbols-weather precipitation">weather_mix</span>
-    <span class="precipitation">
-        {{$cur.Precipitation}}{{$units.Precipitation}}
-    </span></span
->
-<span class="title-center"></span>
-<span class="title-right">
-    <span class="symbols-weather windspeed">air</span>
-    <span class="windspeed"
-        >{{$cur.WindSpeed}}{{$units.WindSpeed}}
-        {{$cur.WindDirection}}{{$units.WindDirection}}</span
-    ></span
->
-<span class="title-left">
-    <span class="symbols-weather humidity">humidity_mid</span>
-    <span class="humidity">{{$cur.Humidity}}{{$units.Humidity}}</span></span
->
-<span class="title-center"></span>
-
-<span class="title-right">
-    <span class="symbols-weather pressure">compress</span>
-    <span class="pressure"
-        >{{$cur.SurfacePressure}} {{$units.SurfacePressure}}
+<div class="title-weather">
+    <span class="title-left">
+        <span class="symbols-weather" style="color:{{$code.Color}}">
+            {{$code.Icon}}
+        </span>
+        <span class="temperature">
+            {{$cur.Temperature}}{{$units.Temperature}}
+        </span>
     </span>
-</span>
+
+    <span class="title-city item-city">{{.City}}</span>
+
+    <span class="title-right">
+        <span class="temperature-feels"
+            >Feels {{$cur.FeelsLike}}{{$units.FeelsLike}}
+        </span>
+        <span class="symbols-weather temperature-feels">airwave</span>
+    </span>
+
+    <span class="title-left">
+        <span class="symbols-weather precipitation">weather_mix</span>
+        <span class="precipitation">
+            {{$cur.Precipitation}} {{$units.Precipitation}}
+        </span></span
+    >
+    <span class="title-right">
+        <span class="humidity">{{$cur.Humidity}}{{$units.Humidity}}</span>
+        <span class="symbols-weather humidity">humidity_mid</span>
+    </span>
+    <span class="title-left">
+        <span class="symbols-weather windspeed">toys_fan</span>
+        <span class="windspeed">
+            {{$cur.WindSpeed}} {{$units.WindSpeed}}
+            {{$cur.WindDirection}}{{$units.WindDirection}}
+        </span>
+    </span>
+    <span class="title-right">
+        <span class="windspeed">{{$cur.WindGusts}} {{$units.WindGusts}} </span>
+        <span class="symbols-weather pressure">compress</span>
+    </span>
+
+    <span class="title-left">
+        <span class="symbols-weather pressure">compress</span>
+        <span class="pressure"
+            >{{$cur.PressureMSL}} {{$units.PressureMSL}}
+        </span>
+    </span>
+    <span></span>
+    <span class="title-right">
+        <span class="pressure"
+            >{{$cur.SurfacePressure}} {{$units.SurfacePressure}}
+        </span>
+        <span class="symbols-weather pressure">compress</span>
+    </span>
+</div>
 {{end}}

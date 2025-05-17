@@ -26,8 +26,7 @@
                 {{ template "layout.actions" . }} {{ template "layout.chat"
                 .WebSocket }}
                 <span id="slots" class="slots"></span>
-                {{$cw := .CurrentWeatherHourly 0}} {{ template "weather.clock"
-                $cw }}
+                {{ template "weather.clock" . }}
             </span>
         </span>
         <script src="/static/js/wsstatus.js" defer></script>

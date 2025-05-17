@@ -24,6 +24,12 @@
       "icon": "reset_settings",
       "group": 3
     },
+    "weather_current": {
+      "name": "weather_current",
+      "title": "Current Weather",
+      "icon": "thunderstorm",
+      "group": 1
+    },
     "weather_daily": {
       "name": "weather_daily",
       "title": "7 Day Forecast",

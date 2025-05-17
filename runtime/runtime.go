@@ -48,6 +48,7 @@ func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
 			config.Actions["camera_list"],
 		},
 		ActionsHome: []*Action{
+			config.Actions["weather_current"],
 			config.Actions["weather_hourly"],
 			config.Actions["weather_daily"],
 			config.Actions["weather_sun"],
@@ -65,10 +66,19 @@ func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
 	}
 
 	now := time.Now()
-	next := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
-	next = next.Add(time.Hour)
-	nextTick := next.Sub(now)
-	rt.ticker = time.NewTicker(nextTick)
+	next := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(),
+		now.Minute(), 0, 0, now.Location())
+	minute := 15 - next.Minute()%15
+	if minute == 0 {
+		minute = 15
+	}
+	next = next.Add(time.Duration(minute) * time.Minute)
+	if next.Compare(now) < 0 {
+		log.Fatal(minute, now, next)
+	}
+	ticker := next.Sub(now)
+	log.Printf("ticker=%v, minute=%v now=%v next=%v\n", ticker, minute, now, next)
+	rt.ticker = time.NewTicker(ticker)
 
 	for _, item := range host.Items {
 		rt.Webcams[item.Url] = item
@@ -118,14 +128,17 @@ func (rt *Runtime) Monitor() {
 
 		case now := <-rt.ticker.C:
 			if initialRun {
-				rt.ticker.Reset(time.Hour)
+				rt.ticker.Reset(time.Minute * 15)
 				initialRun = false
 			}
-			rt.QueryHourly()
+			rt.QueryCurrent()
 			rt.BroadcastTemperature()
 
-			if now.Hour()%4 == 0 {
-				rt.QueryDaily()
+			if now.Minute() == 0 {
+				rt.QueryHourly()
+				if now.Hour()%4 == 0 {
+					rt.QueryDaily()
+				}
 			}
 		}
 
@@ -190,40 +203,6 @@ type HourlySummary struct {
 	Color         string
 }
 
-func (rt *Runtime) CurrentWeatherHourly(index int) (hs *HourlySummary) {
-	hs = &HourlySummary{}
-	if index > len(rt.Locations) {
-		return
-	}
-
-	loc := rt.Locations[index]
-	hourly := loc.WeatherHourly
-	if len(hourly.Hourly.Time) < 1 {
-		return
-	}
-
-	hs.City = loc.City
-	hs.Temperature = fmt.Sprintf("%4.1f%s",
-		hourly.Hourly.Temperature[0],
-		hourly.HourlyUnits.Temperature)
-	hs.FeelsLike = fmt.Sprintf("%4.1f%s",
-		hourly.Hourly.FeelsLike[0],
-		hourly.HourlyUnits.Temperature)
-	hs.Precipitation = fmt.Sprintf("%4.1f %s",
-		hourly.Hourly.Precipitation[0],
-		hourly.HourlyUnits.Precipitation)
-	hs.Probability = fmt.Sprintf("%d%s",
-		hourly.Hourly.Probability[0],
-		hourly.HourlyUnits.Probability)
-	hs.WindSpeed = fmt.Sprintf("%4.1f %s %3.0f%s",
-		hourly.Hourly.WindSpeed[0],
-		hourly.HourlyUnits.WindSpeed, hourly.Hourly.WindDirection[0], hourly.HourlyUnits.WindDirection)
-	code := WeatherCodes[hourly.Hourly.Code[0]]
-	hs.Code = code.Icon
-	hs.Color = code.Color
-	return
-}
-
 func (rt *Runtime) CurrentTemperature() string {
 	hourly := rt.Location.WeatherHourly
 	if len(hourly.Hourly.Temperature) == 0 {
@@ -237,8 +216,7 @@ func (rt *Runtime) CurrentTemperature() string {
 func (rt *Runtime) BroadcastTemperature() {
 	buf := bytes.Buffer{}
 	t := rt.Temp.Lookup("weather.clock")
-	cw := rt.CurrentWeatherHourly(0)
-	t.Execute(&buf, cw)
+	t.Execute(&buf, rt)
 	rt.WebSocket.Broadcast(buf.String())
 }
 
@@ -264,7 +242,9 @@ func (rt *Runtime) HandleAction(path string, templ string, data *WeatherFormData
 		}
 
 		w.Header().Add("Cache-Control", "no-cache")
-		data.Action = rt.ActionMap[path[1:]]
+		if data.Action == nil {
+			data.Action = rt.ActionMap[path[1:]]
+		}
 
 		err := rt.Temp.Lookup(templ).Execute(w, data)
 		if err != nil {
@@ -292,6 +272,15 @@ func (rt *Runtime) QueryHourly() {
 	}
 }
 
+func (rt *Runtime) QueryCurrent() {
+	for _, location := range rt.Locations {
+		err := location.QueryCurrent()
+		if err != nil {
+			log.Printf("WeatherCurrent: %v", err)
+		}
+	}
+}
+
 func (rt *Runtime) HandleWeather() {
 	data := &WeatherFormData{
 		Codes:   WeatherCodes,
@@ -301,6 +290,7 @@ func (rt *Runtime) HandleWeather() {
 	rt.HandleAction("/weather_sun", "weather.sun", data)
 	rt.HandleAction("/weather_daily", "weather.daily", data)
 	rt.HandleAction("/weather_hourly", "weather.hourly", data)
+	rt.HandleAction("/weather_current", "weather.current", data)
 
 }
 

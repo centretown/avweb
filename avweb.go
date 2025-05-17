@@ -87,6 +87,7 @@ func main() {
 	mux.HandleFunc("/events", rt.WebSocket.Events)
 	mux.HandleFunc("/msghook", rt.WebSocket.MessageHook)
 
+	rt.QueryCurrent()
 	rt.QueryDaily()
 	rt.QueryHourly()
 
