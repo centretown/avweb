@@ -286,13 +286,14 @@ func (rt *Runtime) QueryHourly() {
 }
 
 func (rt *Runtime) QueryCurrent() {
-	for _, location := range rt.Locations {
+	for i, location := range rt.Locations {
 		err := location.QueryCurrent()
 		if err != nil {
 			log.Printf("WeatherCurrent: %v", err)
 			continue
 		}
 		location.WeatherCurrent.UpdateTime = time.Now()
+		location.BuildCurrentProperties(i)
 	}
 }
 

@@ -6,6 +6,7 @@
         var hideHourly = [];
         var canvasIds = [];
         var hourlyList = [];
+        var hourlyCodes = [];
 
         function drawHourlyItems(index) {
             let canvasId = canvasIds[index];
@@ -78,16 +79,22 @@
             {{template "weather.hourly.min" $location}}
             <script>
                 hideHourly.push(true);
+                hourlyCodes.push({{$location.WeatherHourly.Hourly.Code}});
                 var hourlyItems = new Map();
                 var id = "canvas-hourly"+{{$loc}};
                 canvasIds.push(id);
                 {{range $p:=$location.HourlyProperties.Items}}
                 hourlyItems.set({{$p.ID}}, {
                     id:{{$p.ID}},
-                    selected: false,
+                    selected: {{$p.Selected}},
                     draw: function (canvasId) {
-                      showGraph(canvasId, {{$p.Color}}, {{$p.Min}}, {{$p.Max}}, {{$p.Values}});}
-                });
+                      if ("line"=={{$p.Chart}}) {
+                        showGraph(canvasId, {{$p.Color}}, {{$p.ScaleMin}}, {{$p.ScaleMax}}, {{$p.Values}});
+                      } else if ("bar"=={{$p.Chart}}) {
+                        var codes = hourlyCodes[{{$loc}}];
+                        showBars(canvasId, {{$p.Values}}, codes);
+                      }
+                }});
                 {{end}}
                 hourlyList.push(hourlyItems);
                 // showBars(id, {{$hourly.Hourly.Precipitation}},{{$hourly.Hourly.Code}});
@@ -179,8 +186,7 @@
 <!--  -->
 {{ define "weather.hourly.properties" }}
 <!--  -->
-{{$props:=.HourlyProperties}}
-{{$w:=.WeatherHourly}}{{$cur:=$w.Hourly}}{{$units:=$w.HourlyUnits}}
+{{$props:=.HourlyProperties}} {{$w:=.WeatherHourly}}{{$cur:=$w.Hourly}}
 <!--  -->
 {{$c:=index $cur.Code 0}} {{$code:=$w.WeatherCode $c}}
 <!--  -->
@@ -196,7 +202,9 @@
     {{$left:=true}} {{range $item:=$props.Items}} {{if $left}}
     <div
         id="hourly-{{$item.ID}}"
-        class="title-left"
+        class="title-left {{if
+        $item.Selected}}title-selected
+        {{end}}"
         hx-on:click="toggleHourlyItem('{{$item.ID}}', {{$props.Index}})"
     >
         <span class="symbols-weather-medium {{$item.Klass}}"
@@ -207,7 +215,9 @@
     {{else}}
     <div
         id="hourly-{{$item.ID}}"
-        class="title-right"
+        class="title-right {{if
+        $item.Selected}}title-selected
+        {{end}}"
         hx-on:click="toggleHourlyItem('{{$item.ID}}', {{$props.Index}})"
     >
         <span>{{index $item.Values 0}}{{$item.Units}}</span>
@@ -229,7 +239,13 @@
 <div id="grid-max{{$props.Index}}" class="grid-minmax">
     <!--  -->
     {{range $item:=$props.Items}}
-    <span id="hourly-max-{{$item.ID}}" class="hide">
+    <span
+        id="hourly-max-{{$item.ID}}"
+        {{if
+        not
+        $item.Selected}}class="hide"
+        {{end}}
+    >
         <span class="symbols-weather {{$item.Klass}}">{{$item.Icon}}</span>
         <span class="{{$item.Klass}}">{{$item.Max}}{{$item.Units}}</span>
     </span>
@@ -240,10 +256,17 @@
 {{ define "weather.hourly.min" }}
 <!--  -->
 {{$props:=.HourlyProperties}}
-<div id="grid-max{{$props.Index}}" class="grid-minmax">
+<div id="grid-min{{$props.Index}}" class="grid-minmax">
     <!--  -->
     {{range $item:=$props.Items}}
-    <span id="hourly-min-{{$item.ID}}" class="hide">
+    <!--  -->
+    <span
+        id="hourly-min-{{$item.ID}}"
+        {{if
+        not
+        $item.Selected}}class="hide"
+        {{end}}
+    >
         <span class="symbols-weather {{$item.Klass}}">{{$item.Icon}}</span>
         <span class="{{$item.Klass}}">{{$item.Min}}{{$item.Units}}</span>
     </span>

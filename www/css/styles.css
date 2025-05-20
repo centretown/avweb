@@ -273,6 +273,8 @@ h3 {
         ". icon ."
         ". city ."
         ". city ."
+        ". city ."
+        ". city ."
         ". . .";
     grid-template-columns: 1fr 1fr 1fr;
     margin-bottom: 0.5rem;
@@ -438,10 +440,10 @@ h3 {
 }
 
 .windspeed {
-    color: yellow;
+    color: rgba(255, 255, 0, 255);
 }
 .windgusts {
-    color: yellow;
+    color: rgba(192, 192, 0, 255);
 }
 .humidity {
     color: rgba(192, 63, 255, 255);
@@ -449,11 +451,14 @@ h3 {
 .pressure {
     color: rgba(31, 255, 31, 255);
 }
+.surface {
+    color: rgba(95, 255, 95, 255);
+}
 .precipitation {
-    color: rgba(31, 144, 255, 255);
+    color: rgba(31, 120, 255, 255);
 }
 .probability {
-    color: rgba(31, 144, 255, 255);
+    color: rgba(144, 180, 255, 255);
 }
 .shower {
     color: rgba(20, 96, 172, 255);
