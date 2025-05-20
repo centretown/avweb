@@ -12,6 +12,17 @@ function doAction(action) {
   htmx.trigger("#" + action, "click");
 }
 
+function toggleClass(id, toggle, klass) {
+  if (toggle) {
+    toggle = false;
+    htmx.removeClass("#" + id, klass);
+  } else {
+    toggle = true;
+    htmx.addClass("#" + id, klass);
+  }
+  return toggle;
+}
+
 var hideLeft = true;
 function toggleMenu(id) {
   if (hideLeft) {
@@ -159,6 +170,12 @@ function codeToColor(code) {
   return rain;
 }
 
+function clearCanvas(canvasId) {
+  let canvas = document.getElementById(canvasId);
+  let ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
 function showBars(canvasId, values, codes) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");
@@ -213,59 +230,6 @@ function showGraph(canvasId, color, min, max, values, lineWidth = 2) {
   ctx.stroke();
 }
 
-function showFullDate() {
-  let now = new Date();
-  let options = {
-    timeStyle: "short",
-    dateStyle: "full",
-    timeZone: "America/New_York",
-  };
-  let fmt = new Intl.DateTimeFormat("en-US", options);
-  return fmt.format(now);
-}
-
-function showTimes(canvasId, times, options) {
-  let canvas = document.getElementById(canvasId);
-  let ctx = canvas.getContext("2d");
-  let xStep = canvas.width / times.length;
-  let x = 0;
-  let fmt = new Intl.DateTimeFormat("en-US", options);
-  ctx.fillStyle = `rgba(255,255,0,255)`;
-  for (let t of times) {
-    let day = new Date(t);
-    // console.log(t, day);
-    ctx.fillText(fmt.format(day), x, 12);
-    x += xStep;
-  }
-}
-
-function showHours(canvasId, times) {
-  let options = {
-    hour: "numeric",
-  };
-  let intervals = [];
-  let interval = times.length / 6;
-  if (interval <= 1) intervals = times;
-  else {
-    for (let i = 0; i < times.length; i++) {
-      if (i % interval == 0) {
-        intervals.push(times[i]);
-      }
-    }
-  }
-  showTimes(canvasId, intervals, options);
-}
-
-function showDays(canvasId, times) {
-  let options = {
-    weekday: "short",
-    timeZone: "America/New_York",
-  };
-  let intervals = [];
-  for (let t of times) intervals.push(t + " GMT-0400");
-  showTimes(canvasId, intervals, options);
-}
-
 function showMinMax(canvasId) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");
@@ -280,6 +244,19 @@ function showMinMax(canvasId) {
   ctx.moveTo(0, canvas.height - 1);
   ctx.lineTo(canvas.width, canvas.height - 1);
   ctx.stroke();
+}
+
+function showFullDate(dt) {
+  if (dt == undefined) {
+    let dt = new Date();
+  }
+  let options = {
+    timeStyle: "short",
+    dateStyle: "full",
+    timeZone: "America/New_York",
+  };
+  let fmt = new Intl.DateTimeFormat("en-US", options);
+  return fmt.format(dt);
 }
 
 const gamepads = {};

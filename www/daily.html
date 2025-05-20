@@ -1,6 +1,8 @@
 {{ define "weather.daily" }}
 
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
+    {{$rt := .Runtime}} {{$first := index $rt.Locations
+    0}}{{$dt:=$first.WeatherDaily.UpdateTime}}
     <script>
         var hideDaily = [];
         function toggleDaily(index) {
@@ -13,36 +15,42 @@
                 htmx.addClass("#" + id, "hide");
             }
         }
-        document.getElementById("daily-date").innerHTML = showFullDate();
+        document.getElementById("daily-date").innerHTML = showFullDate(
+            new Date(),
+        );
     </script>
-    {{template "layout.content.head" .Action }}{{$codes := .Codes}}
+    {{template "layout.content.head" .Action }}
+    <!--  -->
+    {{$codes := .Codes}}
+    <!--  -->
     <span>
         <div id="daily-date" class="title-date"></div>
         <div class="content scroll">
-            {{$rt := .Runtime}} {{range $loc, $location := .Data}}{{$daily :=
+            {{range $loc, $location := .Data}}{{$daily :=
             $location.WeatherDaily}} {{$fmt := $rt.CurrentWeatherDaily $loc}}
+
             <div class="title">
                 <span class="title-left">
-                    <span class="symbols-weather temperature-high"
-                        >arrow_upward</span
-                    >
+                    <span class="symbols-weather temperature-high">
+                        arrow_upward
+                    </span>
                     <span class="temperature-high">{{$fmt.High}}</span></span
                 >
                 <span class="title-city">{{$location.City}}</span>
                 <span class="title-right">
-                    <span class="symbols-weather temperature-low"
-                        >arrow_downward</span
-                    >
-                    <span class="temperature-low">{{$fmt.Low}}</span></span
-                >
+                    <span class="symbols-weather temperature-low">
+                        arrow_downward
+                    </span>
+                    <span class="temperature-low">{{$fmt.Low}}</span>
+                </span>
                 <span class="title-left">
-                    <span class="symbols-weather precipitation"
-                        >weather_mix</span
-                    >
+                    <span class="symbols-weather precipitation">
+                        weather_mix
+                    </span>
                     <span class="precipitation">
-                        {{$fmt.Precipitation}} ({{$fmt.Probability}})</span
-                    ></span
-                >
+                        {{$fmt.Precipitation}} ({{$fmt.Probability}})
+                    </span>
+                </span>
 
                 <span class="title-center"></span>
             </div>

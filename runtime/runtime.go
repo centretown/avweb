@@ -131,12 +131,15 @@ func (rt *Runtime) Monitor() {
 				rt.ticker.Reset(time.Minute * 15)
 				initialRun = false
 			}
+			log.Println("QueryCurrent")
 			rt.QueryCurrent()
 			rt.BroadcastTemperature()
 
 			if now.Minute() == 0 {
+				log.Println("QueryHourly")
 				rt.QueryHourly()
 				if now.Hour()%4 == 0 {
+					log.Println("QueryDaily")
 					rt.QueryDaily()
 				}
 			}
@@ -179,7 +182,7 @@ func (rt *Runtime) CurrentWeatherDaily(index int) (hs DailySummary) {
 	hs.Precipitation = fmt.Sprintf("%4.1f %s",
 		daily.Daily.Precipitation[0],
 		daily.DailyUnits.Precipitation)
-	hs.Probability = fmt.Sprintf("%d%s",
+	hs.Probability = fmt.Sprintf("%.0f%s",
 		daily.Daily.Probability[0],
 		daily.DailyUnits.Probability)
 	code := WeatherCodes[daily.Daily.Code[0]]
@@ -242,9 +245,7 @@ func (rt *Runtime) HandleAction(path string, templ string, data *WeatherFormData
 		}
 
 		w.Header().Add("Cache-Control", "no-cache")
-		if data.Action == nil {
-			data.Action = rt.ActionMap[path[1:]]
-		}
+		data.Action = rt.ActionMap[path[1:]]
 
 		err := rt.Temp.Lookup(templ).Execute(w, data)
 		if err != nil {
@@ -259,16 +260,28 @@ func (rt *Runtime) QueryDaily() {
 		err := location.QueryDaily()
 		if err != nil {
 			log.Printf("WeatherDaily: %v", err)
+			continue
 		}
+		location.WeatherDaily.UpdateTime = time.Now()
 	}
 }
 
+type LocationData struct {
+	Index    int
+	Location *Location
+}
+
 func (rt *Runtime) QueryHourly() {
-	for _, location := range rt.Locations {
+	for i, location := range rt.Locations {
 		err := location.QueryHourly()
 		if err != nil {
 			log.Printf("WeatherHourly: %v", err)
+			continue
 		}
+		location.WeatherHourly.UpdateTime = time.Now()
+		location.BuildHourlyProperties(i)
+		// buf, _ := json.MarshalIndent(location.WeatherHourly, "", "  ")
+		// log.Println(string(buf))
 	}
 }
 
@@ -277,7 +290,9 @@ func (rt *Runtime) QueryCurrent() {
 		err := location.QueryCurrent()
 		if err != nil {
 			log.Printf("WeatherCurrent: %v", err)
+			continue
 		}
+		location.WeatherCurrent.UpdateTime = time.Now()
 	}
 }
 

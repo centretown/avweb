@@ -12,15 +12,14 @@ type Limits struct {
 }
 
 type WeatherCommon struct {
-	Latitude             float64 `json:"latitude"`
-	Longitude            float64 `json:"longitude"`
-	GenerationtimeMs     float64 `json:"generationtime_ms"`
-	UtcOffsetSeconds     int64   `json:"utc_offset_seconds"`
-	Timezone             string  `json:"timezone"`
-	TimezoneAbbreviation string  `json:"timezone_abbreviation"`
-	Elevation            float64 `json:"elevation"`
-	Min                  float64 `json:"-"`
-	Max                  float64 `json:"-"`
+	Latitude             float64   `json:"latitude"`
+	Longitude            float64   `json:"longitude"`
+	GenerationtimeMs     float64   `json:"generationtime_ms"`
+	UtcOffsetSeconds     float64   `json:"utc_offset_seconds"`
+	Timezone             string    `json:"timezone"`
+	TimezoneAbbreviation string    `json:"timezone_abbreviation"`
+	Elevation            float64   `json:"elevation"`
+	UpdateTime           time.Time `json:"-"`
 }
 
 type WeatherHourly struct {
@@ -53,10 +52,10 @@ type CurrentUnits struct {
 	WindGusts       string `json:"wind_gusts_10m"`
 	Rain            string `json:"rain"`
 	Showers         string `json:"showers"`
-	Snowfall        string `json:"cloud_cover"`
-	CloudCover      string `json:"pressure_msl"`
-	PressureMSL     string `json:"surface_pressure"`
-	SurfacePressure string `json:"snowfall"`
+	Snowfall        string `json:"snowfall"`
+	CloudCover      string `json:"cloud_cover"`
+	PressureMSL     string `json:"pressure_msl"`
+	SurfacePressure string `json:"surface_pressure"`
 }
 
 type Current struct {
@@ -64,7 +63,7 @@ type Current struct {
 	Interval        int32   `json:"interval"`
 	Temperature     float64 `json:"temperature_2m"`
 	Precipitation   float64 `json:"precipitation"`
-	Humidity        int32   `json:"relative_humidity_2m"`
+	Humidity        float64 `json:"relative_humidity_2m"`
 	FeelsLike       float64 `json:"apparent_temperature"`
 	IsDay           int8    `json:"is_day"`
 	Code            int32   `json:"weather_code"`
@@ -97,7 +96,7 @@ type Hourly struct {
 	Time          []string  `json:"time"`
 	Temperature   []float64 `json:"temperature_2m"`
 	FeelsLike     []float64 `json:"apparent_temperature"`
-	Probability   []int32   `json:"precipitation_probability"`
+	Probability   []float64 `json:"precipitation_probability"`
 	Precipitation []float64 `json:"precipitation"`
 	WindSpeed     []float64 `json:"wind_speed_10m"`
 	WindDirection []float64 `json:"wind_direction_10m"`
@@ -132,7 +131,7 @@ type Daily struct {
 	Daylight      []float64 `json:"daylight_duration"`
 	Sunshine      []float64 `json:"sunshine_duration"`
 	Precipitation []float64 `json:"precipitation_sum"`
-	Probability   []int32   `json:"precipitation_probability_max"`
+	Probability   []float64 `json:"precipitation_probability_max"`
 	WindSpeed     []float64 `json:"wind_speed_10m_max"`
 	WindDirection []float64 `json:"wind_direction_10m_dominant"`
 	WindGusts     []float64 `json:"wind_gusts_10m_max"`
@@ -140,7 +139,7 @@ type Daily struct {
 }
 
 func (c *WeatherCommon) LogCommon() {
-	log.Printf("latitude: %f longitude: %f \ngenerationtime_ms: %f utc_offset_seconds: %d \ntimezone: %s (%s) \nelevation %f\n",
+	log.Printf("latitude: %f longitude: %f \ngenerationtime_ms: %f utc_offset_seconds: %f \ntimezone: %s (%s) \nelevation %f\n",
 		c.Latitude,
 		c.Longitude,
 		c.GenerationtimeMs,
@@ -203,7 +202,7 @@ func (w *WeatherHourly) FormatPrecipitation(index int) string {
 	return fmt.Sprintf("%6.2f", w.Hourly.Precipitation[index])
 }
 func (w *WeatherHourly) FormatProbability(index int) string {
-	return fmt.Sprintf("%6d", w.Hourly.Probability[index])
+	return fmt.Sprintf("%6.0f", w.Hourly.Probability[index])
 }
 func (w *WeatherHourly) FormatWindSpeed(index int) string {
 	return fmt.Sprintf("%6.2f", w.Hourly.WindSpeed[index])
@@ -296,13 +295,13 @@ var WeatherCodes = map[int32]*WeatherCode{
 	3:  {Code: 3, Color: "darkgray", Icon: "cloud", Tokens: []string{"overcast", ""}},
 	45: {Code: 45, Color: "dimgray", Icon: "foggy", Tokens: []string{"fog", ""}},
 	48: {Code: 48, Color: "gray", Icon: "mist", Tokens: []string{"rime", "fog"}},
-	51: {Code: 51, Color: "dodgerblue", Icon: "rainy_light", Tokens: []string{"light", "drizzle"}},
-	53: {Code: 53, Color: "dodgerblue", Icon: "rainy_light", Tokens: []string{"moderate", "drizzle"}},
-	55: {Code: 55, Color: "dodgerblue", Icon: "rainy_light", Tokens: []string{"dense", "drizzle"}},
+	51: {Code: 51, Color: "dodgerblue", Icon: "rainy", Tokens: []string{"light", "drizzle"}},
+	53: {Code: 53, Color: "dodgerblue", Icon: "rainy", Tokens: []string{"moderate", "drizzle"}},
+	55: {Code: 55, Color: "dodgerblue", Icon: "rainy", Tokens: []string{"dense", "drizzle"}},
 	56: {Code: 56, Color: "lightblue", Icon: "rainy_snow", Tokens: []string{"light", "freezing", "drizzle"}},
 	57: {Code: 57, Color: "lightblue", Icon: "rainy_snow", Tokens: []string{"dense", "freezing", "drizzle"}},
 	61: {Code: 61, Color: "royalblue", Icon: "rainy_light", Tokens: []string{"slight", "rain"}},
-	63: {Code: 63, Color: "royalblue", Icon: "rainy", Tokens: []string{"moderate", "rain"}},
+	63: {Code: 63, Color: "royalblue", Icon: "rainy_light", Tokens: []string{"moderate", "rain"}},
 	65: {Code: 65, Color: "royalblue", Icon: "rainy_heavy", Tokens: []string{"heavy", "rain"}},
 	66: {Code: 66, Color: "slateblue", Icon: "rainy_heavy", Tokens: []string{"light", "freezing", "rain"}},
 	67: {Code: 67, Color: "slateblue", Icon: "rainy_heavy", Tokens: []string{"heavy", "freezing", "rain"}},
@@ -310,8 +309,8 @@ var WeatherCodes = map[int32]*WeatherCode{
 	73: {Code: 73, Color: "white", Icon: "snowing", Tokens: []string{"moderate", "snow"}},
 	75: {Code: 75, Color: "white", Icon: "snowing_heavy", Tokens: []string{"heavy", "snow"}},
 	77: {Code: 77, Color: "white", Icon: "snowing", Tokens: []string{"snow", "grains"}},
-	80: {Code: 80, Color: "dodgerblue", Icon: "rainy_light", Tokens: []string{"slight", "rain", "showers"}},
-	81: {Code: 81, Color: "dodgerblue", Icon: "rainy", Tokens: []string{"moderate", "rain", "showers"}},
+	80: {Code: 80, Color: "dodgerblue", Icon: "shower", Tokens: []string{"slight", "rain", "showers"}},
+	81: {Code: 81, Color: "dodgerblue", Icon: "shower", Tokens: []string{"moderate", "rain", "showers"}},
 	82: {Code: 82, Color: "red", Icon: "rainy_heavy", Tokens: []string{"violent", "rain", "showers"}},
 	85: {Code: 85, Color: "whitesmoke", Icon: "snowing", Tokens: []string{"slight", "snow", "showers"}},
 	86: {Code: 86, Color: "white", Icon: "snowing_heavy", Tokens: []string{"heavy", "snow", "showers"}},

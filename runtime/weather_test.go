@@ -17,32 +17,41 @@ func TestWeather(t *testing.T) {
 	config := testConfig(t)
 
 	testFile(t, "testdata/daily.json", &daily)
-	testFile(t, "testdata/hourly.json", &hourly)
+	testFile(t, "testdata/hourly2.json", &hourly)
 	testFile(t, "testdata/current.json", &current)
 
+	for i, l := range config.Locations {
+		l.WeatherDaily = &daily
+		l.WeatherHourly = &hourly
+		t.Log("BuildHourlyProperties", i)
+		l.BuildHourlyProperties(i)
+		buf, _ := json.MarshalIndent(l.HourlyProperties, "", "  ")
+		t.Log(string(buf))
+		l.WeatherCurrent = &current
+	}
+
+	testCurrent(t, config, &hourly)
+	return
+}
+func testCurrent(t *testing.T, config *Config, current *WeatherHourly) {
 	tmpl, err := template.ParseGlob("../www/*.html")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	tmp := tmpl.Lookup("weather.current")
-
-	for _, l := range config.Locations {
-		l.WeatherCurrent = &current
-	}
+	tmp := tmpl.Lookup("weather.hourly.properties")
 
 	rt := &Runtime{
 		Location:  config.Locations[0],
 		Locations: config.Locations,
 	}
-	data := &WeatherFormData{
-		Codes:   WeatherCodes,
-		Data:    rt.Locations,
-		Runtime: rt}
+	// data := &WeatherFormData{
+	// 	Codes:   WeatherCodes,
+	// 	Data:    rt.Locations,
+	// 	Runtime: rt}
 
-	data.Action = config.Actions["weather_current"]
-	rt.Location.WeatherCurrent = &current
-	err = tmp.Execute(os.Stdout, data)
+	rt.Location.WeatherHourly = current
+	err = tmp.Execute(os.Stdout, rt.Location)
 	if err != nil {
 		t.Fatal(err)
 	}

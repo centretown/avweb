@@ -2,12 +2,12 @@
     --bgOpaque: rgba(0, 0, 0, 0.75);
     --bgTransparent: rgba(0, 0, 0, 0.15);
     --bgH3: rgba(0, 127, 255, 0.15);
-    --fgBright: rgba(0, 255, 255, 1);
-    --fgDim: rgba(72, 168, 158, 0.8);
+    --fgBright: rgba(165, 208, 198, 1);
+    --fgSelected: rgba(200, 255, 240, 1);
+    --fgDim: rgba(165, 208, 198, 0.8);
     --fgOut: rgba(128, 255, 0, 1);
     --fgIn: rgba(255, 255, 255, 1);
-    --fgClock: lime;
-    --fgClockBright: rgba(240, 155, 90, 1);
+    --fgClock: rgba(165, 208, 198, 1);
     --fgStatus: rgba(255, 255, 0, 0.9);
     --fgIcon: rgba(120, 184, 244, 1);
     --fgWeatherIcon: rgba(0, 0, 255, 1);
@@ -31,7 +31,9 @@
 
 .material-symbols-outlined,
 .symbols,
+.symbols-title,
 .symbols-weather,
+.symbols-weather-medium,
 .symbols-small,
 .symbols-form {
     font-family: "Material Symbols Outlined";
@@ -54,18 +56,26 @@
     font-size: 2.25rem;
 }
 
-.symbols-weather,
+.symbols-title,
 .symbols-small {
     color: var(--fgIcon);
     margin-right: 0.5rem;
     font-size: 1rem;
 }
+.symbols-weather-medium,
 .symbols-weather {
     font-size: 0.75rem;
     margin-right: 0rem;
     color: var(--fgIcon);
-    /* color: var(--fgWeatherIcon); */
 }
+.symbols-weather-medium {
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+.symbols-title {
+    font-size: 1.75rem;
+}
+
 .symbols-form {
     color: var(--fgIcon);
     font-size: 1.5rem;
@@ -241,10 +251,16 @@ h3 {
     font-weight: bold;
 }
 
-.title-date {
-    padding-left: 1rem;
-    font-size: 0.8rem;
-    /* font-weight: bold; */
+.item-icon {
+    grid-area: icon;
+    text-align: center;
+}
+
+.item-date {
+    font-weight: normal;
+    font-size: 0.65rem;
+    text-align: center;
+    grid-area: date;
 }
 
 .title-weather {
@@ -252,10 +268,13 @@ h3 {
     font-size: 0.9rem;
     font-weight: bold;
     grid-template-areas:
-        ". city ."
+        ". date ."
+        ". icon ."
+        ". icon ."
         ". city ."
         ". city ."
         ". . .";
+    grid-template-columns: 1fr 1fr 1fr;
     margin-bottom: 0.5rem;
 }
 
@@ -272,9 +291,22 @@ h3 {
 .title-left {
     font-weight: normal;
     font-size: 0.7rem;
+    cursor: pointer;
+}
+
+.title-date {
+    margin-left: 1rem;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.title-selected {
+    font-weight: 900;
+    color: var(--fgSelected);
 }
 
 .title-left {
+    text-align: left;
 }
 .title-right {
     text-align: right;
@@ -323,14 +355,22 @@ h3 {
 
 .clock:hover {
     opacity: 1;
+    /* Will override color (regardless of order) */
+    /* -webkit-text-fill-color: var(--fgClock);
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: var(--fgClockOutline); */
+    animation-name: fade-clock;
+    animation-timing-function: cubic-bezier(0.39, 0.575, 0.565, 1);
+    animation-duration: 800ms;
+    animation-fill-mode: forwards;
 }
 
 @keyframes fade-clock {
     0% {
-        opacity: 1;
+        opacity: 0.4;
     }
     100% {
-        opacity: 0.4;
+        opacity: 1;
     }
 }
 
@@ -341,10 +381,10 @@ h3 {
     color: var(--fgClock);
     text-align: center;
     width: 100%;
-    font-size: 2.2rem;
+    font-size: 2.1rem;
     font-style: bolder;
-    opacity: 0.4;
     grid-template-columns: auto auto auto auto;
+    opacity: 0.4;
 }
 
 .name-item {
@@ -394,9 +434,13 @@ h3 {
     width: 100%;
     text-align: center;
     grid-template-columns: auto auto auto auto auto auto auto auto;
+    grid-auto-flow: column dense;
 }
 
 .windspeed {
+    color: yellow;
+}
+.windgusts {
     color: yellow;
 }
 .humidity {
@@ -408,16 +452,28 @@ h3 {
 .precipitation {
     color: rgba(31, 144, 255, 255);
 }
+.probability {
+    color: rgba(31, 144, 255, 255);
+}
+.shower {
+    color: rgba(20, 96, 172, 255);
+}
 .rain {
     color: rgba(31, 144, 255, 255);
 }
 .snow {
     color: rgba(255, 255, 255, 255);
 }
+.cloud {
+    color: rgba(127, 127, 127, 255);
+}
 .temperature {
     color: rgba(255, 150, 0, 255);
 }
 .temperature-feels {
+    color: rgba(255, 200, 150, 255);
+}
+.feelslike {
     color: rgba(255, 200, 150, 255);
 }
 .temperature-high {

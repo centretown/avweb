@@ -1,0 +1,60 @@
+        <div id="grid-max{{$loc}}" class="grid-minmax">
+                <span id="hourly-temperature-max{{$loc}}" class="">
+                    <span class="symbols-weather temperature">thermometer</span>
+                    <span class="temperature"
+                        >{{$temperature.Max}}{{$hourly.HourlyUnits.Temperature}}</span
+                    >
+                </span>
+                <span id="hourly-feelslike-max{{$loc}}">
+                    <span class="symbols-weather temperature">airwave</span>
+                    <span class="temperature-feels"
+                        >{{$feelslike.Max}}{{$hourly.HourlyUnits.FeelsLike}}</span
+                    >
+                </span>
+                <span id="hourly-precipitation-max{{$loc}}" class="">
+                    <span class="symbols-weather precipitation"
+                        >weather_mix</span
+                    >
+                    <span class="precipitation"
+                        >{{$precipitation.Max}}{{$hourly.HourlyUnits.Precipitation}}</span
+                    >
+                </span>
+                <span id="hourly-probability-max{{$loc}}">
+                    <span class="symbols-weather probability">weather_mix</span>
+                    <span class="probability"
+                        >{{$probability.Max}}{{$hourly.HourlyUnits.Probability}}</span
+                    >
+                </span>
+                <span id="hourly-windspeed-max{{$loc}}" class="hide">
+                    <span class="symbols-weather windspeed">weather_mix</span>
+                    <span class="windspeed"
+                        >{{$windspeed.Max}}{{$hourly.HourlyUnits.WindSpeed}}</span
+                    >
+                </span>
+                <span id="hourly-windgusts-max{{$loc}}" class="hide">
+                    <span class="symbols-weather windspeed">air</span>
+                    <span class="windspeed"
+                        >{{$windgusts.Max}}{{$hourly.HourlyUnits.WindGusts}}</span
+                    >
+                </span>
+                <span id="hourly-pressure-max{{$loc}}" class="hide">
+                    <span class="symbols-weather pressure">compress</span>
+                    <span class="pressure"
+                        >{{$pressure.Max}}{{$hourly.HourlyUnits.Pressure}}</span
+                    >
+                </span>
+                <span id="hourly-humidity-max{{$loc}}" class="hide">
+                    <span class="symbols-weather humidity">humidity_mid</span>
+                    <span class="humidity"
+                        >{{$humidity.Max}}{{$hourly.HourlyUnits.Humidity}}</span
+                    >
+                </span>
+            </div>
+            <div id="grid-min{{$loc}}" class="grid-minmax">
+                <span class="temperature"
+                    >{{$temperature.Min}}{{$hourly.HourlyUnits.Temperature}}</span
+                >
+                <span class="temperature-feels"
+                    >{{$feelslike.Min}}{{$hourly.HourlyUnits.FeelsLike}}</span
+                >
+            </div>

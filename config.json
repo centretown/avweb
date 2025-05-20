@@ -8,7 +8,7 @@
     },
     "camera_list": {
       "name": "camera_list",
-      "title": "List Cameras",
+      "title": "Camera Select",
       "icon": "replace_video",
       "group": 0
     },

@@ -1,84 +1,97 @@
-{{ define "weather.current" }} {{$rt := .Runtime}}
+{{ define "weather.current" }}
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
+    {{$rt:=.Runtime}}{{$dt:=$rt.Location.WeatherDaily.UpdateTime}} {{template
+    "layout.content.head" .Action }}
     <script>
-        document.getElementById("current-date").innerHTML = showFullDate();
+        document.getElementById("current-date").innerHTML = showFullDate(
+            new Date(),
+        );
     </script>
-    {{template "layout.content.head" .Action }}
-    <!--  -->
     <span>
         <div id="current-date" class="title-date"></div>
         <div class="content scroll">
-            {{range $loc, $location := $rt.Locations}} {{template
-            "weather.current.titles" $location}}
+            {{range $loc, $location := $rt.Locations}}
+            <!--  -->
+            {{template "weather.current.titles" $location}}
             <!--  -->
             {{end}}
         </div>
     </span>
-    <!--  -->
 </div>
-<!--  -->
 {{end}}
-
 <!--  -->
+
 {{ define "weather.current.titles" }}
 <!--  -->
 {{$w:=.WeatherCurrent}}{{$cur:=$w.Current}}{{$units:=$w.CurrentUnits}}
 <!--  -->
 {{$code:=$w.WeatherCode $cur.Code}}
-<!--  -->
 <div class="title-weather">
+    <span class="symbols-title item-icon" style="color:{{$code.Color}}">
+        {{$code.Icon}}
+    </span>
+
     <span class="title-left">
-        <span class="symbols-weather" style="color:{{$code.Color}}">
-            {{$code.Icon}}
-        </span>
-        <span class="temperature">
-            {{$cur.Temperature}}{{$units.Temperature}}
-        </span>
+        <span class="symbols-weather-medium temperature">thermometer</span>
+        <span> {{$cur.Temperature}}{{$units.Temperature}} </span>
+    </span>
+    <span class="title-right">
+        <span>Feels {{$cur.FeelsLike}}{{$units.FeelsLike}} </span>
+        <span class="symbols-weather-medium temperature-feels">airwave</span>
     </span>
 
     <span class="title-city item-city">{{.City}}</span>
+    <div class="item-date">
+        {{$fmt:="3:04PM MST"}} {{.WeatherCurrent.UpdateTime.Format $fmt}}
+    </div>
 
+    <span class="title-left">
+        <span class="symbols-weather-medium precipitation">weather_mix</span>
+        <span>{{$cur.Precipitation}} {{$units.Precipitation}}</span>
+    </span>
     <span class="title-right">
-        <span class="temperature-feels"
-            >Feels {{$cur.FeelsLike}}{{$units.FeelsLike}}
-        </span>
-        <span class="symbols-weather temperature-feels">airwave</span>
+        <span>{{$cur.Rain}} {{$units.Rain}}</span>
+        <span class="symbols-weather-medium rain">rainy</span>
     </span>
 
     <span class="title-left">
-        <span class="symbols-weather precipitation">weather_mix</span>
-        <span class="precipitation">
-            {{$cur.Precipitation}} {{$units.Precipitation}}
-        </span></span
-    >
-    <span class="title-right">
-        <span class="humidity">{{$cur.Humidity}}{{$units.Humidity}}</span>
-        <span class="symbols-weather humidity">humidity_mid</span>
+        <span class="symbols-weather-medium shower">shower</span>
+        <span>{{$cur.Showers}} {{$units.Showers}} </span>
     </span>
+    <span class="title-right">
+        <span>{{$cur.Snowfall}} {{$units.Snowfall}}</span>
+        <span class="symbols-weather-medium snow">snowing</span>
+    </span>
+
     <span class="title-left">
-        <span class="symbols-weather windspeed">toys_fan</span>
-        <span class="windspeed">
+        <span class="symbols-weather-medium cloud">cloud</span>
+        <span>{{$cur.CloudCover}} {{$units.CloudCover}}</span>
+    </span>
+    <span class="title-right">
+        <span>{{$cur.Humidity}}{{$units.Humidity}}</span>
+        <span class="symbols-weather-medium humidity">humidity_mid</span>
+    </span>
+
+    <span class="title-left">
+        <span class="symbols-weather-medium windspeed">toys_fan</span>
+        <span>
             {{$cur.WindSpeed}} {{$units.WindSpeed}}
             {{$cur.WindDirection}}{{$units.WindDirection}}
         </span>
     </span>
     <span class="title-right">
-        <span class="windspeed">{{$cur.WindGusts}} {{$units.WindGusts}} </span>
-        <span class="symbols-weather pressure">compress</span>
+        <span>{{$cur.WindGusts}} {{$units.WindGusts}} </span>
+        <span class="symbols-weather-medium windspeed">air</span>
     </span>
 
     <span class="title-left">
-        <span class="symbols-weather pressure">compress</span>
-        <span class="pressure"
-            >{{$cur.PressureMSL}} {{$units.PressureMSL}}
-        </span>
+        <span class="symbols-weather-medium pressure">compress</span>
+        <span>{{$cur.PressureMSL}} {{$units.PressureMSL}} </span>
     </span>
     <span></span>
     <span class="title-right">
-        <span class="pressure"
-            >{{$cur.SurfacePressure}} {{$units.SurfacePressure}}
-        </span>
-        <span class="symbols-weather pressure">compress</span>
+        <span>{{$cur.SurfacePressure}} {{$units.SurfacePressure}} </span>
+        <span class="symbols-weather-medium pressure">compress</span>
     </span>
 </div>
 {{end}}
