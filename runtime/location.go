@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -46,6 +45,7 @@ type Location struct {
 	Longitude         float64             `json:"longitude"`
 	Zone              string              `json:"zone"`
 	WeatherDaily      *WeatherDaily       `json:"-"`
+	DailyProperties   *LocationProperties `json:"-"`
 	WeatherHourly     *WeatherHourly      `json:"-"`
 	HourlyProperties  *LocationProperties `json:"-"`
 	WeatherCurrent    *WeatherCurrent     `json:"-"`
@@ -94,19 +94,28 @@ type WeatherAttributes struct {
 }
 
 var weatherAttributes = map[string]WeatherAttributes{
-	"temperature":   {Icon: "thermometer", Color: "rgba(255, 150, 0, 255)", Chart: "line", Selected: true},
-	"feelslike":     {Icon: "airwave", Color: "rgba(255, 200, 150, 255)", Chart: "line", Selected: true},
-	"precipitation": {Icon: "weather_mix", Color: "rgba(31, 144, 255, 255)", Chart: "bar", Selected: true},
-	"probability":   {Icon: "weather_mix", Color: "rgba(144, 144, 255, 255)", Chart: "line", Selected: true},
-	"windspeed":     {Icon: "toys_fan", Color: "rgba(255, 255, 0, 255)", Chart: "line"},
-	"windgusts":     {Icon: "air", Color: "rgba(192, 192, 0, 255)", Chart: "line"},
-	"pressure":      {Icon: "compress", Color: "rgba(31, 255, 31, 255)", Chart: "line"},
-	"humidity":      {Icon: "humidity_mid", Color: "rgba(192, 63, 255, 255)", Chart: "line"},
+	"temperature":      {Icon: "thermometer", Color: "rgba(255,69,0, 255)", Chart: "line", Selected: true},
+	"feelslike":        {Icon: "airwave", Color: "rgba(255, 140, 0, 255)", Chart: "line", Selected: true},
+	"temperature-high": {Icon: "thermostat_arrow_up", Color: "rgba(233,105,44, 255)", Chart: "line", Selected: true},
+	"temperature-low":  {Icon: "thermostat_arrow_down", Color: "rgba(255,179,71, 255)", Chart: "line", Selected: true},
+
+	"precipitation": {Icon: "weather_mix", Color: "rgba(0,119,190)", Chart: "bar", Selected: true},
+	"probability":   {Icon: "weather_mix", Color: "rgba(8,146,208, 255)", Chart: "line", Selected: true},
 	"rain":          {Icon: "rainy", Color: "rgba(31, 144, 255, 255)", Chart: "line"},
-	"shower":        {Icon: "shower", Color: "rgba(20, 96, 172, 255)", Chart: "line"},
+	"shower":        {Icon: "shower", Color: "rgba(135,206,235, 255)", Chart: "line"},
 	"snow":          {Icon: "snowing", Color: "rgba(255, 255, 255, 255)", Chart: "line"},
-	"cloud":         {Icon: "cloud", Color: "rgba(127, 127, 127, 255)", Chart: "line"},
-	"surface":       {Icon: "compress", Color: "color: rgba(95, 255, 95, 255)", Chart: "line"},
+	"cloud":         {Icon: "cloud", Color: "rgba(119,139,165, 255)", Chart: "line"},
+
+	"humidity": {Icon: "humidity_mid", Color: "rgba(221,160,221, 255)", Chart: "line"},
+
+	"windspeed": {Icon: "toys_fan", Color: "rgba(255,218,185, 255)", Chart: "line"},
+	"windgusts": {Icon: "air", Color: "rgba(255,239,213, 255)", Chart: "line"},
+
+	"pressure": {Icon: "compress", Color: "rgba(255,153,153, 255)", Chart: "line"},
+	"surface":  {Icon: "compress", Color: "color: rgba(230,103,113, 255)", Chart: "line"},
+
+	"daylight": {Icon: "brightness_medium", Color: "rgba(255,225,53, 255)", Chart: "line"},
+	"sunshine": {Icon: "brightness_7", Color: "rgba(255, 255, 0, 255)", Chart: "line"},
 }
 
 var currentKeys = []string{
@@ -123,6 +132,13 @@ var hourlyKeys = []string{
 	"precipitation", "probability",
 	"windspeed", "windgusts",
 	"pressure", "humidity",
+}
+
+var dailyKeys = []string{
+	"temperature-high", "temperature-low",
+	"precipitation", "probability",
+	"windspeed", "windgusts",
+	"daylight", "sunshine",
 }
 
 func (loc *Location) BuildCurrentProperties(index int) {
@@ -189,6 +205,65 @@ func (loc *Location) BuildCurrentProperties(index int) {
 	}
 }
 
+func (loc *Location) BuildDailyProperties(index int) {
+	p := &LocationProperties{}
+	loc.DailyProperties = p
+	p.Index = index
+	p.Items = make([]*LocationItem, len(dailyKeys))
+	p.Code = loc.WeatherDaily.Daily.Code
+	limits := make(map[string]*Limits)
+	for i, key := range dailyKeys {
+		item := &LocationItem{}
+		p.Items[i] = item
+
+		item.ID = fmt.Sprintf("%s%d", key, index)
+		item.Klass = key
+
+		attr := weatherAttributes[key]
+		item.Icon = attr.Icon
+		item.Color = attr.Color
+		item.Chart = attr.Chart
+		item.Selected = attr.Selected
+
+		values := loc.WeatherDaily.Daily
+		units := loc.WeatherDaily.DailyUnits
+
+		switch key {
+		case "temperature-high":
+			item.Values = values.High
+			item.Units = units.High
+		case "temperature-low":
+			item.Values = values.Low
+			item.Units = units.Low
+		case "precipitation":
+			item.Values = values.Precipitation
+			item.Units = units.Precipitation
+		case "probability":
+			item.Values = values.Probability
+			item.Units = units.Probability
+		case "windspeed":
+			item.Values = values.WindSpeed
+			item.Units = units.WindSpeed
+		case "windgusts":
+			item.Values = values.WindGusts
+			item.Units = units.WindGusts
+		case "daylight":
+			item.Values = values.Daylight
+			item.Units = units.Daylight
+		case "sunshine":
+			item.Values = values.Sunshine
+			item.Units = units.Sunshine
+		}
+
+		mnx := loc.WeatherDaily.MinMax(item.Values)
+		item.Max = mnx.Max
+		item.Min = mnx.Min
+		p.BuildScale(limits, &mnx, item.Units)
+	}
+
+	p.Scale(limits)
+}
+
 func (loc *Location) BuildHourlyProperties(index int) {
 	p := &LocationProperties{}
 	loc.HourlyProperties = p
@@ -241,22 +316,30 @@ func (loc *Location) BuildHourlyProperties(index int) {
 		}
 
 		mnx := loc.WeatherHourly.MinMax(item.Values)
-		lim, ok := limits[item.Units]
-		if !ok {
-			limits[item.Units] = &mnx
-		} else {
-			log.Println(item.Units, lim.Min, lim.Max)
-			if lim.Min > mnx.Min {
-				lim.Min = mnx.Min
-			}
-			if lim.Max < mnx.Max {
-				lim.Max = mnx.Max
-			}
-		}
 		item.Max = mnx.Max
 		item.Min = mnx.Min
+		p.BuildScale(limits, &mnx, item.Units)
 	}
 
+	p.Scale(limits)
+}
+
+func (p *LocationProperties) BuildScale(limits map[string]*Limits, mnx *Limits, units string) {
+	lim, ok := limits[units]
+	if !ok {
+		limits[units] = mnx
+	} else {
+		// log.Println(units, lim.Min, lim.Max)
+		if lim.Min > mnx.Min {
+			lim.Min = mnx.Min
+		}
+		if lim.Max < mnx.Max {
+			lim.Max = mnx.Max
+		}
+	}
+}
+
+func (p *LocationProperties) Scale(limits map[string]*Limits) {
 	for _, item := range p.Items {
 		lim, ok := limits[item.Units]
 		if !ok {

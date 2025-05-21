@@ -256,13 +256,14 @@ func (rt *Runtime) HandleAction(path string, templ string, data *WeatherFormData
 }
 
 func (rt *Runtime) QueryDaily() {
-	for _, location := range rt.Locations {
+	for i, location := range rt.Locations {
 		err := location.QueryDaily()
 		if err != nil {
 			log.Printf("WeatherDaily: %v", err)
 			continue
 		}
 		location.WeatherDaily.UpdateTime = time.Now()
+		location.BuildDailyProperties(i)
 	}
 }
 

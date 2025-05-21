@@ -8,35 +8,9 @@
         var hourlyList = [];
         var hourlyCodes = [];
 
-        function drawHourlyItems(index) {
-            let canvasId = canvasIds[index];
-            clearCanvas(canvasId);
-            let hourlyItems = hourlyList[index];
-            let items = hourlyItems.entries();
-            for (let [key, item] of items) {
-                if (item.selected && item.draw !== undefined) {
-                    item.draw(canvasId);
-                }
-            }
-            showMinMax(canvasId);
-        }
-
         function toggleHourlyItem(sel, index) {
-            let hourlyItems = hourlyList[index];
-            let item = hourlyItems.get(sel);
-            item.selected = toggleClass(
-                "hourly-" + sel,
-                item.selected,
-                "title-selected",
-            );
-            if (item.selected) {
-                htmx.removeClass("#" + "hourly-max-" + sel, "hide");
-                htmx.removeClass("#" + "hourly-min-" + sel, "hide");
-            } else {
-                htmx.addClass("#" + "hourly-max-" + sel, "hide");
-                htmx.addClass("#" + "hourly-min-" + sel, "hide");
-            }
-            drawHourlyItems(index);
+            let canvasId = canvasIds[index];
+            toggleItem(sel, "hourly", index, canvasId, hourlyList);
         }
 
         function toggleHourly(index) {
@@ -61,8 +35,7 @@
             <!--  -->
             {{template "weather.hourly.properties" $location}}
             <!--  -->
-            {{$hourly := $location.WeatherHourly}} {{$limit := $hourly.MinMax
-            $hourly.Hourly.Temperature $hourly.Hourly.FeelsLike}}
+            {{$hourly := $location.WeatherHourly}}
             <div class="grid-hour">
                 {{$hours:=$hourly.Hours}} {{range $t := $hours}}
                 <span class="grid-data">{{$hourly.FormatHour $t}}</span>
@@ -77,6 +50,7 @@
                 class="chart-hourly unfade-it"
             ></canvas>
             {{template "weather.hourly.min" $location}}
+
             <script>
                 hideHourly.push(true);
                 hourlyCodes.push({{$location.WeatherHourly.Hourly.Code}});
@@ -97,10 +71,7 @@
                 }});
                 {{end}}
                 hourlyList.push(hourlyItems);
-                // showBars(id, {{$hourly.Hourly.Precipitation}},{{$hourly.Hourly.Code}});
-                // showGraph(id, "rgba(255, 200, 150, 255)", {{$limit.Min}}, {{$limit.Max}}, {{$hourly.Hourly.FeelsLike}});
-                // showGraph(id, "rgba(255, 150, 0, 255)", {{$limit.Min}}, {{$limit.Max}}, {{$hourly.Hourly.Temperature}}, 3);
-                drawHourlyItems({{$loc}});
+                drawItems({{$loc}}, id, hourlyList);
             </script>
             <button class="more" hx-on:click="toggleHourly({{$loc}})">
                 <span class="symbols-small">more_horiz</span>

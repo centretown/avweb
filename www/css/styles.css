@@ -268,10 +268,9 @@ h3 {
     font-size: 0.9rem;
     font-weight: bold;
     grid-template-areas:
+        ". icon ."
+        ". icon ."
         ". date ."
-        ". icon ."
-        ". icon ."
-        ". city ."
         ". city ."
         ". city ."
         ". city ."
@@ -440,28 +439,28 @@ h3 {
 }
 
 .windspeed {
-    color: rgba(255, 255, 0, 255);
+    color: rgba(255, 218, 185, 255);
 }
 .windgusts {
-    color: rgba(192, 192, 0, 255);
+    color: rgba(255, 239, 213, 255);
 }
 .humidity {
-    color: rgba(192, 63, 255, 255);
+    color: rgba(221, 160, 221, 255);
 }
 .pressure {
-    color: rgba(31, 255, 31, 255);
+    color: rgba(255, 153, 153, 255);
 }
 .surface {
-    color: rgba(95, 255, 95, 255);
+    color: rgba(230, 103, 113, 255);
 }
 .precipitation {
-    color: rgba(31, 120, 255, 255);
+    color: rgba(0, 119, 190, 255);
 }
 .probability {
-    color: rgba(144, 180, 255, 255);
+    color: rgba(8, 146, 208, 255);
 }
 .shower {
-    color: rgba(20, 96, 172, 255);
+    color: rgba(135, 206, 235, 255);
 }
 .rain {
     color: rgba(31, 144, 255, 255);
@@ -470,22 +469,25 @@ h3 {
     color: rgba(255, 255, 255, 255);
 }
 .cloud {
-    color: rgba(127, 127, 127, 255);
+    color: rgba(119, 139, 165, 255);
 }
 .temperature {
-    color: rgba(255, 150, 0, 255);
-}
-.temperature-feels {
-    color: rgba(255, 200, 150, 255);
+    color: rgba(255, 69, 0, 255);
 }
 .feelslike {
-    color: rgba(255, 200, 150, 255);
+    color: rgba(255, 140, 0, 255);
 }
 .temperature-high {
-    color: rgba(255, 100, 0, 255);
+    color: rgba(233, 105, 44, 255);
 }
 .temperature-low {
-    color: rgba(255, 200, 100, 255);
+    color: rgba(255, 179, 71, 255);
+}
+.daylight {
+    color: rgba(255, 225, 53, 255);
+}
+.sunshine {
+    color: rgba(255, 255, 0, 255);
 }
 
 .grid-container,

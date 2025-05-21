@@ -230,6 +230,36 @@ function showGraph(canvasId, color, min, max, values, lineWidth = 2) {
   ctx.stroke();
 }
 
+function toggleItem(sel, prefix, index, canvasId, list) {
+  let listItems = list[index];
+  let item = listItems.get(sel);
+  item.selected = toggleClass(
+    prefix + "-" + sel,
+    item.selected,
+    "title-selected",
+  );
+  if (item.selected) {
+    htmx.removeClass("#" + prefix + "-max-" + sel, "hide");
+    htmx.removeClass("#" + prefix + "-min-" + sel, "hide");
+  } else {
+    htmx.addClass("#" + prefix + "-max-" + sel, "hide");
+    htmx.addClass("#" + prefix + "-min-" + sel, "hide");
+  }
+  drawItems(index, canvasId, list);
+}
+
+function drawItems(index, canvasId, list) {
+  clearCanvas(canvasId);
+  let listItems = list[index];
+  let items = listItems.entries();
+  for (let [key, item] of items) {
+    if (item.selected && item.draw !== undefined) {
+      item.draw(canvasId);
+    }
+  }
+  showMinMax(canvasId);
+}
+
 function showMinMax(canvasId) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");

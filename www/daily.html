@@ -5,6 +5,15 @@
     0}}{{$dt:=$first.WeatherDaily.UpdateTime}}
     <script>
         var hideDaily = [];
+        var canvasIds = [];
+        var dailyList = [];
+        var dailyCodes = [];
+
+        function toggleDailyItem(sel, index) {
+            let canvasId = canvasIds[index];
+            toggleItem(sel, "daily", index, canvasId, dailyList);
+        }
+
         function toggleDaily(index) {
             let id = "daily" + index;
             if (hideDaily[index]) {
@@ -83,11 +92,30 @@
             </div>
             <script>
                 hideDaily.push(true);
+                dailyCodes.push({{$location.WeatherDaily.Daily.Code}});
+                var dailyItems = new Map();
                 var id = "daily_canvas"+{{$loc}};
-                showBars(id, {{$daily.Daily.Precipitation}}, {{$daily.Daily.Code}});
-                showGraph(id, "rgba(255, 200, 100, 255)", {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.Low}}, 3);
-                showGraph(id, "rgba(255, 100, 0, 255)",  {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.High}}, 3);
-                showMinMax(id);
+                canvasIds.push(id);
+                {{range $p:=$location.DailyProperties.Items}}
+                dailyItems.set({{$p.ID}}, {
+                    id:{{$p.ID}},
+                    selected: {{$p.Selected}},
+                    draw: function (canvasId) {
+                      if ("line"=={{$p.Chart}}) {
+                        showGraph(canvasId, {{$p.Color}}, {{$p.ScaleMin}}, {{$p.ScaleMax}}, {{$p.Values}});
+                      } else if ("bar"=={{$p.Chart}}) {
+                        var codes = dailyCodes[{{$loc}}];
+                        showBars(canvasId, {{$p.Values}}, codes);
+                      }
+                }});
+                {{end}}
+                dailyList.push(dailyItems);
+                drawItems({{$loc}}, id, dailyList);
+
+                // showBars(id, {{$daily.Daily.Precipitation}}, {{$daily.Daily.Code}});
+                // showGraph(id, "rgba(255, 200, 100, 255)", {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.Low}}, 3);
+                // showGraph(id, "rgba(255, 100, 0, 255)",  {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.High}}, 3);
+                // showMinMax(id);
             </script>
             <button class="more" hx-on:click="toggleDaily({{$loc}})">
                 <span class="symbols-small">more_horiz</span>
