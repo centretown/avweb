@@ -3,6 +3,7 @@ package runtime
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -107,12 +108,19 @@ func InsertHistory(db *sqlx.DB, ID uint64, current *Current) (err error) {
 	return
 }
 
-const fmtSelectHistory = "SELECT * FROM history WHERE Time>'%s' AND Time<='%s' ORDER BY LocationID, Time DESC;"
+const (
+	fmtSelectHistory   = "SELECT * FROM history WHERE Time>'%s' AND Time<='%s' ORDER BY LocationID, Time;"
+	fmtLocationHistory = "SELECT * FROM history WHERE LocationID=%d AND Time>'%s' AND Time<='%s' ORDER BY Time;"
+)
 
-func SelectHistory(db *sqlx.DB, ID uint64, after string, before string) (history []*Current, err error) {
+func SelectHistoryInterval(db *sqlx.DB, ID uint64, after string, before string) (history []*Current, err error) {
+	query := fmt.Sprintf(fmtLocationHistory, ID, after, before)
+	return SelectHistory(db, query)
+}
+
+func SelectHistory(db *sqlx.DB, query string) (history []*Current, err error) {
 	var rows *sqlx.Rows
-	q := fmt.Sprintf(fmtSelectHistory, after, before)
-	rows, err = db.Queryx(q)
+	rows, err = db.Queryx(query)
 	if err != nil {
 		log.Println(err)
 		return
@@ -151,5 +159,12 @@ func SelectLocations(db *sqlx.DB) (locations []*Location, err error) {
 			locations = append(locations, location)
 		}
 	}
+	return
+}
+
+func BeforeTime(t time.Time, d time.Duration) (after string, before string) {
+	layout := "2006-01-02T15:04"
+	before = t.Format(layout)
+	after = t.Add(-d).Format(layout)
 	return
 }

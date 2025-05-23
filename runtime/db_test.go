@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestCreateDB(t *testing.T) {
@@ -49,7 +50,7 @@ func TestCreateDB(t *testing.T) {
 		}
 	}
 
-	listH, err := SelectHistory(db, 1, "2025-05-21T23:45", "2025-05-22T02:00")
+	listH, err := SelectHistoryInterval(db, 1, "2025-05-21T23:45", "2025-05-22T02:00")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,17 +93,15 @@ func TestQueryDB(t *testing.T) {
 	defer db.Close()
 	t.Log("opened")
 
-	var after = "2025-05-21T23:45"
-	var before = "2025-05-22T02:00"
-
-	historyList, err := SelectHistory(db, 1, after, before)
+	after, before := BeforeTime(time.Now(), 8*time.Hour)
+	historyList, err := SelectHistoryInterval(db, 1, after, before)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for i, area := range historyList {
-		if !(area.Time > after && area.Time <= before) {
-			t.Fatal("!(area.Time > after && area.Time <= before)", area.Time)
+	for i, currentItem := range historyList {
+		if !(currentItem.Time > after && currentItem.Time <= before) {
+			t.Fatal("!(area.Time > after && area.Time <= before)", currentItem.Time)
 		}
-		t.Log(i, area)
+		t.Log(i, currentItem)
 	}
 }

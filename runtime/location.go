@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type CurrentItem struct {
@@ -82,15 +85,17 @@ func (loc *Location) QueryHourly() (err error) {
 	return
 }
 
-func (loc *Location) QueryCurrent() (err error) {
+func (loc *Location) QueryCurrent(db *sqlx.DB) (err error) {
 	var (
 		trailer = "&current=temperature_2m,precipitation,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,rain,showers,cloud_cover,pressure_msl,surface_pressure,snowfall"
 	)
 	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, trailer)
 	loc.WeatherCurrent, err = GetWeatherCurrent(q)
-	if loc.WeatherCurrent != nil {
-		loc.History = append(loc.History, loc.WeatherCurrent.Current)
+	if err != nil {
+		log.Println("QueryCurrent", err)
+		return
 	}
+	err = InsertHistory(db, loc.ID, loc.WeatherCurrent.Current)
 	return
 }
 

@@ -35,13 +35,6 @@ func main() {
 	flag.StringVar(&remoteAddr, "r", remoteAddr, remoteAddrUsage)
 	flag.Parse()
 
-	filename := "config.json"
-	config := runtime.NewConfig()
-	err := config.Read(filename)
-	if err != nil {
-		log.Fatalln("Read Configuration", filename, err)
-	}
-
 	host = avcamx.NewAvHost(hostAddr, hostPort)
 	const pattern = "www/*.html"
 	templ, err := template.ParseGlob(pattern)
@@ -60,9 +53,14 @@ func main() {
 	log.Print("MakeProxy")
 	host.MakeProxy(remote, sockServer)
 
-	rt = runtime.NewRuntime(host, config)
+	// filename := "config.json"
+	// config := runtime.NewConfig()
+	// err := config.Read(filename)
+	// if err != nil {
+	// 	log.Fatalln("Read Configuration", filename, err)
+	// }
 
-	rt.LoadHistory()
+	rt = runtime.NewRuntime(host)
 
 	rt.Template = templ
 	rt.WebSocket = sockServer
@@ -114,7 +112,7 @@ func main() {
 	}
 
 	rt.WebSocket.SaveMessages()
-	rt.SaveHistory()
+	// rt.SaveHistory()
 
 	ctx, cancel := context.WithTimeout(context.Background(),
 		time.Second)

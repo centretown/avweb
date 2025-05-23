@@ -14,6 +14,7 @@ import (
 
 	"github.com/centretown/avcamx"
 	"github.com/centretown/avweb/socket"
+	"github.com/jmoiron/sqlx"
 )
 
 type Runtime struct {
@@ -34,9 +35,10 @@ type Runtime struct {
 	ticker  *time.Ticker
 	done    chan bool
 	TickCmd chan int
+	db      *sqlx.DB
 }
 
-func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
+func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 	var webcamUrl = ""
 	if len(host.Items) > 0 {
 		webcamUrl = host.Items[0].Url
@@ -46,25 +48,40 @@ func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
 		Host:      host,
 		WebcamUrl: webcamUrl,
 		ActionsCamera: []*Action{
-			config.Actions["camera_list"],
-			config.Actions["camera"],
+			{Name: "camera_list", Title: "Select Camera", Icon: "replace_video", Group: Camera},
+			{Name: "camera", Title: "Setup Camera", Icon: "settings_video_camera", Group: Camera},
+			// {Name: "cameraadd", Title: "Add Camera", Icon: "linked_camera", Group: Camera},
 		},
 		ActionsHome: []*Action{
-			config.Actions["weather_current"],
-			config.Actions["weather_hourly"],
-			config.Actions["weather_daily"],
-			config.Actions["weather_sun"],
+			// {Name: "sun", Title: "Next Sun", Icon: "wb_twilight", Group: Home},
+			{Name: "weather_current", Title: "Current Weather", Icon: "thunderstorm", Group: Home},
+			{Name: "weather_hourly", Title: "24 Hour Forecast", Icon: "schedule", Group: Home},
+			{Name: "weather_daily", Title: "7 Day Forecast", Icon: "calendar_view_week", Group: Home},
+			{Name: "weather_sun", Title: "Sun", Icon: "wb_twilight", Group: Home},
+			// {Name: "wifi", Title: "WIFI Signals", Icon: "network_wifi", Group: Home},
+			// {Name: "lights", Title: "LED Lights", Icon: "backlight_high", Group: Home},
 		},
 		ActionsChat: []*Action{
-			config.Actions["resetcontrols"],
-			config.Actions["record"],
+			// {Name: "chat", Title: "Chat", Icon: "chat", Group: Chat},
+			{Name: "resetcontrols", Title: "Reset Camera", Icon: "reset_settings", Group: Chat},
+			{Name: "record", Title: "Record", Icon: "radio_button_checked", Group: Chat},
 		},
 
-		ActionMap: config.Actions,
+		ActionMap: make(map[string]*Action),
 		Webcams:   make(map[string]*avcamx.AvItem),
 
 		done:    make(chan bool),
 		TickCmd: make(chan int),
+	}
+
+	for _, action := range rt.ActionsCamera {
+		rt.ActionMap[action.Name] = action
+	}
+	for _, action := range rt.ActionsHome {
+		rt.ActionMap[action.Name] = action
+	}
+	for _, action := range rt.ActionsChat {
+		rt.ActionMap[action.Name] = action
 	}
 
 	now := time.Now()
@@ -86,13 +103,50 @@ func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
 		rt.Webcams[item.Url] = item
 	}
 
-	rt.Locations = config.Locations
+	err := rt.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rt.Locations, err = SelectLocations(rt.db)
+	if err != nil {
+		log.Fatal(err)
+	}
 	rt.Location = rt.Locations[0]
+
+	err = rt.LoadHistory()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	return
 }
 
-func (rt *Runtime) LoadHistory() error {
+func (rt *Runtime) Connect() (err error) {
+	rt.db, err = OpenDB("location.db")
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	return
+}
+
+func (rt *Runtime) SelectHistory(loc int, after string, before string) (history []*Current, err error) {
+	return SelectHistoryInterval(rt.db, rt.Locations[loc].ID, after, before)
+}
+
+func (rt *Runtime) LoadHistory() (err error) {
+	after, before := BeforeTime(time.Now(), 6*time.Hour)
+	for i := range rt.Locations {
+		rt.Location.History, err = rt.SelectHistory(i, after, before)
+		if err != nil {
+			log.Print(err)
+		}
+	}
+	return
+}
+
+func (rt *Runtime) LoadHistoryFile() error {
 	buf, err := os.ReadFile("history.json")
 	if err != nil {
 		log.Println(err)
@@ -125,8 +179,9 @@ func (rt *Runtime) SaveHistory() error {
 }
 
 func (rt *Runtime) Done() {
-	// rt.WebSocket.Done()
-	// rt.done <- true
+	if rt.db != nil {
+		rt.db.Close()
+	}
 }
 
 func (rt *Runtime) Monitor() {
@@ -322,13 +377,17 @@ func (rt *Runtime) QueryHourly() {
 
 func (rt *Runtime) QueryCurrent() {
 	for i, location := range rt.Locations {
-		err := location.QueryCurrent()
+		err := location.QueryCurrent(rt.db)
 		if err != nil {
 			log.Printf("WeatherCurrent: %v", err)
 			continue
 		}
 		location.WeatherCurrent.UpdateTime = time.Now()
 		location.BuildCurrentProperties(i)
+	}
+	err := rt.LoadHistory()
+	if err != nil {
+		log.Printf("WeatherCurrent LoadHistory: %v", err)
 	}
 }
 
