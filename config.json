@@ -1,15 +1,15 @@
 {
   "actions": {
-    "camera": {
-      "name": "camera",
-      "title": "Camera Settings",
-      "icon": "settings_video_camera",
-      "group": 0
-    },
     "camera_list": {
       "name": "camera_list",
       "title": "Camera Select",
       "icon": "replace_video",
+      "group": 0
+    },
+    "camera": {
+      "name": "camera",
+      "title": "Camera Settings",
+      "icon": "settings_video_camera",
       "group": 0
     },
     "record": {

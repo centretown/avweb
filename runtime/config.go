@@ -40,7 +40,6 @@ func (cfg *Config) Write(filename string) error {
 		return err
 	}
 
-	var perm os.FileMode = 0660
-	err = os.WriteFile(filename, buf, perm)
+	err = os.WriteFile(filename, buf, os.ModePerm)
 	return err
 }

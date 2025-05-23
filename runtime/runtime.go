@@ -2,11 +2,13 @@ package runtime
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -27,7 +29,7 @@ type Runtime struct {
 	WebSocket     *socket.Server
 	Host          *avcamx.AvHost
 	Webcams       map[string]*avcamx.AvItem
-	Temp          *template.Template
+	Template      *template.Template
 
 	ticker  *time.Ticker
 	done    chan bool
@@ -44,8 +46,8 @@ func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
 		Host:      host,
 		WebcamUrl: webcamUrl,
 		ActionsCamera: []*Action{
-			config.Actions["camera"],
 			config.Actions["camera_list"],
+			config.Actions["camera"],
 		},
 		ActionsHome: []*Action{
 			config.Actions["weather_current"],
@@ -88,6 +90,38 @@ func NewRuntime(host *avcamx.AvHost, config *Config) (rt *Runtime) {
 	rt.Location = rt.Locations[0]
 
 	return
+}
+
+func (rt *Runtime) LoadHistory() error {
+	buf, err := os.ReadFile("history.json")
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	history := make([][]*Current, 0)
+	err = json.Unmarshal(buf, &history)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	for i := range history {
+		rt.Locations[i].History = history[i]
+	}
+	return err
+}
+
+func (rt *Runtime) SaveHistory() error {
+	history := make([][]*Current, 0)
+	for _, loc := range rt.Locations {
+		history = append(history, loc.History)
+	}
+	buf, err := json.Marshal(history)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = os.WriteFile("history.json", buf, os.ModePerm)
+	return err
 }
 
 func (rt *Runtime) Done() {
@@ -218,7 +252,7 @@ func (rt *Runtime) CurrentTemperature() string {
 
 func (rt *Runtime) BroadcastTemperature() {
 	buf := bytes.Buffer{}
-	t := rt.Temp.Lookup("weather.clock")
+	t := rt.Template.Lookup("weather.clock")
 	t.Execute(&buf, rt)
 	rt.WebSocket.Broadcast(buf.String())
 }
@@ -247,7 +281,7 @@ func (rt *Runtime) HandleAction(path string, templ string, data *WeatherFormData
 		w.Header().Add("Cache-Control", "no-cache")
 		data.Action = rt.ActionMap[path[1:]]
 
-		err := rt.Temp.Lookup(templ).Execute(w, data)
+		err := rt.Template.Lookup(templ).Execute(w, data)
 		if err != nil {
 			log.Fatal(path, err)
 		}
@@ -326,7 +360,7 @@ func (rt *Runtime) HandleCameraAction(path string, templ string) {
 
 		data.Action = rt.ActionMap[path[1:]]
 
-		err := rt.Temp.Lookup(templ).Execute(w, data)
+		err := rt.Template.Lookup(templ).Execute(w, data)
 		if err != nil {
 			log.Fatal(path, err)
 		}

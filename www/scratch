@@ -58,3 +58,29 @@
                     >{{$feelslike.Min}}{{$hourly.HourlyUnits.FeelsLike}}</span
                 >
             </div>
+
+            <div class="title">
+                <span class="title-left">
+                    <span class="symbols-weather temperature-high">
+                        arrow_upward
+                    </span>
+                    <span class="temperature-high">{{$fmt.High}}</span></span
+                >
+                <span class="title-city">{{$location.City}}</span>
+                <span class="title-right">
+                    <span class="symbols-weather temperature-low">
+                        arrow_downward
+                    </span>
+                    <span class="temperature-low">{{$fmt.Low}}</span>
+                </span>
+                <span class="title-left">
+                    <span class="symbols-weather precipitation">
+                        weather_mix
+                    </span>
+                    <span class="precipitation">
+                        {{$fmt.Precipitation}} ({{$fmt.Probability}})
+                    </span>
+                </span>
+
+                <span class="title-center"></span>
+            </div>

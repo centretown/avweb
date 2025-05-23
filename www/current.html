@@ -3,9 +3,20 @@
     {{$rt:=.Runtime}}{{$dt:=$rt.Location.WeatherDaily.UpdateTime}} {{template
     "layout.content.head" .Action }}
     <script>
+        var hideCurrentHistory = [];
         document.getElementById("current-date").innerHTML = showFullDate(
             new Date(),
         );
+        function toggleHistory(index) {
+            let id = "current-history" + index;
+            if (hideCurrentHistory[index]) {
+                hideCurrentHistory[index] = false;
+                htmx.removeClass("#" + id, "hide");
+            } else {
+                hideCurrentHistory[index] = true;
+                htmx.addClass("#" + id, "hide");
+            }
+        }
     </script>
     <span>
         <div id="current-date" class="title-date"></div>
@@ -14,6 +25,34 @@
             <!--  -->
             {{template "weather.current.properties" $location}}
             <!--  -->
+            <script>
+                hideCurrentHistory.push(true);
+            </script>
+            <button class="more" hx-on:click="toggleHistory({{$loc}})">
+                <span class="symbols-small">more_horiz</span>
+            </button>
+            <div id="current-history{{$loc}}" class="hide">
+                {{range $histIndex,$hist:=$location.History}}
+                <div class="history-date">
+                    {{$location.WeatherCurrent.FormatTime $hist.Time}}
+                </div>
+                {{$props:=$location.BuildHistoryProperties $histIndex}}
+                <!--  -->
+                <div id="history-{{$loc}}" class="history">
+                    {{range $index, $item:=$props.Items}}
+                    <span id="history-item-{{$item.ID}}">
+                        <span class="symbols-weather-medium {{$item.Klass}}">
+                            {{$item.Icon}}
+                        </span>
+                        <span class="title-left">
+                            {{index $item.Value}}{{$item.Units}}
+                        </span>
+                    </span>
+                    <!--  -->
+                    {{end}}
+                </div>
+                {{end}}
+            </div>
             {{end}}
         </div>
     </span>

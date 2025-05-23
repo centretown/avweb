@@ -43,16 +43,19 @@
 <!--  -->
 {{ define "weather.clock" }}
 <span id="current-temperature" class="clock" hx-swap-oob="outerHTML">
-    <span id="clock"></span>
     <!--  -->
     {{$w:=.Location.WeatherCurrent}}{{$cur:=$w.Current}}{{$units:=$w.CurrentUnits}}
     <!--  -->
     {{$code:=$w.WeatherCode $cur.Code}}
-
     <span>
         <span class="symbols" style="color:{{$code.Color}}"
             >{{$code.Icon}}</span
         >
+        <span id="clock"></span>
+    </span>
+
+    <span>
+        <span class="symbols temperature">thermometer</span>
         <span>{{$cur.Temperature}}{{$units.Temperature}}</span>
     </span>
     <span>

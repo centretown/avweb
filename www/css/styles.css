@@ -254,6 +254,7 @@ h3 {
 .item-icon {
     grid-area: icon;
     text-align: center;
+    align-content: center;
 }
 
 .item-date {
@@ -261,6 +262,7 @@ h3 {
     font-size: 0.65rem;
     text-align: center;
     grid-area: date;
+    align-content: center;
 }
 
 .title-weather {
@@ -277,6 +279,21 @@ h3 {
         ". . .";
     grid-template-columns: 1fr 1fr 1fr;
     margin-bottom: 0.5rem;
+}
+
+.history-date {
+    font-size: 0.7rem;
+    margin-bottom: 0.5rem;
+}
+
+.history {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    margin-bottom: 1rem;
+}
+.history-item {
+    font-weight: normal;
+    font-size: 0.7rem;
 }
 
 .title {

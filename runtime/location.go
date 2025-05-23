@@ -8,18 +8,20 @@ import (
 )
 
 type CurrentItem struct {
-	ID       string
-	Klass    string
-	Min      float64
-	Max      float64
-	ScaleMin float64
-	ScaleMax float64
-	Icon     string
-	Color    string
-	Units    string
-	Chart    string
-	Selected bool
-	Value    float64
+	ID          string
+	Title       string
+	Description string
+	Klass       string
+	Min         float64
+	Max         float64
+	ScaleMin    float64
+	ScaleMax    float64
+	Icon        string
+	Color       string
+	Units       string
+	Chart       string
+	Selected    bool
+	Value       float64
 }
 
 type LocationItem struct {
@@ -40,16 +42,19 @@ type CurrentProperties struct {
 }
 
 type Location struct {
-	City              string              `json:"city"`
-	Latitude          float64             `json:"latitude"`
-	Longitude         float64             `json:"longitude"`
-	Zone              string              `json:"zone"`
+	ID                uint64              `json:"-" db:"ID"`
+	City              string              `json:"city" db:"City"`
+	Latitude          float64             `json:"latitude" db:"Latitude"`
+	Longitude         float64             `json:"longitude" db:"Longitude"`
+	Zone              string              `json:"zone" db:"Zone"`
 	WeatherDaily      *WeatherDaily       `json:"-"`
 	DailyProperties   *LocationProperties `json:"-"`
 	WeatherHourly     *WeatherHourly      `json:"-"`
 	HourlyProperties  *LocationProperties `json:"-"`
 	WeatherCurrent    *WeatherCurrent     `json:"-"`
 	CurrentProperties *CurrentProperties  `json:"-"`
+	History           []*Current          `json:"-"`
+	HistoryProperties *CurrentProperties  `json:"-"`
 }
 
 // "https://api.open-meteo.com/v1/forecast?latitude=45.42&longitude=-75.7&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,precipitation_sum,weather_code,uv_index_max&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m&timezone=America%2FNew_York"
@@ -83,39 +88,10 @@ func (loc *Location) QueryCurrent() (err error) {
 	)
 	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, trailer)
 	loc.WeatherCurrent, err = GetWeatherCurrent(q)
+	if loc.WeatherCurrent != nil {
+		loc.History = append(loc.History, loc.WeatherCurrent.Current)
+	}
 	return
-}
-
-type WeatherAttributes struct {
-	Icon     string
-	Color    string
-	Chart    string
-	Selected bool
-}
-
-var weatherAttributes = map[string]WeatherAttributes{
-	"temperature":      {Icon: "thermometer", Color: "rgba(255,69,0, 255)", Chart: "line", Selected: true},
-	"feelslike":        {Icon: "airwave", Color: "rgba(255, 140, 0, 255)", Chart: "line", Selected: true},
-	"temperature-high": {Icon: "thermostat_arrow_up", Color: "rgba(233,105,44, 255)", Chart: "line", Selected: true},
-	"temperature-low":  {Icon: "thermostat_arrow_down", Color: "rgba(255,179,71, 255)", Chart: "line", Selected: true},
-
-	"precipitation": {Icon: "weather_mix", Color: "rgba(0,119,190)", Chart: "bar", Selected: true},
-	"probability":   {Icon: "weather_mix", Color: "rgba(8,146,208, 255)", Chart: "line", Selected: true},
-	"rain":          {Icon: "rainy", Color: "rgba(31, 144, 255, 255)", Chart: "line"},
-	"shower":        {Icon: "shower", Color: "rgba(135,206,235, 255)", Chart: "line"},
-	"snow":          {Icon: "snowing", Color: "rgba(255, 255, 255, 255)", Chart: "line"},
-	"cloud":         {Icon: "cloud", Color: "rgba(119,139,165, 255)", Chart: "line"},
-
-	"humidity": {Icon: "humidity_mid", Color: "rgba(221,160,221, 255)", Chart: "line"},
-
-	"windspeed": {Icon: "toys_fan", Color: "rgba(255,218,185, 255)", Chart: "line"},
-	"windgusts": {Icon: "air", Color: "rgba(255,239,213, 255)", Chart: "line"},
-
-	"pressure": {Icon: "compress", Color: "rgba(255,153,153, 255)", Chart: "line"},
-	"surface":  {Icon: "compress", Color: "color: rgba(230,103,113, 255)", Chart: "line"},
-
-	"daylight": {Icon: "brightness_medium", Color: "rgba(255,225,53, 255)", Chart: "line"},
-	"sunshine": {Icon: "brightness_7", Color: "rgba(255, 255, 0, 255)", Chart: "line"},
 }
 
 var currentKeys = []string{
@@ -124,7 +100,7 @@ var currentKeys = []string{
 	"shower", "snow",
 	"cloud", "humidity",
 	"windspeed", "windgusts",
-	"pressure", "surface",
+	"surface", "pressure",
 }
 
 var hourlyKeys = []string{
@@ -141,14 +117,23 @@ var dailyKeys = []string{
 	"daylight", "sunshine",
 }
 
+func (loc *Location) BuildHistoryProperties(index int) *CurrentProperties {
+	p := &CurrentProperties{}
+	AttributesCurrent(index, p, loc.History[index], &loc.WeatherCurrent.CurrentUnits)
+	loc.HistoryProperties = p
+	return p
+}
+
 func (loc *Location) BuildCurrentProperties(index int) {
 	p := &CurrentProperties{}
+	AttributesCurrent(index, p, loc.WeatherCurrent.Current, &loc.WeatherCurrent.CurrentUnits)
 	loc.CurrentProperties = p
+}
+
+func AttributesCurrent(index int, p *CurrentProperties, values *Current, units *CurrentUnits) {
 	p.Index = index
 	p.Items = make([]*CurrentItem, len(currentKeys))
-	p.Code = loc.WeatherCurrent.Current.Code
-	values := loc.WeatherCurrent.Current
-	units := loc.WeatherCurrent.CurrentUnits
+	p.Code = values.Code
 	for i, key := range currentKeys {
 		item := &CurrentItem{}
 		p.Items[i] = item
@@ -156,12 +141,8 @@ func (loc *Location) BuildCurrentProperties(index int) {
 		item.ID = fmt.Sprintf("%s%d", key, index)
 		item.Klass = key
 
-		attr := weatherAttributes[key]
-		item.Icon = attr.Icon
-		item.Color = attr.Color
-		item.Chart = attr.Chart
-		item.Selected = attr.Selected
-
+		attr := Attributes[key]
+		attr.ToItem(item)
 		switch key {
 		case "temperature":
 			item.Value = values.Temperature
@@ -219,12 +200,8 @@ func (loc *Location) BuildDailyProperties(index int) {
 		item.ID = fmt.Sprintf("%s%d", key, index)
 		item.Klass = key
 
-		attr := weatherAttributes[key]
-		item.Icon = attr.Icon
-		item.Color = attr.Color
-		item.Chart = attr.Chart
-		item.Selected = attr.Selected
-
+		attr := Attributes[key]
+		attr.ToItem(&item.CurrentItem)
 		values := loc.WeatherDaily.Daily
 		units := loc.WeatherDaily.DailyUnits
 
@@ -282,11 +259,8 @@ func (loc *Location) BuildHourlyProperties(index int) {
 		item.ID = fmt.Sprintf("%s%d", key, index)
 		item.Klass = key
 
-		attr := weatherAttributes[key]
-		item.Icon = attr.Icon
-		item.Color = attr.Color
-		item.Chart = attr.Chart
-		item.Selected = attr.Selected
+		attr := Attributes[key]
+		attr.ToItem(&item.CurrentItem)
 
 		switch key {
 		case "temperature":
@@ -349,6 +323,9 @@ func (p *LocationProperties) Scale(limits map[string]*Limits) {
 			if item.Units == "%" {
 				item.ScaleMax = 100.0
 				item.ScaleMin = 0.0
+			} else if item.Units == "s" {
+				item.ScaleMax = item.Max
+				item.ScaleMin = item.Min
 			} else {
 				item.ScaleMax = lim.Max
 				item.ScaleMin = lim.Min

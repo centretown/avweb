@@ -25,19 +25,20 @@ type WeatherCommon struct {
 type WeatherHourly struct {
 	WeatherCommon
 	HourlyUnits HourlyUnits `json:"hourly_units"`
-	Hourly      Hourly      `json:"hourly"`
+	Hourly      *Hourly     `json:"hourly"`
 }
 
 type WeatherDaily struct {
 	WeatherCommon
 	DailyUnits DailyUnits `json:"daily_units"`
-	Daily      Daily      `json:"daily"`
+	Daily      *Daily     `json:"daily"`
 }
 type WeatherCurrent struct {
 	WeatherCommon
 	CurrentUnits CurrentUnits `json:"current_units"`
-	Current      Current      `json:"current"`
+	Current      *Current     `json:"current"`
 }
+
 type CurrentUnits struct {
 	Time            string `json:"time"`
 	Interval        string `json:"interval"`
@@ -59,23 +60,24 @@ type CurrentUnits struct {
 }
 
 type Current struct {
-	Time            string  `json:"time"`
-	Interval        int32   `json:"interval"`
-	Temperature     float64 `json:"temperature_2m"`
-	Precipitation   float64 `json:"precipitation"`
-	Humidity        float64 `json:"relative_humidity_2m"`
-	FeelsLike       float64 `json:"apparent_temperature"`
-	IsDay           int8    `json:"is_day"`
-	Code            int32   `json:"weather_code"`
-	WindSpeed       float64 `json:"wind_speed_10m"`
-	WindDirection   float64 `json:"wind_direction_10m"`
-	WindGusts       float64 `json:"wind_gusts_10m"`
-	Rain            float64 `json:"rain"`
-	Showers         float64 `json:"showers"`
-	Snowfall        float64 `json:"snowfall"`
-	CloudCover      float64 `json:"cloud_cover"`
-	PressureMSL     float64 `json:"pressure_msl"`
-	SurfacePressure float64 `json:"surface_pressure"`
+	LocationID      uint64  `json:"-" db:"LocationID"`
+	Time            string  `json:"time" db:"Time"`
+	Interval        int32   `json:"interval" db:"Interval"`
+	Temperature     float64 `json:"temperature_2m" db:"Temperature"`
+	Precipitation   float64 `json:"precipitation" db:"Precipitation"`
+	Humidity        float64 `json:"relative_humidity_2m" db:"Humidity"`
+	FeelsLike       float64 `json:"apparent_temperature" db:"FeelsLike"`
+	IsDay           int8    `json:"is_day" db:"IsDay"`
+	Code            int32   `json:"weather_code" db:"Code"`
+	WindSpeed       float64 `json:"wind_speed_10m" db:"WindSpeed"`
+	WindDirection   float64 `json:"wind_direction_10m" db:"WindDirection"`
+	WindGusts       float64 `json:"wind_gusts_10m" db:"WindGusts"`
+	Rain            float64 `json:"rain" db:"Rain"`
+	Showers         float64 `json:"showers" db:"Showers"`
+	Snowfall        float64 `json:"snowfall" db:"Snowfall"`
+	CloudCover      float64 `json:"cloud_cover" db:"CloudCover"`
+	PressureMSL     float64 `json:"pressure_msl" db:"PressureMSL"`
+	SurfacePressure float64 `json:"surface_pressure" db:"SurfacePressure"`
 }
 
 type HourlyUnits struct {
@@ -171,6 +173,14 @@ func (w *WeatherCommon) MinMax(args ...[]float64) (limits Limits) {
 		}
 	}
 	return limits
+}
+
+func (w *WeatherCommon) FormatTime(timeStr string) string {
+	t, err := time.Parse("2006-01-02T15:04", timeStr)
+	if err != nil {
+		log.Printf("FormatTime: %v\n", err)
+	}
+	return t.Format("Monday, Jan 2, 2006 at 3:04pm")
 }
 
 func (w *WeatherHourly) FormatTime(index int) string {

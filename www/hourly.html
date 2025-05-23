@@ -4,12 +4,12 @@
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
     <script>
         var hideHourly = [];
-        var canvasIds = [];
+        var hourlyCanvasIDS = [];
         var hourlyList = [];
         var hourlyCodes = [];
 
         function toggleHourlyItem(sel, index) {
-            let canvasId = canvasIds[index];
+            let canvasId = hourlyCanvasIDS[index];
             toggleItem(sel, "hourly", index, canvasId, hourlyList);
         }
 
@@ -56,7 +56,7 @@
                 hourlyCodes.push({{$location.WeatherHourly.Hourly.Code}});
                 var hourlyItems = new Map();
                 var id = "canvas-hourly"+{{$loc}};
-                canvasIds.push(id);
+                hourlyCanvasIDS.push(id);
                 {{range $p:=$location.HourlyProperties.Items}}
                 hourlyItems.set({{$p.ID}}, {
                     id:{{$p.ID}},
@@ -207,7 +207,7 @@
 {{ define "weather.hourly.max" }}
 <!--  -->
 {{$props:=.HourlyProperties}}
-<div id="grid-max{{$props.Index}}" class="grid-minmax">
+<div id="hourly-grid-max{{$props.Index}}" class="grid-minmax">
     <!--  -->
     {{range $item:=$props.Items}}
     <span

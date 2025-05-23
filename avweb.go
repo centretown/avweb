@@ -61,7 +61,10 @@ func main() {
 	host.MakeProxy(remote, sockServer)
 
 	rt = runtime.NewRuntime(host, config)
-	rt.Temp = templ
+
+	rt.LoadHistory()
+
+	rt.Template = templ
 	rt.WebSocket = sockServer
 	rt.WebSocket.LoadMessages()
 	rt.WebSocket.Run()
@@ -76,12 +79,12 @@ func main() {
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Cache-Control", "no-cache")
-		rt.Temp, err = template.ParseGlob(pattern)
+		rt.Template, err = template.ParseGlob(pattern)
 		if err != nil {
 			log.Fatalln("ParseGlob", pattern, err)
 		}
-		rt.WebSocket.UpdateTemplate(rt.Temp)
-		rt.Temp.ExecuteTemplate(w, "index.html", rt)
+		rt.WebSocket.UpdateTemplate(rt.Template)
+		rt.Template.ExecuteTemplate(w, "index.html", rt)
 	})
 
 	mux.HandleFunc("/events", rt.WebSocket.Events)
@@ -111,6 +114,7 @@ func main() {
 	}
 
 	rt.WebSocket.SaveMessages()
+	rt.SaveHistory()
 
 	ctx, cancel := context.WithTimeout(context.Background(),
 		time.Second)
