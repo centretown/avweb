@@ -119,7 +119,7 @@
 {{$props:=$location.HourlyProperties}}
 <div id="hourly-detail-{{$location.ID}}" class="summary">
     {{range $index, $item:=$props.Items}}
-    <span id="history-detail-item-{{$item.ID}}">
+    <span id="hourly-detail-item-{{$item.ID}}">
         <span class="symbols-weather-medium {{$item.Klass}}">
             {{$item.Icon}}
         </span>

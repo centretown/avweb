@@ -250,7 +250,7 @@ func (w *WeatherDaily) ReadingsHigh() string {
 
 func (w *WeatherDaily) FormatDay(index int) string {
 	t, _ := time.Parse("2006-01-02", w.Daily.Time[index])
-	return t.Format("Monday")
+	return t.Format("Monday, Jan 2, 2006")
 }
 
 func (w *WeatherDaily) FormatHigh(index int) string {

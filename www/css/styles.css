@@ -289,6 +289,7 @@ h3 {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     margin-bottom: 0.5rem;
+    margin-left: 0.5rem;
 }
 .summary-item {
     font-weight: normal;

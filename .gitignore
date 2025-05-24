@@ -1,4 +1,5 @@
 avweb
 loader/loader
+location.db
 *.db
 www/work/

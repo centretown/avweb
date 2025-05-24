@@ -80,37 +80,12 @@
                 {{end}}
                 dailyList.push(dailyItems);
                 drawItems({{$loc}}, id, dailyList);
-
-                // showBars(id, {{$daily.Daily.Precipitation}}, {{$daily.Daily.Code}});
-                // showGraph(id, "rgba(255, 200, 100, 255)", {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.Low}}, 3);
-                // showGraph(id, "rgba(255, 100, 0, 255)",  {{$limit.Min}}, {{$limit.Max}}, {{$daily.Daily.High}}, 3);
-                // showMinMax(id);
             </script>
             <button class="more" hx-on:click="toggleDaily({{$loc}})">
                 <span class="symbols-small">more_horiz</span>
             </button>
             <div id="daily{{$loc}}" class="hide">
-                <div class="grid-daily">
-                    <div class="grid-label"></div>
-                    <div class="grid-label">Day</div>
-                    <div class="grid-label">High</div>
-                    <div class="grid-label">Low</div>
-                    <div class="grid-label">Precip</div>
-                </div>
-
-                <div class="grid-daily">
-                    {{range $index, $time := $daily.Daily.Time}}{{$code := index
-                    $daily.Daily.Code $index}} {{$wcode := index $codes $code}}
-                    {{$icon := $wcode.Icon}}
-                    <span class="symbols-small">{{$icon}}</span>
-                    <div class="grid-data">{{$daily.FormatDay $index}}</div>
-                    <div class="grid-data">{{$daily.FormatHigh $index}}</div>
-                    <div class="grid-data">{{$daily.FormatLow $index}}</div>
-                    <div class="grid-data">
-                        {{$daily.FormatPrecipitation $index}}
-                    </div>
-                    {{end}}
-                </div>
+                {{template "weather.daily.detail" $location}}
             </div>
             {{end}}
         </div>
@@ -156,6 +131,41 @@
     </span>
     {{ end }}
 </div>
+{{ end }}
+<!--  -->
+{{ define "weather.daily.detail" }}
+<!--  -->
+{{$location:=.}}{{$w:=.WeatherDaily}}
+<!--  -->
+{{range $dailyIndex,$time:=$w.Daily.Time}}
+<!--  -->
+{{$c:=index $w.Daily.Code $dailyIndex}} {{$code:=$w.WeatherCode $c}}
+<div class="summary-date">
+    <span
+        class="symbols-weather-medium item-icon"
+        style="color:{{$code.Color}}; font-size:1rem"
+    >
+        {{$code.Icon}}
+    </span>
+    {{$w.FormatDay $dailyIndex }}
+</div>
+{{$props:=$location.DailyProperties}}
+<div id="daily-detail-{{$location.ID}}" class="summary">
+    {{range $index, $item:=$props.Items}}
+    <span id="daily-detail-item-{{$item.ID}}">
+        <span class="symbols-weather-medium {{$item.Klass}}">
+            {{$item.Icon}}
+        </span>
+        <span class="summary-item"
+            >{{index $item.Values $dailyIndex}}{{$item.Units}}</span
+        >
+    </span>
+    <!--  -->
+    {{end}}
+</div>
+<!--  -->
+{{ end }}
+<!--  -->
 {{ end }}
 <!--  -->
 {{ define "weather.daily.properties" }}
