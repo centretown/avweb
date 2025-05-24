@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
@@ -236,11 +237,17 @@ func (loc *Location) BuildDailyProperties(index int) {
 			item.Values = values.WindGusts
 			item.Units = units.WindGusts
 		case DAYLIGHT:
-			item.Values = values.Daylight
-			item.Units = units.Daylight
+			item.Values = make([]float64, len(values.Daylight))
+			for i, seconds := range values.Daylight {
+				item.Values[i] = math.Round(10*seconds/60/60) / 10
+			}
+			item.Units = "hr"
 		case SUNSHINE:
-			item.Values = values.Sunshine
-			item.Units = units.Sunshine
+			item.Values = make([]float64, len(values.Sunshine))
+			for i, seconds := range values.Sunshine {
+				item.Values[i] = math.Round(10*seconds/60/60) / 10
+			}
+			item.Units = "hr"
 		}
 
 		mnx := loc.WeatherDaily.MinMax(item.Values)
@@ -338,7 +345,7 @@ func (p *LocationProperties) Scale(limits map[string]*Limits) {
 			if item.Units == "%" {
 				item.ScaleMax = 100.0
 				item.ScaleMin = 0.0
-			} else if item.Units == "s" {
+			} else if item.Units == "hr" {
 				item.ScaleMax = item.Max
 				item.ScaleMin = item.Min
 			} else {
