@@ -50,7 +50,7 @@ func TestCreateDB(t *testing.T) {
 		}
 	}
 
-	listH, err := SelectHistoryInterval(db, 1, "2025-05-21T23:45", "2025-05-22T02:00")
+	listH, err := SelectHistoryInterval(db, 1, "2025-05-21T23:45", "2025-05-22T02:00", "ASC")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func TestQueryDB(t *testing.T) {
 	t.Log("opened")
 
 	after, before := BeforeTime(time.Now(), 8*time.Hour)
-	historyList, err := SelectHistoryInterval(db, 1, after, before)
+	historyList, err := SelectHistoryInterval(db, 1, after, before, "ASC")
 	if err != nil {
 		t.Fatal(err)
 	}

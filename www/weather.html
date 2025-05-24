@@ -9,7 +9,9 @@
     <div class="grid-data">{{.Timezone}}</div>
     <div class="grid-data">{{.Elevation}}</div>
 </div>
-{{ end }} {{ define "weather.sun" }}
+{{ end }}
+<!--  -->
+{{ define "weather.sun" }}
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
     {{template "layout.content.head" .Action }}{{$codes := .Codes}}
     <div class="content scroll">

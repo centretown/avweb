@@ -60,36 +60,65 @@ type Location struct {
 	HistoryProperties *CurrentProperties  `json:"-"`
 }
 
-// "https://api.open-meteo.com/v1/forecast?latitude=45.42&longitude=-75.7&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,precipitation_sum,weather_code,uv_index_max&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m&timezone=America%2FNew_York"
-// "https://api.open-meteo.com/v1/forecast?latitude=45.42&longitude=-75.7&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,precipitation_sum,weather_code,uv_index_max&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m&timezone=America%2FNew_York"
+const (
+	format         = "%s?latitude=%.2f&longitude=%.2f&timezone=%s%s&models=gem_seamless"
+	header         = "https://api.open-meteo.com/v1/forecast"
+	dailyTrailer   = "&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max,wind_direction_10m_dominant,wind_gusts_10m_max"
+	hourlytrailer  = "&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,relative_humidity_2m,surface_pressure,&forecast_hours=24"
+	currentTrailer = "&current=temperature_2m,precipitation,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,rain,showers,cloud_cover,pressure_msl,surface_pressure,snowfall"
+)
+
 var (
-	format = "%s?latitude=%.2f&longitude=%.2f&timezone=%s%s&models=gem_seamless"
-	header = "https://api.open-meteo.com/v1/forecast"
+	currentKeys = []string{
+		TEMPERATURE,
+		FEELSLIKE,
+		PRECIPITATION,
+		RAIN,
+		SHOWER,
+		SNOW,
+		CLOUD,
+		HUMIDITY,
+		WINDSPEED,
+		WINDGUSTS,
+		SURFACE,
+		PRESSURE,
+	}
+	hourlyKeys = []string{
+		TEMPERATURE,
+		FEELSLIKE,
+		PRECIPITATION,
+		PROBABILITY,
+		WINDSPEED,
+		WINDGUSTS,
+		PRESSURE,
+		HUMIDITY,
+	}
+	dailyKeys = []string{
+		TEMPERATURE_HIGH,
+		TEMPERATURE_LOW,
+		PRECIPITATION,
+		PROBABILITY,
+		WINDSPEED,
+		WINDGUSTS,
+		DAYLIGHT,
+		SUNSHINE,
+	}
 )
 
 func (loc *Location) QueryDaily() (err error) {
-	var (
-		trailer = "&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max,wind_direction_10m_dominant,wind_gusts_10m_max"
-	)
-	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, trailer)
+	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, dailyTrailer)
 	loc.WeatherDaily, err = GetWeatherDaily(q)
 	return
 }
 
 func (loc *Location) QueryHourly() (err error) {
-	var (
-		trailer = "&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,relative_humidity_2m,surface_pressure,&forecast_hours=24"
-	)
-	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, trailer)
+	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, hourlytrailer)
 	loc.WeatherHourly, err = GetWeatherHourly(q)
 	return
 }
 
 func (loc *Location) QueryCurrent(db *sqlx.DB) (err error) {
-	var (
-		trailer = "&current=temperature_2m,precipitation,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,rain,showers,cloud_cover,pressure_msl,surface_pressure,snowfall"
-	)
-	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, trailer)
+	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, currentTrailer)
 	loc.WeatherCurrent, err = GetWeatherCurrent(q)
 	if err != nil {
 		log.Println("QueryCurrent", err)
@@ -97,29 +126,6 @@ func (loc *Location) QueryCurrent(db *sqlx.DB) (err error) {
 	}
 	err = InsertHistory(db, loc.ID, loc.WeatherCurrent.Current)
 	return
-}
-
-var currentKeys = []string{
-	"temperature", "feelslike",
-	"precipitation", "rain",
-	"shower", "snow",
-	"cloud", "humidity",
-	"windspeed", "windgusts",
-	"surface", "pressure",
-}
-
-var hourlyKeys = []string{
-	"temperature", "feelslike",
-	"precipitation", "probability",
-	"windspeed", "windgusts",
-	"pressure", "humidity",
-}
-
-var dailyKeys = []string{
-	"temperature-high", "temperature-low",
-	"precipitation", "probability",
-	"windspeed", "windgusts",
-	"daylight", "sunshine",
 }
 
 func (loc *Location) BuildHistoryProperties(index int) *CurrentProperties {
@@ -149,40 +155,40 @@ func AttributesCurrent(index int, p *CurrentProperties, values *Current, units *
 		attr := Attributes[key]
 		attr.ToItem(item)
 		switch key {
-		case "temperature":
+		case TEMPERATURE:
 			item.Value = values.Temperature
 			item.Units = units.Temperature
-		case "feelslike":
+		case FEELSLIKE:
 			item.Value = values.FeelsLike
 			item.Units = units.FeelsLike
-		case "precipitation":
+		case PRECIPITATION:
 			item.Value = values.Precipitation
 			item.Units = units.Precipitation
-		case "windspeed":
+		case WINDSPEED:
 			item.Value = values.WindSpeed
 			item.Units = units.WindSpeed
-		case "windgusts":
+		case WINDGUSTS:
 			item.Value = values.WindGusts
 			item.Units = units.WindGusts
-		case "pressure":
+		case PRESSURE:
 			item.Value = values.PressureMSL
 			item.Units = units.PressureMSL
-		case "surface":
+		case SURFACE:
 			item.Value = values.SurfacePressure
 			item.Units = units.SurfacePressure
-		case "humidity":
+		case HUMIDITY:
 			item.Value = values.Humidity
 			item.Units = units.Humidity
-		case "rain":
+		case RAIN:
 			item.Value = values.Rain
 			item.Units = units.Rain
-		case "shower":
+		case SHOWER:
 			item.Value = values.Showers
 			item.Units = units.Showers
-		case "snow":
+		case SNOW:
 			item.Value = values.Snowfall
 			item.Units = units.Snowfall
-		case "cloud":
+		case CLOUD:
 			item.Value = values.CloudCover
 			item.Units = units.CloudCover
 		}
@@ -211,28 +217,28 @@ func (loc *Location) BuildDailyProperties(index int) {
 		units := loc.WeatherDaily.DailyUnits
 
 		switch key {
-		case "temperature-high":
+		case TEMPERATURE_HIGH:
 			item.Values = values.High
 			item.Units = units.High
-		case "temperature-low":
+		case TEMPERATURE_LOW:
 			item.Values = values.Low
 			item.Units = units.Low
-		case "precipitation":
+		case PRECIPITATION:
 			item.Values = values.Precipitation
 			item.Units = units.Precipitation
-		case "probability":
+		case PROBABILITY:
 			item.Values = values.Probability
 			item.Units = units.Probability
-		case "windspeed":
+		case WINDSPEED:
 			item.Values = values.WindSpeed
 			item.Units = units.WindSpeed
-		case "windgusts":
+		case WINDGUSTS:
 			item.Values = values.WindGusts
 			item.Units = units.WindGusts
-		case "daylight":
+		case DAYLIGHT:
 			item.Values = values.Daylight
 			item.Units = units.Daylight
-		case "sunshine":
+		case SUNSHINE:
 			item.Values = values.Sunshine
 			item.Units = units.Sunshine
 		}
@@ -247,11 +253,14 @@ func (loc *Location) BuildDailyProperties(index int) {
 }
 
 func (loc *Location) BuildHourlyProperties(index int) {
-	p := &LocationProperties{}
-	loc.HourlyProperties = p
-	p.Index = index
-	p.Items = make([]*LocationItem, len(hourlyKeys))
-	p.Code = loc.WeatherHourly.Hourly.Code
+	loc.HourlyProperties = loc.GenHourlyProperties(index)
+}
+
+func (loc *Location) GenHourlyProperties(index int) (props *LocationProperties) {
+	props = &LocationProperties{}
+	props.Index = index
+	props.Items = make([]*LocationItem, len(hourlyKeys))
+	props.Code = loc.WeatherHourly.Hourly.Code
 	limits := make(map[string]*Limits)
 
 	values := loc.WeatherHourly.Hourly
@@ -259,7 +268,7 @@ func (loc *Location) BuildHourlyProperties(index int) {
 
 	for i, key := range hourlyKeys {
 		item := &LocationItem{}
-		p.Items[i] = item
+		props.Items[i] = item
 
 		item.ID = fmt.Sprintf("%s%d", key, index)
 		item.Klass = key
@@ -268,28 +277,28 @@ func (loc *Location) BuildHourlyProperties(index int) {
 		attr.ToItem(&item.CurrentItem)
 
 		switch key {
-		case "temperature":
+		case TEMPERATURE:
 			item.Values = values.Temperature
 			item.Units = units.Temperature
-		case "feelslike":
+		case FEELSLIKE:
 			item.Values = values.FeelsLike
 			item.Units = units.FeelsLike
-		case "precipitation":
+		case PRECIPITATION:
 			item.Values = values.Precipitation
 			item.Units = units.Precipitation
-		case "probability":
+		case PROBABILITY:
 			item.Values = values.Probability
 			item.Units = units.Probability
-		case "windspeed":
+		case WINDSPEED:
 			item.Values = values.WindSpeed
 			item.Units = units.WindSpeed
-		case "windgusts":
+		case WINDGUSTS:
 			item.Values = values.WindGusts
 			item.Units = units.WindGusts
-		case "pressure":
+		case PRESSURE:
 			item.Values = values.Pressure
 			item.Units = units.Pressure
-		case "humidity":
+		case HUMIDITY:
 			item.Values = values.Humidity
 			item.Units = units.Humidity
 		}
@@ -297,10 +306,11 @@ func (loc *Location) BuildHourlyProperties(index int) {
 		mnx := loc.WeatherHourly.MinMax(item.Values)
 		item.Max = mnx.Max
 		item.Min = mnx.Min
-		p.BuildScale(limits, &mnx, item.Units)
+		props.BuildScale(limits, &mnx, item.Units)
 	}
 
-	p.Scale(limits)
+	props.Scale(limits)
+	return
 }
 
 func (p *LocationProperties) BuildScale(limits map[string]*Limits, mnx *Limits, units string) {
@@ -341,21 +351,18 @@ func (p *LocationProperties) Scale(limits map[string]*Limits) {
 
 func GetWeatherDaily(query string) (daily *WeatherDaily, err error) {
 	daily = &WeatherDaily{}
-	// daily.UpdateTime = time.Now()
 	err = GetWeather(query, daily)
 	return daily, err
 }
 
 func GetWeatherHourly(query string) (hourly *WeatherHourly, err error) {
 	hourly = &WeatherHourly{}
-	// hourly.UpdateTime = time.Now()
 	err = GetWeather(query, hourly)
 	return hourly, err
 }
 
 func GetWeatherCurrent(query string) (current *WeatherCurrent, err error) {
 	current = &WeatherCurrent{}
-	// current.UpdateTime = time.Now()
 	err = GetWeather(query, current)
 	return current, err
 }

@@ -32,26 +32,7 @@
                 <span class="symbols-small">more_horiz</span>
             </button>
             <div id="current-history{{$loc}}" class="hide">
-                {{range $histIndex,$hist:=$location.History}}
-                <div class="history-date">
-                    {{$location.WeatherCurrent.FormatTime $hist.Time}}
-                </div>
-                {{$props:=$location.BuildHistoryProperties $histIndex}}
-                <!--  -->
-                <div id="history-{{$loc}}" class="history">
-                    {{range $index, $item:=$props.Items}}
-                    <span id="history-item-{{$item.ID}}">
-                        <span class="symbols-weather-medium {{$item.Klass}}">
-                            {{$item.Icon}}
-                        </span>
-                        <span class="title-left">
-                            {{index $item.Value}}{{$item.Units}}
-                        </span>
-                    </span>
-                    <!--  -->
-                    {{end}}
-                </div>
-                {{end}}
+                {{template "weather.current.history" $location}}
             </div>
             {{end}}
         </div>
@@ -59,6 +40,35 @@
 </div>
 {{end}}
 <!--  -->
+{{ define "weather.current.history" }}
+<!--  -->
+{{$location:=.}}{{$w:=.WeatherCurrent}}
+<!--  -->
+{{range $histIndex,$hist:=.History}} {{$code:=$w.WeatherCode $hist.Code}}
+<div class="summary-date">
+    <span
+        class="symbols-weather-medium item-icon"
+        style="color:{{$code.Color}}; font-size:1rem"
+    >
+        {{$code.Icon}}
+    </span>
+    {{$location.WeatherCurrent.FormatTime $hist.Time}}
+</div>
+{{$props:=$location.BuildHistoryProperties $histIndex}}
+<div id="history-{{$location.ID}}" class="summary">
+    {{range $index, $item:=$props.Items}}
+    <span id="history-item-{{$item.ID}}">
+        <span class="symbols-weather-medium {{$item.Klass}}">
+            {{$item.Icon}}
+        </span>
+        <span class="summary-item">{{index $item.Value}}{{$item.Units}}</span>
+    </span>
+    <!--  -->
+    {{end}}
+</div>
+{{end}}
+<!--  -->
+{{end}}
 <!--  -->
 {{ define "weather.current.properties" }}
 <!--  -->

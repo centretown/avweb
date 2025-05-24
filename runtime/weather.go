@@ -33,21 +33,24 @@ type WeatherDaily struct {
 	DailyUnits DailyUnits `json:"daily_units"`
 	Daily      *Daily     `json:"daily"`
 }
+
 type WeatherCurrent struct {
 	WeatherCommon
 	CurrentUnits CurrentUnits `json:"current_units"`
 	Current      *Current     `json:"current"`
 }
 
+type WeatherCurrently struct {
+	CurrentUnits *CurrentUnits
+	Currently    Currently
+}
+
 type CurrentUnits struct {
 	Time            string `json:"time"`
-	Interval        string `json:"interval"`
 	Temperature     string `json:"temperature_2m"`
 	Precipitation   string `json:"precipitation"`
 	Humidity        string `json:"relative_humidity_2m"`
 	FeelsLike       string `json:"apparent_temperature"`
-	IsDay           string `json:"is_day"`
-	Code            string `json:"weather_code"`
 	WindSpeed       string `json:"wind_speed_10m"`
 	WindDirection   string `json:"wind_direction_10m"`
 	WindGusts       string `json:"wind_gusts_10m"`
@@ -57,18 +60,18 @@ type CurrentUnits struct {
 	CloudCover      string `json:"cloud_cover"`
 	PressureMSL     string `json:"pressure_msl"`
 	SurfacePressure string `json:"surface_pressure"`
+	Code            string `json:"weather_code"`
+	Interval        string `json:"interval"`
+	IsDay           string `json:"is_day"`
 }
 
 type Current struct {
 	LocationID      uint64  `json:"-" db:"LocationID"`
 	Time            string  `json:"time" db:"Time"`
-	Interval        int32   `json:"interval" db:"Interval"`
 	Temperature     float64 `json:"temperature_2m" db:"Temperature"`
 	Precipitation   float64 `json:"precipitation" db:"Precipitation"`
 	Humidity        float64 `json:"relative_humidity_2m" db:"Humidity"`
 	FeelsLike       float64 `json:"apparent_temperature" db:"FeelsLike"`
-	IsDay           int8    `json:"is_day" db:"IsDay"`
-	Code            int32   `json:"weather_code" db:"Code"`
 	WindSpeed       float64 `json:"wind_speed_10m" db:"WindSpeed"`
 	WindDirection   float64 `json:"wind_direction_10m" db:"WindDirection"`
 	WindGusts       float64 `json:"wind_gusts_10m" db:"WindGusts"`
@@ -78,6 +81,29 @@ type Current struct {
 	CloudCover      float64 `json:"cloud_cover" db:"CloudCover"`
 	PressureMSL     float64 `json:"pressure_msl" db:"PressureMSL"`
 	SurfacePressure float64 `json:"surface_pressure" db:"SurfacePressure"`
+	Code            int32   `json:"weather_code" db:"Code"`
+	Interval        int32   `json:"interval" db:"Interval"`
+	IsDay           int8    `json:"is_day" db:"IsDay"`
+}
+
+type Currently struct {
+	Time            []string
+	Temperature     []float64
+	Precipitation   []float64
+	Humidity        []float64
+	FeelsLike       []float64
+	WindSpeed       []float64
+	WindDirection   []float64
+	WindGusts       []float64
+	Rain            []float64
+	Showers         []float64
+	Snowfall        []float64
+	CloudCover      []float64
+	PressureMSL     []float64
+	SurfacePressure []float64
+	Code            []int32
+	Interval        []int32
+	IsDay           []int8
 }
 
 type HourlyUnits struct {

@@ -110,11 +110,13 @@ func InsertHistory(db *sqlx.DB, ID uint64, current *Current) (err error) {
 
 const (
 	fmtSelectHistory   = "SELECT * FROM history WHERE Time>'%s' AND Time<='%s' ORDER BY LocationID, Time;"
-	fmtLocationHistory = "SELECT * FROM history WHERE LocationID=%d AND Time>'%s' AND Time<='%s' ORDER BY Time;"
+	fmtLocationHistory = "SELECT * FROM history WHERE LocationID=%d AND Time>'%s' AND Time<='%s' ORDER BY Time %s;"
+	timeLayout         = "2006-01-02T15:04"
+	fmtSelectLocation  = "SELECT * FROM location;"
 )
 
-func SelectHistoryInterval(db *sqlx.DB, ID uint64, after string, before string) (history []*Current, err error) {
-	query := fmt.Sprintf(fmtLocationHistory, ID, after, before)
+func SelectHistoryInterval(db *sqlx.DB, ID uint64, after string, before string, order string) (history []*Current, err error) {
+	query := fmt.Sprintf(fmtLocationHistory, ID, after, before, order)
 	return SelectHistory(db, query)
 }
 
@@ -139,8 +141,6 @@ func SelectHistory(db *sqlx.DB, query string) (history []*Current, err error) {
 	return
 }
 
-const fmtSelectLocation = "SELECT * FROM location;"
-
 func SelectLocations(db *sqlx.DB) (locations []*Location, err error) {
 	var rows *sqlx.Rows
 	rows, err = db.Queryx(fmtSelectLocation)
@@ -163,8 +163,7 @@ func SelectLocations(db *sqlx.DB) (locations []*Location, err error) {
 }
 
 func BeforeTime(t time.Time, d time.Duration) (after string, before string) {
-	layout := "2006-01-02T15:04"
-	before = t.Format(layout)
-	after = t.Add(-d).Format(layout)
+	before = t.Format(timeLayout)
+	after = t.Add(-d).Format(timeLayout)
 	return
 }

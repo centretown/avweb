@@ -32,10 +32,9 @@ type Runtime struct {
 	Webcams       map[string]*avcamx.AvItem
 	Template      *template.Template
 
-	ticker  *time.Ticker
-	done    chan bool
-	TickCmd chan int
-	db      *sqlx.DB
+	ticker *time.Ticker
+	retry  *time.Ticker
+	db     *sqlx.DB
 }
 
 func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
@@ -69,9 +68,6 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 
 		ActionMap: make(map[string]*Action),
 		Webcams:   make(map[string]*avcamx.AvItem),
-
-		done:    make(chan bool),
-		TickCmd: make(chan int),
 	}
 
 	for _, action := range rt.ActionsCamera {
@@ -84,20 +80,7 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 		rt.ActionMap[action.Name] = action
 	}
 
-	now := time.Now()
-	next := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(),
-		now.Minute(), 0, 0, now.Location())
-	minute := 15 - next.Minute()%15
-	if minute == 0 {
-		minute = 15
-	}
-	next = next.Add(time.Duration(minute) * time.Minute)
-	if next.Compare(now) < 0 {
-		log.Fatal(minute, now, next)
-	}
-	ticker := next.Sub(now)
-	log.Printf("ticker=%v, minute=%v now=%v next=%v\n", ticker, minute, now, next)
-	rt.ticker = time.NewTicker(ticker)
+	rt.ticker = time.NewTicker(FirstTicker())
 
 	for _, item := range host.Items {
 		rt.Webcams[item.Url] = item
@@ -131,14 +114,14 @@ func (rt *Runtime) Connect() (err error) {
 	return
 }
 
-func (rt *Runtime) SelectHistory(loc int, after string, before string) (history []*Current, err error) {
-	return SelectHistoryInterval(rt.db, rt.Locations[loc].ID, after, before)
+func (rt *Runtime) SelectHistory(ID uint64, after string, before string) (history []*Current, err error) {
+	return SelectHistoryInterval(rt.db, ID, after, before, "DESC")
 }
 
 func (rt *Runtime) LoadHistory() (err error) {
 	after, before := BeforeTime(time.Now(), 6*time.Hour)
-	for i := range rt.Locations {
-		rt.Location.History, err = rt.SelectHistory(i, after, before)
+	for _, loc := range rt.Locations {
+		loc.History, err = rt.SelectHistory(loc.ID, after, before)
 		if err != nil {
 			log.Print(err)
 		}
@@ -181,60 +164,6 @@ func (rt *Runtime) SaveHistory() error {
 func (rt *Runtime) Done() {
 	if rt.db != nil {
 		rt.db.Close()
-	}
-}
-
-func (rt *Runtime) Monitor() {
-	const (
-		NEXT_DAY = iota
-		NEXT_HOUR
-		NEXT_MINUTE
-	)
-	var (
-		initialRun = true
-	)
-
-	log.Println("start Monitoring")
-	defer func() {
-		log.Println("stop Monitoring")
-	}()
-
-	for {
-		select {
-		case <-rt.done:
-			log.Println("Done!")
-			return
-
-		case cmd := <-rt.TickCmd:
-			switch cmd {
-			case NEXT_DAY:
-				rt.QueryDaily()
-			case NEXT_HOUR:
-				rt.QueryHourly()
-				rt.BroadcastTemperature()
-			case NEXT_MINUTE:
-			}
-
-		case now := <-rt.ticker.C:
-			if initialRun {
-				rt.ticker.Reset(time.Minute * 15)
-				initialRun = false
-			}
-			log.Println("QueryCurrent")
-			rt.QueryCurrent()
-			rt.BroadcastTemperature()
-
-			if now.Minute() == 0 {
-				log.Println("QueryHourly")
-				rt.QueryHourly()
-				if now.Hour()%4 == 0 {
-					log.Println("QueryDaily")
-					rt.QueryDaily()
-				}
-			}
-		}
-
-		time.Sleep(time.Millisecond)
 	}
 }
 
