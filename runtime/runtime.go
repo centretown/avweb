@@ -94,12 +94,6 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 		log.Fatal(err)
 	}
 	rt.Location = rt.Locations[0]
-
-	// err = rt.LoadHistory()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
 	return
 }
 
@@ -113,7 +107,7 @@ func (rt *Runtime) Connect() (err error) {
 }
 
 func (rt *Runtime) SelectHistory(ID uint64, after string, before string) (history []*Current, err error) {
-	return SelectHistoryInterval(rt.db, ID, after, before, "DESC")
+	return SelectHistoryInterval(rt.db, ID, after, before, "ASC")
 }
 
 func (rt *Runtime) LoadHistory() (err error) {

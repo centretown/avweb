@@ -201,6 +201,21 @@ func (w *WeatherCommon) MinMax(args ...[]float64) (limits Limits) {
 	return limits
 }
 
+func (w *WeatherCommon) FormatTimeCurrent(times []string) (intervals []string) {
+	for index, timestr := range times {
+		if index%4 != 0 {
+			continue
+		}
+		t, err := time.Parse("2006-01-02T15:04", timestr)
+		if err != nil {
+			log.Printf("FormatTime: %v\n", err)
+		}
+		intervals = append(intervals, t.Format("3:04PM"))
+	}
+
+	return
+}
+
 func (w *WeatherCommon) FormatTime(timeStr string) string {
 	t, err := time.Parse("2006-01-02T15:04", timeStr)
 	if err != nil {

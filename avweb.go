@@ -36,8 +36,21 @@ func main() {
 	flag.Parse()
 
 	host = avcamx.NewAvHost(hostAddr, hostPort)
+
+	funcMap := template.FuncMap{
+		// The name "inc" is what the function will be called in the template text.
+		"inc": func(i int) int {
+			return i + 1
+		},
+		"dec": func(i int) int {
+			return i - 1
+		},
+		"sub": func(i int, j int) int {
+			return i - j
+		},
+	}
 	const pattern = "www/*.html"
-	templ, err := template.ParseGlob(pattern)
+	templ, err := template.New("").Funcs(funcMap).ParseGlob(pattern)
 	if err != nil {
 		log.Fatalln("ParseGlob", pattern, err)
 	}
@@ -77,7 +90,7 @@ func main() {
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Cache-Control", "no-cache")
-		rt.Template, err = template.ParseGlob(pattern)
+		rt.Template, err = template.New("").Funcs(funcMap).ParseGlob(pattern)
 		if err != nil {
 			log.Fatalln("ParseGlob", pattern, err)
 		}

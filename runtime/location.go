@@ -125,7 +125,7 @@ func (loc *Location) QueryCurrent(db *sqlx.DB) (err error) {
 func (loc *Location) BuildCurrentProperties(history []*Current) {
 	p := &LocationProperties{}
 	loc.CurrentProperties = p
-	p.Index = int(loc.ID)
+	p.Index = int(loc.ID) - 1
 	p.Items = make([]*LocationProperty, len(currentAttributes))
 	p.Code = make([]int32, len(history))
 	p.Time = make([]string, len(history))
