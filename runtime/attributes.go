@@ -9,7 +9,7 @@ type WeatherAttributes struct {
 	Selected    bool
 }
 
-func (attr *WeatherAttributes) ToItem(item *CurrentItem) {
+func (attr *WeatherAttributes) ToItem(item *CurrentProperty) {
 	item.Icon = attr.Icon
 	item.Title = attr.Title
 	item.Description = attr.Description

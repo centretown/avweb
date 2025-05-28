@@ -13,8 +13,7 @@
             toggleItem(sel, "hourly", index, canvasId, hourlyList);
         }
 
-        function toggleHourly(index) {
-            let id = "hourly" + index;
+        function toggleHourly(index, id) {
             if (hideHourly[index]) {
                 hideHourly[index] = false;
                 htmx.removeClass("#" + id, "hide");
@@ -46,7 +45,7 @@
             <!--  -->
             {{template "weather.hourly.max" $location}}
             <canvas
-                id="canvas-hourly{{$loc}}"
+                id="canvas-hourly{{$location.ID}}"
                 class="chart-hourly unfade-it"
             ></canvas>
             {{template "weather.hourly.min" $location}}
@@ -55,7 +54,7 @@
                 hideHourly.push(true);
                 hourlyCodes.push({{$location.WeatherHourly.Hourly.Code}});
                 var hourlyItems = new Map();
-                var id = "canvas-hourly"+{{$loc}};
+                var id = "canvas-hourly"+{{$location.ID}};
                 hourlyCanvasIDS.push(id);
                 {{range $p:=$location.HourlyProperties.Items}}
                 hourlyItems.set({{$p.ID}}, {
@@ -73,10 +72,13 @@
                 hourlyList.push(hourlyItems);
                 drawItems({{$loc}}, id, hourlyList);
             </script>
-            <button class="more" hx-on:click="toggleHourly({{$loc}})">
+            <button
+                class="more"
+                hx-on:click="toggleHourly({{$loc}}, 'hourly{{$location.ID}}')"
+            >
                 <span class="symbols-small">more_horiz</span>
             </button>
-            <div id="hourly{{$loc}}" class="hide">
+            <div id="hourly{{$location.ID}}" class="hide">
                 {{template "weather.hourly.detail" $location}}
             </div>
             {{end}}

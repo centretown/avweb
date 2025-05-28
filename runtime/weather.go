@@ -40,11 +40,6 @@ type WeatherCurrent struct {
 	Current      *Current     `json:"current"`
 }
 
-type WeatherCurrently struct {
-	CurrentUnits *CurrentUnits
-	Currently    Currently
-}
-
 type CurrentUnits struct {
 	Time            string `json:"time"`
 	Temperature     string `json:"temperature_2m"`
@@ -86,24 +81,29 @@ type Current struct {
 	IsDay           int8    `json:"is_day" db:"IsDay"`
 }
 
-type Currently struct {
-	Time            []string
-	Temperature     []float64
-	Precipitation   []float64
-	Humidity        []float64
-	FeelsLike       []float64
-	WindSpeed       []float64
-	WindDirection   []float64
-	WindGusts       []float64
-	Rain            []float64
-	Showers         []float64
-	Snowfall        []float64
-	CloudCover      []float64
-	PressureMSL     []float64
-	SurfacePressure []float64
-	Code            []int32
-	Interval        []int32
-	IsDay           []int8
+const (
+	HISTORY_INTERVALS       = 24
+	HISTORY_MINUTE_INTERVAL = 15
+)
+
+type CurrentValues struct {
+	Time            [HISTORY_INTERVALS]string
+	Temperature     [HISTORY_INTERVALS]float64
+	Precipitation   [HISTORY_INTERVALS]float64
+	Humidity        [HISTORY_INTERVALS]float64
+	FeelsLike       [HISTORY_INTERVALS]float64
+	WindSpeed       [HISTORY_INTERVALS]float64
+	WindDirection   [HISTORY_INTERVALS]float64
+	WindGusts       [HISTORY_INTERVALS]float64
+	Rain            [HISTORY_INTERVALS]float64
+	Showers         [HISTORY_INTERVALS]float64
+	Snowfall        [HISTORY_INTERVALS]float64
+	CloudCover      [HISTORY_INTERVALS]float64
+	PressureMSL     [HISTORY_INTERVALS]float64
+	SurfacePressure [HISTORY_INTERVALS]float64
+	Code            [HISTORY_INTERVALS]int32
+	Interval        [HISTORY_INTERVALS]int32
+	IsDay           [HISTORY_INTERVALS]int8
 }
 
 type HourlyUnits struct {

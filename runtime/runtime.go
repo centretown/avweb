@@ -2,13 +2,11 @@ package runtime
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -97,10 +95,10 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 	}
 	rt.Location = rt.Locations[0]
 
-	err = rt.LoadHistory()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err = rt.LoadHistory()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	return
 }
@@ -121,44 +119,13 @@ func (rt *Runtime) SelectHistory(ID uint64, after string, before string) (histor
 func (rt *Runtime) LoadHistory() (err error) {
 	after, before := BeforeTime(time.Now(), 6*time.Hour)
 	for _, loc := range rt.Locations {
-		loc.History, err = rt.SelectHistory(loc.ID, after, before)
+		history, err := rt.SelectHistory(loc.ID, after, before)
 		if err != nil {
 			log.Print(err)
 		}
+		loc.BuildCurrentProperties(history)
 	}
 	return
-}
-
-func (rt *Runtime) LoadHistoryFile() error {
-	buf, err := os.ReadFile("history.json")
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	history := make([][]*Current, 0)
-	err = json.Unmarshal(buf, &history)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	for i := range history {
-		rt.Locations[i].History = history[i]
-	}
-	return err
-}
-
-func (rt *Runtime) SaveHistory() error {
-	history := make([][]*Current, 0)
-	for _, loc := range rt.Locations {
-		history = append(history, loc.History)
-	}
-	buf, err := json.Marshal(history)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	err = os.WriteFile("history.json", buf, os.ModePerm)
-	return err
 }
 
 func (rt *Runtime) Done() {
@@ -274,14 +241,14 @@ func (rt *Runtime) HandleAction(path string, templ string, data *WeatherFormData
 }
 
 func (rt *Runtime) QueryDaily() {
-	for i, location := range rt.Locations {
+	for _, location := range rt.Locations {
 		err := location.QueryDaily()
 		if err != nil {
 			log.Printf("WeatherDaily: %v", err)
 			continue
 		}
 		location.WeatherDaily.UpdateTime = time.Now()
-		location.BuildDailyProperties(i)
+		location.BuildDailyProperties()
 	}
 }
 
@@ -291,29 +258,29 @@ type LocationData struct {
 }
 
 func (rt *Runtime) QueryHourly() {
-	for i, location := range rt.Locations {
+	for _, location := range rt.Locations {
 		err := location.QueryHourly()
 		if err != nil {
 			log.Printf("WeatherHourly: %v", err)
 			continue
 		}
 		location.WeatherHourly.UpdateTime = time.Now()
-		location.BuildHourlyProperties(i)
+		location.BuildHourlyProperties()
 		// buf, _ := json.MarshalIndent(location.WeatherHourly, "", "  ")
 		// log.Println(string(buf))
 	}
 }
 
 func (rt *Runtime) QueryCurrent() {
-	for i, location := range rt.Locations {
+	for _, location := range rt.Locations {
 		err := location.QueryCurrent(rt.db)
 		if err != nil {
 			log.Printf("WeatherCurrent: %v", err)
 			continue
 		}
 		location.WeatherCurrent.UpdateTime = time.Now()
-		location.BuildCurrentProperties(i)
 	}
+
 	err := rt.LoadHistory()
 	if err != nil {
 		log.Printf("WeatherCurrent LoadHistory: %v", err)

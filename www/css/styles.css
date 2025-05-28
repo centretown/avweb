@@ -89,7 +89,7 @@
 .chart-bar,
 .chart,
 .chart-hourly {
-    opacity: 1;
+    /* opacity: 1; */
     color: green;
     width: var(--chartWidth);
     height: var(--chartHeight);
@@ -105,7 +105,7 @@
 
 body {
     font-family: sans-serif;
-    background-color: black;
+    background-color: var(--bgOpaque);
     scrollbar-color: var(--fgDim) var(--bgOpaque);
     scrollbar-width: thin;
     overflow: auto;
@@ -279,6 +279,8 @@ h3 {
         ". . .";
     grid-template-columns: 1fr 1fr 1fr;
     margin-bottom: 0.5rem;
+    background-color: rgba(0, 9, 17, 1);
+    border-radius: 0.35rem;
 }
 
 .summary-date {
@@ -290,6 +292,7 @@ h3 {
     grid-template-columns: 1fr 1fr 1fr 1fr;
     margin-bottom: 0.5rem;
     margin-left: 0.5rem;
+    margin-bottom: 1rem;
 }
 .summary-item {
     font-weight: normal;

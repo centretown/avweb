@@ -24,7 +24,7 @@ func TestWeather(t *testing.T) {
 		l.WeatherDaily = &daily
 		l.WeatherHourly = &hourly
 		t.Log("BuildHourlyProperties", i)
-		l.BuildHourlyProperties(i)
+		l.BuildHourlyProperties()
 		buf, _ := json.MarshalIndent(l.HourlyProperties, "", "  ")
 		t.Log(string(buf))
 		l.WeatherCurrent = &current

@@ -11,7 +11,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type CurrentItem struct {
+type CurrentProperty struct {
 	ID          string
 	Title       string
 	Description string
@@ -28,21 +28,16 @@ type CurrentItem struct {
 	Value       float64
 }
 
-type LocationItem struct {
-	CurrentItem
+type LocationProperty struct {
+	CurrentProperty
 	Values []float64
 }
 
 type LocationProperties struct {
 	Index int
-	Items []*LocationItem
+	Items []*LocationProperty
 	Code  []int32
-}
-
-type CurrentProperties struct {
-	Index int
-	Items []*CurrentItem
-	Code  int32
+	Time  []string
 }
 
 type Location struct {
@@ -56,9 +51,7 @@ type Location struct {
 	WeatherHourly     *WeatherHourly      `json:"-"`
 	HourlyProperties  *LocationProperties `json:"-"`
 	WeatherCurrent    *WeatherCurrent     `json:"-"`
-	CurrentProperties *CurrentProperties  `json:"-"`
-	History           []*Current          `json:"-"`
-	HistoryProperties *CurrentProperties  `json:"-"`
+	CurrentProperties *LocationProperties `json:"-"`
 }
 
 const (
@@ -70,7 +63,7 @@ const (
 )
 
 var (
-	currentKeys = []string{
+	currentAttributes = []string{
 		TEMPERATURE,
 		FEELSLIKE,
 		PRECIPITATION,
@@ -84,7 +77,7 @@ var (
 		SURFACE,
 		PRESSURE,
 	}
-	hourlyKeys = []string{
+	hourlyAttributes = []string{
 		TEMPERATURE,
 		FEELSLIKE,
 		PRECIPITATION,
@@ -94,7 +87,7 @@ var (
 		PRESSURE,
 		HUMIDITY,
 	}
-	dailyKeys = []string{
+	dailyAttributes = []string{
 		TEMPERATURE_HIGH,
 		TEMPERATURE_LOW,
 		PRECIPITATION,
@@ -129,91 +122,116 @@ func (loc *Location) QueryCurrent(db *sqlx.DB) (err error) {
 	return
 }
 
-func (loc *Location) BuildHistoryProperties(index int) *CurrentProperties {
-	p := &CurrentProperties{}
-	AttributesCurrent(index, p, loc.History[index], &loc.WeatherCurrent.CurrentUnits)
-	loc.HistoryProperties = p
-	return p
-}
-
-func (loc *Location) BuildCurrentProperties(index int) {
-	p := &CurrentProperties{}
-	AttributesCurrent(index, p, loc.WeatherCurrent.Current, &loc.WeatherCurrent.CurrentUnits)
+func (loc *Location) BuildCurrentProperties(history []*Current) {
+	p := &LocationProperties{}
 	loc.CurrentProperties = p
-}
-
-func AttributesCurrent(index int, p *CurrentProperties, values *Current, units *CurrentUnits) {
-	p.Index = index
-	p.Items = make([]*CurrentItem, len(currentKeys))
-	p.Code = values.Code
-	for i, key := range currentKeys {
-		item := &CurrentItem{}
-		p.Items[i] = item
-
-		item.ID = fmt.Sprintf("%s%d", key, index)
-		item.Klass = key
-
-		attr := Attributes[key]
-		attr.ToItem(item)
-		switch key {
-		case TEMPERATURE:
-			item.Value = values.Temperature
-			item.Units = units.Temperature
-		case FEELSLIKE:
-			item.Value = values.FeelsLike
-			item.Units = units.FeelsLike
-		case PRECIPITATION:
-			item.Value = values.Precipitation
-			item.Units = units.Precipitation
-		case WINDSPEED:
-			item.Value = values.WindSpeed
-			item.Units = units.WindSpeed
-		case WINDGUSTS:
-			item.Value = values.WindGusts
-			item.Units = units.WindGusts
-		case PRESSURE:
-			item.Value = values.PressureMSL
-			item.Units = units.PressureMSL
-		case SURFACE:
-			item.Value = values.SurfacePressure
-			item.Units = units.SurfacePressure
-		case HUMIDITY:
-			item.Value = values.Humidity
-			item.Units = units.Humidity
-		case RAIN:
-			item.Value = values.Rain
-			item.Units = units.Rain
-		case SHOWER:
-			item.Value = values.Showers
-			item.Units = units.Showers
-		case SNOW:
-			item.Value = values.Snowfall
-			item.Units = units.Snowfall
-		case CLOUD:
-			item.Value = values.CloudCover
-			item.Units = units.CloudCover
-		}
-		item.Max = item.Value
-		item.Min = 0
+	p.Index = int(loc.ID)
+	p.Items = make([]*LocationProperty, len(currentAttributes))
+	p.Code = make([]int32, len(history))
+	p.Time = make([]string, len(history))
+	// limits := make(map[string]*Limits)
+	for recno, rec := range history {
+		p.Time[recno] = rec.Time
+		p.Code[recno] = rec.Code
 	}
+	for i, key := range currentAttributes {
+		item := &LocationProperty{}
+		p.Items[i] = item
+		attr := Attributes[key]
+		attr.ToItem(&item.CurrentProperty)
+		item.Values = make([]float64, len(history))
+		item.Units = CurrentUnit(key, &loc.WeatherCurrent.CurrentUnits)
+		item.Klass = key
+		item.ID = fmt.Sprintf("%s%d", key, loc.ID)
+		for recno, rec := range history {
+			item.Values[recno] = CurrentValue(key, rec)
+			item.Max = item.Value
+			item.Min = 0
+		}
+		mnx := loc.WeatherCurrent.MinMax(item.Values)
+		item.Max = mnx.Max
+		item.Min = mnx.Min
+		// p.BuildScale(limits, &mnx, item.Units)
+	}
+	// p.Scale(limits)
 }
 
-func (loc *Location) BuildDailyProperties(index int) {
+func CurrentValue(key string, values *Current) (value float64) {
+	switch key {
+	case TEMPERATURE:
+		value = values.Temperature
+	case FEELSLIKE:
+		value = values.FeelsLike
+	case PRECIPITATION:
+		value = values.Precipitation
+	case WINDSPEED:
+		value = values.WindSpeed
+	case WINDGUSTS:
+		value = values.WindGusts
+	case PRESSURE:
+		value = values.PressureMSL
+	case SURFACE:
+		value = values.SurfacePressure
+	case HUMIDITY:
+		value = values.Humidity
+	case RAIN:
+		value = values.Rain
+	case SHOWER:
+		value = values.Showers
+	case SNOW:
+		value = values.Snowfall
+	case CLOUD:
+		value = values.CloudCover
+	}
+	return
+}
+
+func CurrentUnit(key string, units *CurrentUnits) (unit string) {
+	switch key {
+	case TEMPERATURE:
+		unit = units.Temperature
+	case FEELSLIKE:
+		unit = units.FeelsLike
+	case PRECIPITATION:
+		unit = units.Precipitation
+	case WINDSPEED:
+		unit = units.WindSpeed
+	case WINDGUSTS:
+		unit = units.WindGusts
+	case PRESSURE:
+		unit = units.PressureMSL
+	case SURFACE:
+		unit = units.SurfacePressure
+	case HUMIDITY:
+		unit = units.Humidity
+	case RAIN:
+		unit = units.Rain
+	case SHOWER:
+		unit = units.Showers
+	case SNOW:
+		unit = units.Snowfall
+	case CLOUD:
+		unit = units.CloudCover
+	}
+	return
+}
+
+func (loc *Location) BuildDailyProperties() {
 	p := &LocationProperties{}
 	loc.DailyProperties = p
-	p.Index = index
-	p.Items = make([]*LocationItem, len(dailyKeys))
+	p.Index = int(loc.ID)
+	p.Items = make([]*LocationProperty, len(dailyAttributes))
 	p.Code = loc.WeatherDaily.Daily.Code
 	limits := make(map[string]*Limits)
-	for i, key := range dailyKeys {
-		item := &LocationItem{}
+	for i, key := range dailyAttributes {
+		item := &LocationProperty{}
 		p.Items[i] = item
 
-		item.ID = fmt.Sprintf("%s%d", key, index)
+		item.ID = fmt.Sprintf("%s%d", key, int(loc.ID))
 		item.Klass = key
 
 		attr := Attributes[key]
-		attr.ToItem(&item.CurrentItem)
+		attr.ToItem(&item.CurrentProperty)
 		values := loc.WeatherDaily.Daily
 		units := loc.WeatherDaily.DailyUnits
 
@@ -239,13 +257,13 @@ func (loc *Location) BuildDailyProperties(index int) {
 		case DAYLIGHT:
 			item.Values = make([]float64, len(values.Daylight))
 			for i, seconds := range values.Daylight {
-				item.Values[i] = math.Round(10*seconds/60/60) / 10
+				item.Values[i] = math.Round(100*seconds/60/60) / 100
 			}
 			item.Units = "hr"
 		case SUNSHINE:
 			item.Values = make([]float64, len(values.Sunshine))
 			for i, seconds := range values.Sunshine {
-				item.Values[i] = math.Round(10*seconds/60/60) / 10
+				item.Values[i] = math.Round(100*seconds/60/60) / 100
 			}
 			item.Units = "hr"
 		}
@@ -259,29 +277,28 @@ func (loc *Location) BuildDailyProperties(index int) {
 	p.Scale(limits)
 }
 
-func (loc *Location) BuildHourlyProperties(index int) {
-	loc.HourlyProperties = loc.GenHourlyProperties(index)
-}
-
-func (loc *Location) GenHourlyProperties(index int) (props *LocationProperties) {
-	props = &LocationProperties{}
-	props.Index = index
-	props.Items = make([]*LocationItem, len(hourlyKeys))
+func (loc *Location) BuildHourlyProperties() {
+	props := &LocationProperties{}
+	defer func() {
+		loc.HourlyProperties = props
+	}()
+	props.Index = int(loc.ID)
+	props.Items = make([]*LocationProperty, len(hourlyAttributes))
 	props.Code = loc.WeatherHourly.Hourly.Code
 	limits := make(map[string]*Limits)
 
 	values := loc.WeatherHourly.Hourly
 	units := loc.WeatherHourly.HourlyUnits
 
-	for i, key := range hourlyKeys {
-		item := &LocationItem{}
+	for i, key := range hourlyAttributes {
+		item := &LocationProperty{}
 		props.Items[i] = item
 
-		item.ID = fmt.Sprintf("%s%d", key, index)
+		item.ID = fmt.Sprintf("%s%d", key, loc.ID)
 		item.Klass = key
 
 		attr := Attributes[key]
-		attr.ToItem(&item.CurrentItem)
+		attr.ToItem(&item.CurrentProperty)
 
 		switch key {
 		case TEMPERATURE:
@@ -338,20 +355,16 @@ func (p *LocationProperties) BuildScale(limits map[string]*Limits, mnx *Limits, 
 func (p *LocationProperties) Scale(limits map[string]*Limits) {
 	for _, item := range p.Items {
 		lim, ok := limits[item.Units]
-		if !ok {
+		switch {
+		case !ok, item.Units == "%":
 			item.ScaleMax = 100.0
 			item.ScaleMin = 0.0
-		} else {
-			if item.Units == "%" {
-				item.ScaleMax = 100.0
-				item.ScaleMin = 0.0
-			} else if item.Units == "hr" {
-				item.ScaleMax = item.Max
-				item.ScaleMin = item.Min
-			} else {
-				item.ScaleMax = lim.Max
-				item.ScaleMin = lim.Min
-			}
+		case item.Units == "hr":
+			item.ScaleMax = item.Max
+			item.ScaleMin = item.Min
+		default:
+			item.ScaleMax = lim.Max
+			item.ScaleMin = lim.Min
 		}
 	}
 }

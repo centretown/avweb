@@ -4,11 +4,14 @@
     "layout.content.head" .Action }}
     <script>
         var hideCurrentHistory = [];
+        var historyCanvasIDS = [];
+        var historyList = [];
+        var historyCodes = [];
+
         document.getElementById("current-date").innerHTML = showFullDate(
             new Date(),
         );
-        function toggleHistory(index) {
-            let id = "current-history" + index;
+        function toggleHistory(index, id) {
             if (hideCurrentHistory[index]) {
                 hideCurrentHistory[index] = false;
                 htmx.removeClass("#" + id, "hide");
@@ -25,13 +28,21 @@
             <!--  -->
             {{template "weather.current.properties" $location}}
             <!--  -->
+            <canvas
+                id="canvas-history{{$location.ID}}"
+                class="chart-hourly unfade-it"
+            ></canvas>
             <script>
+                var id = "canvas-history"+{{$location.ID}};
                 hideCurrentHistory.push(true);
             </script>
-            <button class="more" hx-on:click="toggleHistory({{$loc}})">
+            <button
+                class="more"
+                hx-on:click="toggleHistory({{$loc}},'current-history{{$location.ID}}')"
+            >
                 <span class="symbols-small">more_horiz</span>
             </button>
-            <div id="current-history{{$loc}}" class="hide">
+            <div id="current-history{{$location.ID}}" class="hide">
                 {{template "weather.current.history" $location}}
             </div>
             {{end}}
@@ -44,7 +55,11 @@
 <!--  -->
 {{$location:=.}}{{$w:=.WeatherCurrent}}
 <!--  -->
-{{range $histIndex,$hist:=.History}} {{$code:=$w.WeatherCode $hist.Code}}
+{{$props:=.CurrentProperties}}
+<!--  -->
+{{range $recno,$time:=$props.Time}}
+<!--  -->
+{{$pcode:=index $props.Code $recno}} {{$code:=$w.WeatherCode $pcode}}
 <div class="summary-date">
     <span
         class="symbols-weather-medium item-icon"
@@ -52,16 +67,19 @@
     >
         {{$code.Icon}}
     </span>
-    {{$location.WeatherCurrent.FormatTime $hist.Time}}
+    {{$location.WeatherCurrent.FormatTime $time}}
 </div>
-{{$props:=$location.BuildHistoryProperties $histIndex}}
+
 <div id="history-{{$location.ID}}" class="summary">
-    {{range $index, $item:=$props.Items}}
+    {{range $item:=$props.Items}}
+    <!--  -->
     <span id="history-item-{{$item.ID}}">
         <span class="symbols-weather-medium {{$item.Klass}}">
             {{$item.Icon}}
         </span>
-        <span class="summary-item">{{index $item.Value}}{{$item.Units}}</span>
+        <span class="summary-item"
+            >{{index $item.Values $recno}}{{$item.Units}}</span
+        >
     </span>
     <!--  -->
     {{end}}
@@ -89,11 +107,11 @@
         <span class="symbols-weather-medium {{$item.Klass}}">
             {{$item.Icon}}
         </span>
-        <span>{{index $item.Value}}{{$item.Units}}</span>
+        <span>{{index $item.Values 0}}{{$item.Units}}</span>
     </div>
     {{else}}
     <div id="current-{{$item.ID}}" class="title-right">
-        <span>{{index $item.Value}}{{$item.Units}}</span>
+        <span>{{index $item.Values 0}}{{$item.Units}}</span>
         <span class="symbols-weather-medium {{$item.Klass}}">
             {{$item.Icon}}
         </span>
