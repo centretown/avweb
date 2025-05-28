@@ -129,7 +129,7 @@ func (loc *Location) BuildCurrentProperties(history []*Current) {
 	p.Items = make([]*LocationProperty, len(currentAttributes))
 	p.Code = make([]int32, len(history))
 	p.Time = make([]string, len(history))
-	// limits := make(map[string]*Limits)
+	limits := make(map[string]*Limits)
 	for recno, rec := range history {
 		p.Time[recno] = rec.Time
 		p.Code[recno] = rec.Code
@@ -151,9 +151,9 @@ func (loc *Location) BuildCurrentProperties(history []*Current) {
 		mnx := loc.WeatherCurrent.MinMax(item.Values)
 		item.Max = mnx.Max
 		item.Min = mnx.Min
-		// p.BuildScale(limits, &mnx, item.Units)
+		p.BuildScale(limits, &mnx, item.Units)
 	}
-	// p.Scale(limits)
+	p.Scale(limits)
 }
 
 func CurrentValue(key string, values *Current) (value float64) {
