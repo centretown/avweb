@@ -318,3 +318,47 @@ window.addEventListener(
   },
   false,
 );
+
+function locationItem(prefix, canvasID, codes, items) {
+  let obj = {
+    hide: true,
+    canvasID: canvasID,
+    prefix: prefix,
+    codes: codes,
+    items: items,
+    drawItems: function () {
+      clearCanvas(this.canvasID);
+      for (let [_, item] of this.items) {
+        if (item.selected) {
+          item.draw(this.canvasID, this.codes);
+        }
+      }
+      showMinMax(this.canvasID);
+    },
+    toggleItem: function (itemID) {
+      var item = this.items.get(itemID);
+      item.selected = toggleClass(
+        prefix + "-" + itemID,
+        item.selected,
+        "title-selected",
+      );
+      if (item.selected) {
+        htmx.removeClass("#" + this.prefix + "-max-" + itemID, "hide");
+        htmx.removeClass("#" + this.prefix + "-min-" + itemID, "hide");
+      } else {
+        htmx.addClass("#" + this.prefix + "-max-" + itemID, "hide");
+        htmx.addClass("#" + this.prefix + "-min-" + itemID, "hide");
+      }
+      this.drawItems();
+    },
+    toggleDetail: function (id) {
+      this.hide = !this.hide;
+      if (this.hide) {
+        htmx.addClass("#" + id, "hide");
+      } else {
+        htmx.removeClass("#" + id, "hide");
+      }
+    },
+  };
+  return obj;
+}

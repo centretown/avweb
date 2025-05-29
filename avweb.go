@@ -38,13 +38,6 @@ func main() {
 	host = avcamx.NewAvHost(hostAddr, hostPort)
 
 	funcMap := template.FuncMap{
-		// The name "inc" is what the function will be called in the template text.
-		"inc": func(i int) int {
-			return i + 1
-		},
-		"dec": func(i int) int {
-			return i - 1
-		},
 		"sub": func(i int, j int) int {
 			return i - j
 		},
@@ -65,13 +58,6 @@ func main() {
 
 	log.Print("MakeProxy")
 	host.MakeProxy(remote, sockServer)
-
-	// filename := "config.json"
-	// config := runtime.NewConfig()
-	// err := config.Read(filename)
-	// if err != nil {
-	// 	log.Fatalln("Read Configuration", filename, err)
-	// }
 
 	rt = runtime.NewRuntime(host)
 

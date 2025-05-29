@@ -3,24 +3,15 @@
 {{$rt:=.Runtime}}{{$dt:=$rt.Location.WeatherDaily.UpdateTime}}
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
     <script>
-        var hideHourly = [];
-        var hourlyCanvasIDS = [];
-        var hourlyList = [];
-        var hourlyCodes = [];
-
-        function toggleHourlyItem(sel, index) {
-            let canvasId = hourlyCanvasIDS[index];
-            toggleItem(sel, "hourly", index, canvasId, hourlyList);
+        var hrLoc = new Map();
+        function drawHourlyItems(locID) {
+            hrLoc.get(locID).drawItems();
         }
-
-        function toggleHourly(index, id) {
-            if (hideHourly[index]) {
-                hideHourly[index] = false;
-                htmx.removeClass("#" + id, "hide");
-            } else {
-                hideHourly[index] = true;
-                htmx.addClass("#" + id, "hide");
-            }
+        function toggleHourlyItem(locID, itemID) {
+            hrLoc.get(locID).toggleItem(itemID);
+        }
+        function toggleHourlyDetail(locID, id) {
+            hrLoc.get(locID).toggleDetail(id);
         }
         document.getElementById("hourly-date").innerHTML = showFullDate(
             new Date(),
@@ -51,34 +42,35 @@
             {{template "weather.hourly.min" $location}}
 
             <script>
-                hideHourly.push(true);
-                hourlyCodes.push({{$location.WeatherHourly.Hourly.Code}});
+                var canvasID = "canvas-hourly{{$location.ID}}";
                 var hourlyItems = new Map();
-                var id = "canvas-hourly"+{{$location.ID}};
-                hourlyCanvasIDS.push(id);
                 {{range $p:=$location.HourlyProperties.Items}}
                 hourlyItems.set({{$p.ID}}, {
                     id:{{$p.ID}},
                     selected: {{$p.Selected}},
-                    draw: function (canvasId) {
+                    draw: function (canvasId, codes) {
                       if ("line"=={{$p.Chart}}) {
                         showGraph(canvasId, {{$p.Color}}, {{$p.ScaleMin}}, {{$p.ScaleMax}}, {{$p.Values}});
                       } else if ("bar"=={{$p.Chart}}) {
-                        var codes = hourlyCodes[{{$loc}}];
                         showBars(canvasId, {{$p.Values}}, codes);
                       }
                 }});
                 {{end}}
-                hourlyList.push(hourlyItems);
-                drawItems({{$loc}}, id, hourlyList);
+
+                hrLoc.set({{$location.ID}},
+                  locationItem("hourly",
+                    canvasID, {{$location.WeatherHourly.Hourly.Code}},
+                    hourlyItems));
+
+                drawHourlyItems({{$location.ID}});
             </script>
             <button
                 class="more"
-                hx-on:click="toggleHourly({{$loc}}, 'hourly{{$location.ID}}')"
+                hx-on:click="toggleHourly({{$location.ID}}, 'hourly-detail{{$location.ID}}')"
             >
                 <span class="symbols-small">more_horiz</span>
             </button>
-            <div id="hourly{{$location.ID}}" class="hide">
+            <div id="hourly-detail{{$location.ID}}" class="hide">
                 {{template "weather.hourly.detail" $location}}
             </div>
             {{end}}
@@ -138,7 +130,7 @@
 {{ end }}
 <!--  -->
 <!--  -->
-{{ define "weather.hourly.properties" }}
+{{ define "weather.hourly.properties" }}{{$location:=.}}
 <!--  -->
 {{$props:=.HourlyProperties}} {{$w:=.WeatherHourly}}{{$cur:=$w.Hourly}}
 <!--  -->
@@ -159,7 +151,7 @@
         class="title-left {{if
         $item.Selected}}title-selected
         {{end}}"
-        hx-on:click="toggleHourlyItem('{{$item.ID}}', {{$props.Index}})"
+        hx-on:click="toggleHourlyItem({{$location.ID}},'{{$item.ID}}')"
     >
         <span class="symbols-weather-medium {{$item.Klass}}"
             >{{$item.Icon}}</span
@@ -172,7 +164,7 @@
         class="title-right {{if
         $item.Selected}}title-selected
         {{end}}"
-        hx-on:click="toggleHourlyItem('{{$item.ID}}', {{$props.Index}})"
+        hx-on:click="toggleHourlyItem({{$location.ID}}, '{{$item.ID}}')"
     >
         <span>{{index $item.Values 0}}{{$item.Units}}</span>
         <span class="symbols-weather-medium {{$item.Klass}}"
@@ -190,7 +182,7 @@
 {{ define "weather.hourly.max" }}
 <!--  -->
 {{$props:=.HourlyProperties}}
-<div id="hourly-grid-max{{$props.Index}}" class="grid-minmax">
+<div id="hourly-grid-max{{.ID}}" class="grid-minmax">
     <!--  -->
     {{range $item:=$props.Items}}
     <span
@@ -210,7 +202,7 @@
 {{ define "weather.hourly.min" }}
 <!--  -->
 {{$props:=.HourlyProperties}}
-<div id="grid-min{{$props.Index}}" class="grid-minmax">
+<div id="grid-min{{.ID}}" class="grid-minmax">
     <!--  -->
     {{range $item:=$props.Items}}
     <!--  -->

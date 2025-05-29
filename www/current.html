@@ -1,30 +1,20 @@
 {{ define "weather.current" }}
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
-    {{$rt:=.Runtime}}{{$dt:=$rt.Location.WeatherDaily.UpdateTime}} {{template
-    "layout.content.head" .Action }}
+    {{$rt:=.Runtime}} {{template "layout.content.head" .Action }}
     <script>
-        var hideCurrentHistory = [];
-        var currentCanvasIDS = [];
-        var currentList = [];
-        var currentCodes = [];
-
-        function toggleCurrentItem(sel, index) {
-            let canvasId = currentCanvasIDS[index];
-            toggleItem(sel, "current", index, canvasId, currentList);
+        var cwLoc = new Map();
+        function drawCurrentItems(locID) {
+            cwLoc.get(locID).drawItems();
         }
-
+        function toggleCurrentItem(locID, itemID) {
+            cwLoc.get(locID).toggleItem(itemID);
+        }
+        function toggleHistory(locID, id) {
+            cwLoc.get(locID).toggleDetail(id);
+        }
         document.getElementById("current-date").innerHTML = showFullDate(
             new Date(),
         );
-        function toggleHistory(index, id) {
-            if (hideCurrentHistory[index]) {
-                hideCurrentHistory[index] = false;
-                htmx.removeClass("#" + id, "hide");
-            } else {
-                hideCurrentHistory[index] = true;
-                htmx.addClass("#" + id, "hide");
-            }
-        }
     </script>
     <span>
         <div id="current-date" class="title-date"></div>
@@ -50,30 +40,32 @@
             ></canvas>
             {{template "weather.current.min" $location}}
             <script>
-                hideCurrentHistory.push(true);
-                currentCodes.push({{$location.CurrentProperties.Code}});
+                var canvasID = "canvas-current{{$location.ID}}";
                 var currentItems = new Map();
-                var id = "canvas-current"+{{$location.ID}};
-                currentCanvasIDS.push(id);
                 {{range $p:=$location.CurrentProperties.Items}}
                 currentItems.set({{$p.ID}}, {
                     id:{{$p.ID}},
                     selected: {{$p.Selected}},
-                    draw: function (canvasId) {
+                    draw: function (canvasID, codes) {
                       if ("line"=={{$p.Chart}}) {
-                        showGraph(canvasId, {{$p.Color}}, {{$p.ScaleMin}}, {{$p.ScaleMax}}, {{$p.Values}});
+                        showGraph(canvasID, {{$p.Color}}, {{$p.ScaleMin}}, {{$p.ScaleMax}}, {{$p.Values}});
                       } else if ("bar"=={{$p.Chart}}) {
-                        var codes = currentCodes[{{$loc}}];
-                        showBars(canvasId, {{$p.Values}}, codes);
+                        showBars(canvasID, {{$p.Values}}, codes);
                       }
-                }});
+                    },
+                });
                 {{end}}
-                currentList.push(currentItems);
-                drawItems({{$loc}}, id, currentList);
+
+                cwLoc.set({{$location.ID}},
+                  locationItem("current",
+                    canvasID, {{$location.CurrentProperties.Code}},
+                    currentItems));
+
+                drawCurrentItems({{$location.ID}});
             </script>
             <button
                 class="more"
-                hx-on:click="toggleHistory({{$loc}},'current-history{{$location.ID}}')"
+                hx-on:click="toggleHistory({{$location.ID}},'current-history{{$location.ID}}')"
             >
                 <span class="symbols-small">more_horiz</span>
             </button>
@@ -111,7 +103,7 @@
 <!--  -->
 {{$props:=.CurrentProperties}}
 <!--  -->
-{{$count:=len $props.Time}} {{$count:=dec $count}}{{range
+{{$count:=len $props.Time}} {{$count:=sub $count 1}}{{range
 $no,$rec:=$props.Time}}
 <!--  -->
 {{$recno:=sub $count $no}}
@@ -146,7 +138,7 @@ $no,$rec:=$props.Time}}
 <!--  -->
 {{end}}
 <!--  -->
-{{ define "weather.current.properties" }}
+{{ define "weather.current.properties" }}{{$location:=.}}
 <!--  -->
 {{$props:=.CurrentProperties}} {{$w:=.WeatherCurrent}}{{$cur:=$w.Current}}
 <!--  -->
@@ -160,14 +152,14 @@ $no,$rec:=$props.Time}}
         {{$fmt:="3:04PM MST"}} {{$w.UpdateTime.Format $fmt}}
     </div>
 
-    {{$left:=true}} {{range $item:=$props.Items}}{{$last:=len
-    $item.Values}}{{$last:=dec $last}}
+    {{$left:=true}} {{range $pindex,$item:=$props.Items}}{{$last:=len
+    $item.Values}}{{$last:=sub $last 1}}
     <!--  -->
     {{if $left}}
     <div
         id="current-{{$item.ID}}"
         class="title-left {{if $item.Selected}}title-selected {{end}}"
-        hx-on:click="toggleCurrentItem('{{$item.ID}}', {{$props.Index}})"
+        hx-on:click="toggleCurrentItem({{$location.ID}}, '{{$item.ID}}')"
     >
         <span class="symbols-weather-medium {{$item.Klass}}">
             {{$item.Icon}}
@@ -178,7 +170,7 @@ $no,$rec:=$props.Time}}
     <div
         id="current-{{$item.ID}}"
         class="title-right {{if $item.Selected}}title-selected {{end}}"
-        hx-on:click="toggleCurrentItem('{{$item.ID}}', {{$props.Index}})"
+        hx-on:click="toggleCurrentItem({{$location.ID}}, '{{$item.ID}}')"
     >
         <span>{{index $item.Values $last}}{{$item.Units}}</span>
         <span class="symbols-weather-medium {{$item.Klass}}">

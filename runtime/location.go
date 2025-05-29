@@ -125,7 +125,6 @@ func (loc *Location) QueryCurrent(db *sqlx.DB) (err error) {
 func (loc *Location) BuildCurrentProperties(history []*Current) {
 	p := &LocationProperties{}
 	loc.CurrentProperties = p
-	p.Index = int(loc.ID) - 1
 	p.Items = make([]*LocationProperty, len(currentAttributes))
 	p.Code = make([]int32, len(history))
 	p.Time = make([]string, len(history))
@@ -145,8 +144,6 @@ func (loc *Location) BuildCurrentProperties(history []*Current) {
 		item.ID = fmt.Sprintf("%s%d", key, loc.ID)
 		for recno, rec := range history {
 			item.Values[recno] = CurrentValue(key, rec)
-			item.Max = item.Value
-			item.Min = 0
 		}
 		mnx := loc.WeatherCurrent.MinMax(item.Values)
 		item.Max = mnx.Max
