@@ -149,17 +149,6 @@ window.addEventListener("htmx:load", function (evt) {
   addDragHandlers(id);
 });
 
-function minMax(...lists) {
-  var val = { min: 64000, max: -64000 };
-  for (let list of lists) {
-    for (let x of list) {
-      if (val.max < x) val.max = x;
-      if (val.min > x) val.min = x;
-    }
-  }
-  return val;
-}
-
 const rain = "rgba(31, 144, 255, 255)";
 const snow = "rgba(255, 255, 255, 255)";
 
@@ -230,40 +219,9 @@ function showGraph(canvasId, color, min, max, values, lineWidth = 2) {
   ctx.stroke();
 }
 
-function toggleItem(sel, prefix, index, canvasId, list) {
-  let listItems = list[index];
-  let item = listItems.get(sel);
-  item.selected = toggleClass(
-    prefix + "-" + sel,
-    item.selected,
-    "title-selected",
-  );
-  if (item.selected) {
-    htmx.removeClass("#" + prefix + "-max-" + sel, "hide");
-    htmx.removeClass("#" + prefix + "-min-" + sel, "hide");
-  } else {
-    htmx.addClass("#" + prefix + "-max-" + sel, "hide");
-    htmx.addClass("#" + prefix + "-min-" + sel, "hide");
-  }
-  drawItems(index, canvasId, list);
-}
-
-function drawItems(index, canvasId, list) {
-  clearCanvas(canvasId);
-  let listItems = list[index];
-  let items = listItems.entries();
-  for (let [key, item] of items) {
-    if (item.selected && item.draw !== undefined) {
-      item.draw(canvasId);
-    }
-  }
-  showMinMax(canvasId);
-}
-
 function showMinMax(canvasId) {
   let canvas = document.getElementById(canvasId);
   let ctx = canvas.getContext("2d");
-  let height = canvas.height;
 
   ctx.beginPath();
   ctx.lineWidth = 2;
@@ -277,9 +235,6 @@ function showMinMax(canvasId) {
 }
 
 function showFullDate(dt) {
-  if (dt == undefined) {
-    let dt = new Date();
-  }
   let options = {
     timeStyle: "short",
     dateStyle: "full",

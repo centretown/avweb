@@ -10,7 +10,7 @@
     --fgClock: rgba(165, 208, 198, 1);
     --fgStatus: rgba(255, 255, 0, 0.9);
     --fgIcon: rgba(120, 184, 244, 1);
-    --fgWeatherIcon: rgba(0, 0, 255, 1);
+    --fgDateIcon: rgba(120, 184, 244, 0.5);
     --slotWidth: 23rem;
     --slotImageWidth: 18rem;
     --inputWidth: 8rem;
@@ -345,13 +345,33 @@ h3 {
     grid-area: city;
 }
 
+input::-webkit-calendar-picker-indicator:hover {
+    background: var(--fgIcon);
+}
+
+input::-webkit-calendar-picker-indicator {
+    background: var(--fgDateIcon);
+}
+
+.date-input:hover {
+    color: var(--fgBright);
+}
+
+.date-input {
+    background-color: rgba(0, 29, 58, 1);
+    color: inherit;
+    font-size: inherit;
+    border-radius: 0.25rem;
+    width: 100%;
+    color: var(--fgDim);
+}
+
 .text-input {
-    border-radius: 0.35rem;
+    border-radius: 0.25rem;
     background-color: rgba(255, 255, 0, 0.1);
     color: rgba(255, 255, 0, 1);
     width: 100%;
 }
-
 .messages {
     overflow-y: auto;
     overflow-x: wrap;

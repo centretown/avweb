@@ -1,7 +1,6 @@
 package runtime
 
 import (
-	"fmt"
 	"log"
 	"time"
 )
@@ -224,14 +223,6 @@ func (w *WeatherCommon) FormatTime(timeStr string) string {
 	return t.Format("Monday, Jan 2, 2006 at 3:04pm")
 }
 
-func (w *WeatherHourly) FormatTime(index int) string {
-	t, err := time.Parse("2006-01-02T15:04", w.Hourly.Time[index])
-	if err != nil {
-		log.Printf("FormatTime: %v\n", err)
-	}
-	return t.Format("3:04PM")
-}
-
 func (w *WeatherHourly) Hours() (hours []time.Time) {
 	hours = make([]time.Time, 0, len(w.Hourly.Time)/4)
 	for i := range w.Hourly.Time {
@@ -243,87 +234,14 @@ func (w *WeatherHourly) Hours() (hours []time.Time) {
 	return
 }
 
-func (w *WeatherHourly) FormatTemperature(index int) string {
-	return fmt.Sprintf("%6.1f", w.Hourly.Temperature[index])
-}
-func (w *WeatherHourly) FormatFeelsLike(index int) string {
-	return fmt.Sprintf("%6.1f", w.Hourly.FeelsLike[index])
-}
-func (w *WeatherHourly) FormatPrecipitation(index int) string {
-	return fmt.Sprintf("%6.2f", w.Hourly.Precipitation[index])
-}
-func (w *WeatherHourly) FormatProbability(index int) string {
-	return fmt.Sprintf("%6.0f", w.Hourly.Probability[index])
-}
-func (w *WeatherHourly) FormatWindSpeed(index int) string {
-	return fmt.Sprintf("%6.2f", w.Hourly.WindSpeed[index])
-}
-
-func (w *WeatherDaily) ReadingsHigh() string {
-	return fmt.Sprintf("// var readings = [%v];", w.Daily.High)
-}
-
 func (w *WeatherDaily) FormatDay(index int) string {
 	t, _ := time.Parse("2006-01-02", w.Daily.Time[index])
 	return t.Format("Monday, Jan 2, 2006")
 }
 
-func (w *WeatherDaily) FormatHigh(index int) string {
-	return fmt.Sprintf("%4.0f %s", w.Daily.High[index], w.DailyUnits.High)
-}
-func (w *WeatherDaily) FormatPrecipitation(index int) string {
-	return fmt.Sprintf("%4.2f %s", w.Daily.Precipitation[index], w.DailyUnits.Precipitation)
-}
-
-func (w *WeatherDaily) FormatLow(index int) string {
-	return fmt.Sprintf("%4.0f %s", w.Daily.Low[index], w.DailyUnits.Low)
-}
-func (w *WeatherDaily) FormatSunset(index int) string {
-	t, err := time.Parse("2006-01-02T15:04", w.Daily.Sunset[index])
-	if err != nil {
-		log.Printf("FormatSunset: %v\n", err)
-	}
-	return t.Format("3:04PM")
-}
-func (w *WeatherDaily) FormatSunrise(index int) string {
-	t, err := time.Parse("2006-01-02T15:04", w.Daily.Sunrise[index])
-	if err != nil {
-		log.Printf("FormatSunrise: %v\n", err)
-	}
-	return t.Format("3:04PM")
-}
-
 func (w *WeatherDaily) FormatDayShort(index int) string {
 	t, _ := time.Parse("2006-01-02", w.Daily.Time[index])
 	return t.Format("Mon")
-}
-
-func toHours(fsec float64) string {
-	seconds := int(fsec)
-	hours := seconds / 3600
-	seconds -= hours * 3600
-	minutes := seconds / 60
-	seconds = seconds % 60
-	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
-}
-
-func (w *WeatherDaily) FormatDaylight(index int) string {
-	return toHours(w.Daily.Daylight[index])
-}
-func (w *WeatherDaily) FormatSunshine(index int) string {
-	return toHours(w.Daily.Sunshine[index])
-}
-
-func (w *WeatherDaily) Log() {
-	w.LogCommon()
-	for i := range w.Daily.Time {
-		log.Printf("date: %s\tsunrise: %s\tsunset: %s\n",
-			w.Daily.Time[i], w.Daily.Sunrise[i], w.Daily.Sunset[i])
-	}
-}
-
-func (hourly *WeatherHourly) Log() {
-	hourly.LogCommon()
 }
 
 type WeatherEffects struct {
@@ -369,18 +287,3 @@ var WeatherCodes = map[int32]*WeatherCode{
 	96: {Code: 96, Color: "pink", Icon: "weather_hail", Tokens: []string{"slight", "hail", "thunderstorm"}},
 	99: {Code: 99, Color: "red", Icon: "weather_hail", Tokens: []string{"heavy", "hail", "thunderstorm"}},
 }
-
-/*
-0	Clear sky
-1, 2, 3	Mainly cleargreyand depositing rime fog
-51, 53, 55	Drizzle: Light, moderate, and dense intensity
-56, 57	Freezing Drizzle: Light and dense intensity
-61, 63, 65	Rain: Slight, moderate and heavy intensity
-66, 67	Freezing Rain: Light and heavy intensity
-71, 73, 75	Snow fall: Slight, moderate, and heavy intensity
-77	Snow grains
-80, 81, 82	Rain showers: Slight, moderate, and violent
-85, 86	Snow showers slight and heavy
-95 *	Thunderstorm: Slight or moderate
-96, 99 *	Thunderstorm with slight and heavy hail
-*/

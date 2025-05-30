@@ -138,6 +138,7 @@ $no,$rec:=$props.Time}}
 <!--  -->
 {{end}}
 <!--  -->
+<!--  -->
 {{ define "weather.current.properties" }}{{$location:=.}}
 <!--  -->
 {{$props:=.CurrentProperties}} {{$w:=.WeatherCurrent}}{{$cur:=$w.Current}}
@@ -148,8 +149,18 @@ $no,$rec:=$props.Time}}
         {{$code.Icon}}
     </span>
     <div class="title-city item-city">{{.City}}</div>
+    {{$fmt:="2006-01-02T15:04"}}
     <div class="item-date">
-        {{$fmt:="3:04PM MST"}} {{$w.UpdateTime.Format $fmt}}
+        <input
+            class="date-input"
+            type="datetime-local"
+            id="meeting-time"
+            name="meeting-time"
+            value="{{$w.UpdateTime.Format $fmt}}"
+            min="2018-06-07T00:00"
+            max="{{$w.UpdateTime.Format $fmt}}"
+            step="900"
+        />
     </div>
 
     {{$left:=true}} {{range $pindex,$item:=$props.Items}}{{$last:=len
