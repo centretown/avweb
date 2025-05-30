@@ -11,38 +11,6 @@
 </div>
 {{ end }}
 <!--  -->
-{{ define "weather.sun" }}
-<div id="slot-{{.Action.Name}}" class="slot" draggable="false">
-    {{template "layout.content.head" .Action }}{{$codes := .Codes}}
-    <div class="content scroll">
-        {{range $location := .Data}}
-        <div class="title">{{$location.City}}</div>
-        <div class="grid-sun">
-            <div class="grid-label"></div>
-            <div class="grid-label">Day</div>
-            <div class="grid-label">Daylight</div>
-            <div class="grid-label">Sunshine</div>
-            <div class="grid-label">Sunrise</div>
-            <div class="grid-label">Sunset</div>
-        </div>
-
-        <div class="grid-sun">
-            {{$daily := $location.WeatherDaily}} {{range $index, $time :=
-            $daily.Daily.Time}}{{$code := index $daily.Daily.Code $index}}
-            {{$wcode := index $codes $code}} {{$icon := $wcode.Icon}}
-            <span class="symbols-small">{{$icon}}</span>
-            <div class="grid-data">{{$daily.FormatDay $index}}</div>
-            <div class="grid-data">{{$daily.FormatDaylight $index}}</div>
-            <div class="grid-data">{{$daily.FormatSunshine $index}}</div>
-            <div class="grid-data">{{$daily.FormatSunrise $index}}</div>
-            <div class="grid-data">{{$daily.FormatSunset $index}}</div>
-            {{end}}
-        </div>
-        {{end}}
-    </div>
-</div>
-{{ end }}
-<!--  -->
 {{ define "weather.clock" }}
 <span id="current-temperature" class="clock" hx-swap-oob="outerHTML">
     <!--  -->

@@ -3,3 +3,4 @@ loader/loader
 location.db
 *.db
 www/work/
+database/

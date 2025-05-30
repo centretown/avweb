@@ -54,7 +54,7 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 			{Name: "weather_current", Title: "Current Weather", Icon: "thunderstorm", Group: Home},
 			{Name: "weather_hourly", Title: "24 Hour Forecast", Icon: "schedule", Group: Home},
 			{Name: "weather_daily", Title: "7 Day Forecast", Icon: "calendar_view_week", Group: Home},
-			{Name: "weather_sun", Title: "Sun", Icon: "wb_twilight", Group: Home},
+			// {Name: "weather_sun", Title: "Sun", Icon: "wb_twilight", Group: Home},
 			// {Name: "wifi", Title: "WIFI Signals", Icon: "network_wifi", Group: Home},
 			// {Name: "lights", Title: "LED Lights", Icon: "backlight_high", Group: Home},
 		},
@@ -98,7 +98,7 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 }
 
 func (rt *Runtime) Connect() (err error) {
-	rt.db, err = OpenDB("location.db")
+	rt.db, err = OpenDB("database/location.db")
 	if err != nil {
 		log.Print(err)
 		return
@@ -287,7 +287,6 @@ func (rt *Runtime) HandleWeather() {
 		Data:    rt.Locations,
 		Runtime: rt}
 
-	rt.HandleAction("/weather_sun", "weather.sun", data)
 	rt.HandleAction("/weather_daily", "weather.daily", data)
 	rt.HandleAction("/weather_hourly", "weather.hourly", data)
 	rt.HandleAction("/weather_current", "weather.current", data)
