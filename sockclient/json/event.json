@@ -1,0 +1,226 @@
+[{
+    "type": "event",
+    "event": {
+        "event_type": "state_changed",
+        "data": {
+            "entity_id": "light.led_matrix_24",
+            "old_state": {
+                "entity_id": "light.led_matrix_24",
+                "state": "on",
+                "attributes": {
+                    "effect_list": [
+                        "None",
+                        "black-white-scan",
+                        "complementary-scan",
+                        "double-scan",
+                        "gradient-scan",
+                        "rainbow-diagonal",
+                        "rainbow-horizontal",
+                        "rainbow-vertical",
+                        "split_in_three",
+                        "split_in_two",
+                        "spotlight"
+                    ],
+                    "supported_color_modes": [
+                        "rgb"
+                    ],
+                    "effect": "None",
+                    "color_mode": "rgb",
+                    "brightness": 46,
+                    "hs_color": [
+                        191.059,
+                        100.0
+                    ],
+                    "rgb_color": [
+                        0,
+                        208,
+                        255
+                    ],
+                    "xy_color": [
+                        0.147,
+                        0.267
+                    ],
+                    "friendly_name": "LED Matrix 24",
+                    "supported_features": 44
+                },
+                "last_changed": "2024-07-05T17:24:11.624421+00:00",
+                "last_reported": "2024-07-05T20:46:51.217163+00:00",
+                "last_updated": "2024-07-05T20:46:51.217163+00:00",
+                "context": {
+                    "id": "01J22ACMQMTGAHCDHGZAZ193QD",
+                    "parent_id": null,
+                    "user_id": "4fcc5ee6683d4c9eb1ac5e8e1e42d240"
+                }
+            },
+            "new_state": {
+                "entity_id": "light.led_matrix_24",
+                "state": "on",
+                "attributes": {
+                    "effect_list": [
+                        "None",
+                        "black-white-scan",
+                        "complementary-scan",
+                        "double-scan",
+                        "gradient-scan",
+                        "rainbow-diagonal",
+                        "rainbow-horizontal",
+                        "rainbow-vertical",
+                        "split_in_three",
+                        "split_in_two",
+                        "spotlight"
+                    ],
+                    "supported_color_modes": [
+                        "rgb"
+                    ],
+                    "effect": "None",
+                    "color_mode": "rgb",
+                    "brightness": 76,
+                    "hs_color": [
+                        191.059,
+                        100.0
+                    ],
+                    "rgb_color": [
+                        0,
+                        208,
+                        255
+                    ],
+                    "xy_color": [
+                        0.147,
+                        0.267
+                    ],
+                    "friendly_name": "LED Matrix 24",
+                    "supported_features": 44
+                },
+                "last_changed": "2024-07-05T17:24:11.624421+00:00",
+                "last_reported": "2024-07-05T21:13:23.849446+00:00",
+                "last_updated": "2024-07-05T21:13:23.849446+00:00",
+                "context": {
+                    "id": "01J22BX81WSVAVDVGZWMXY42Y5",
+                    "parent_id": null,
+                    "user_id": "4fcc5ee6683d4c9eb1ac5e8e1e42d240"
+                }
+            }
+        },
+        "origin": "LOCAL",
+        "time_fired": "2024-07-05T21:13:23.849446+00:00",
+        "context": {
+            "id": "01J22BX81WSVAVDVGZWMXY42Y5",
+            "parent_id": null,
+            "user_id": "4fcc5ee6683d4c9eb1ac5e8e1e42d240"
+        }
+    },
+    "id": 21
+},
+{
+    "type": "event",
+    "event": {
+        "event_type": "state_changed",
+        "origin": "LOCAL",
+        "time_fired": "2024-07-06T00:59:29.312227+00:00",
+        "context": {
+            "id": "01J22RV7KHT64XJXV9R9QCG120",
+            "parent_id": null,
+            "user_id": "4fcc5ee6683d4c9eb1ac5e8e1e42d240"
+        },
+        "data": {
+            "entity_id": "light.led_strip_24",
+            "old_state": {
+                "entity_id": "light.led_strip_24",
+                "state": "on",
+                "attributes": {
+                    "effect_list": [
+                        "None",
+                        "black-white-scan",
+                        "complementary-scan",
+                        "double-scan",
+                        "gradient-scan",
+                        "rainbow-diagonal",
+                        "rainbow-horizontal",
+                        "rainbow-vertical",
+                        "split_in_three",
+                        "split_in_two",
+                        "spotlight"
+                    ],
+                    "supported_color_modes": [
+                        "rgb"
+                    ],
+                    "effect": "None",
+                    "color_mode": "rgb",
+                    "brightness": 79,
+                    "hs_color": [
+                        63.059,
+                        100.0
+                    ],
+                    "rgb_color": [
+                        242,
+                        255,
+                        0
+                    ],
+                    "xy_color": [
+                        0.428,
+                        0.53
+                    ],
+                    "friendly_name": "LED Strip 24",
+                    "supported_features": 44
+                },
+                "last_changed": "2024-07-05T17:24:18.998368+00:00",
+                "last_reported": "2024-07-05T23:44:26.946368+00:00",
+                "last_updated": "2024-07-05T23:44:26.946368+00:00",
+                "context": {
+                    "id": "01J22MHTRDBRSYJ3T5TKHXJ4VR",
+                    "parent_id": null,
+                    "user_id": "4fcc5ee6683d4c9eb1ac5e8e1e42d240"
+                }
+            },
+            "new_state": {
+                "entity_id": "light.led_strip_24",
+                "state": "on",
+                "attributes": {
+                    "effect_list": [
+                        "None",
+                        "black-white-scan",
+                        "complementary-scan",
+                        "double-scan",
+                        "gradient-scan",
+                        "rainbow-diagonal",
+                        "rainbow-horizontal",
+                        "rainbow-vertical",
+                        "split_in_three",
+                        "split_in_two",
+                        "spotlight"
+                    ],
+                    "supported_color_modes": [
+                        "rgb"
+                    ],
+                    "effect": "None",
+                    "color_mode": "rgb",
+                    "brightness": 59,
+                    "hs_color": [
+                        63.059,
+                        100.0
+                    ],
+                    "rgb_color": [
+                        242,
+                        255,
+                        0
+                    ],
+                    "xy_color": [
+                        0.428,
+                        0.53
+                    ],
+                    "friendly_name": "LED Strip 24",
+                    "supported_features": 44
+                },
+                "last_changed": "2024-07-05T17:24:18.998368+00:00",
+                "last_reported": "2024-07-06T00:59:29.312227+00:00",
+                "last_updated": "2024-07-06T00:59:29.312227+00:00",
+                "context": {
+                    "id": "01J22RV7KHT64XJXV9R9QCG120",
+                    "parent_id": null,
+                    "user_id": "4fcc5ee6683d4c9eb1ac5e8e1e42d240"
+                }
+            }
+        }
+    },
+    "id": 21
+}]

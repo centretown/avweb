@@ -16,17 +16,6 @@ func TestCreateDB(t *testing.T) {
 	defer db.Close()
 	t.Log("db opened!")
 
-	config, err := testLoadConfig(t)
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, location := range config.Locations {
-		err = InsertLocation(db, location)
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-
 	list, err := SelectLocations(db)
 	if err != nil {
 		t.Fatal(err)
@@ -57,15 +46,6 @@ func TestCreateDB(t *testing.T) {
 	for i, area := range listH {
 		t.Log(i, area)
 	}
-}
-
-func testLoadConfig(t *testing.T) (config *Config, err error) {
-	config = &Config{}
-	err = config.Read("testdata/config.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-	return
 }
 
 func testLoadHistory(t *testing.T) (history [][]*Current, err error) {

@@ -1,0 +1,40 @@
+{{ define "layout.audio.list" }}
+<div id="slot-{{.Action.Name}}" class="slot" draggable="false">
+    {{template "layout.content.head" .Action }}
+    <div class="content">
+        <div class="form-entry">
+            {{$curr:=.Current}}
+            <label for="audio_select" class="form-label">Currrent</label>
+            <select id="audio_select"  name="audio_select" class="form-input"
+                hx-post="/audio/select" hx-swap="none">
+            {{range .Devices}}
+                <option class="form-option" value="{{.Name}}"
+                    {{if eq $curr .}}selected{{end}}>{{.Name}}
+                </option>
+            {{end}}
+            </select>
+        </div>
+        <div class="form-entry">
+            <label for="audio_enabled" class="form-label">Enabled</label>
+            <input id="audio_enabled" class="form-input" type="checkbox" 
+                name="audio_enabled"
+                hx-post="/audio/enable" hx-swap="none"
+                {{if eq .Enabled true}}checked{{end}}>
+        </div><br>
+        {{range .Devices}}
+            {{template "layout.audio.device" . }}<br>
+        {{end}}
+    </div>
+</div>
+{{ end }}
+
+{{ define "layout.audio.device" }}
+    <div class="form-entry"><span>Name:</span>                      <span class="form-input">{{.Name}}</span></div>
+    <div class="form-entry"><span>MaxInputChannels:</span>          <span class="form-input">{{.MaxInputChannels}}</span></div>
+    <div class="form-entry"><span>MaxOutputChannels:</span>         <span class="form-input">{{.MaxOutputChannels}}</span></div>
+    <div class="form-entry"><span>DefaultLowInputLatency:</span>    <span class="form-input">{{.DefaultLowInputLatency}}</span></div>
+    <div class="form-entry"><span>DefaultLowOutputLatency:</span>   <span class="form-input">{{.DefaultLowOutputLatency}}</span></div>
+    <div class="form-entry"><span>DefaultHighInputLatency:</span>   <span class="form-input">{{.DefaultHighInputLatency}}</span></div>
+    <div class="form-entry"><span>DefaultHighOutputLatency:</span>  <span class="form-input">{{.DefaultHighOutputLatency}}</span></div>
+    <div class="form-entry"><span>DefaultSampleRate:</span>         <span class="form-input">{{.DefaultSampleRate}}</span></div>
+{{ end }}

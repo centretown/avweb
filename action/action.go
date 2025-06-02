@@ -1,4 +1,4 @@
-package runtime
+package action
 
 type ActionGroup int
 

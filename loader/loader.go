@@ -1,30 +1,29 @@
 package main
 
 import (
-	"log"
-
+	"github.com/centretown/avweb/action"
 	"github.com/centretown/avweb/runtime"
 )
 
-var ActionsCamera = []*runtime.Action{
-	{Name: "camera", Title: "Setup Camera", Icon: "settings_video_camera", Group: runtime.Camera},
-	// {Name: "cameraadd", Title: "Add Camera", Icon: "linked_camera", Group: runtime.Camera},
-	{Name: "camera_list", Title: "Select Camera", Icon: "replace_video", Group: runtime.Camera},
+var ActionsCamera = []*action.Action{
+	{Name: "camera", Title: "Setup Camera", Icon: "settings_video_camera", Group: action.Camera},
+	// {Name: "cameraadd", Title: "Add Camera", Icon: "linked_camera", Group: action.Camera},
+	{Name: "camera_list", Title: "Select Camera", Icon: "replace_video", Group: action.Camera},
 }
-var ActionsHome = []*runtime.Action{
+var ActionsHome = []*action.Action{
 	// {Name: "sun", Title: "Next Sun", Icon: "wb_twilight", Group: Home},
-	{Name: "weather_current", Title: "Current Weather", Icon: "thunderstorm", Group: runtime.Home},
-	{Name: "weather_hourly", Title: "24 Hour Forecast", Icon: "schedule", Group: runtime.Home},
-	{Name: "weather_daily", Title: "7 Day Forecast", Icon: "calendar_view_week", Group: runtime.Home},
-	{Name: "weather_sun", Title: "Sun", Icon: "wb_twilight", Group: runtime.Home},
+	{Name: "weather_current", Title: "Current Weather", Icon: "thunderstorm", Group: action.Home},
+	{Name: "weather_hourly", Title: "24 Hour Forecast", Icon: "schedule", Group: action.Home},
+	{Name: "weather_daily", Title: "7 Day Forecast", Icon: "calendar_view_week", Group: action.Home},
+	{Name: "weather_sun", Title: "Sun", Icon: "wb_twilight", Group: action.Home},
 	// {Name: "wifi", Title: "WIFI Signals", Icon: "network_wifi", Group: Home},
 	// {Name: "lights", Title: "LED Lights", Icon: "backlight_high", Group: Home},
 }
 
-var ActionsChat = []*runtime.Action{
+var ActionsChat = []*action.Action{
 	// {Name: "chat", Title: "Chat", Icon: "chat", Group: Chat},
-	{Name: "resetcontrols", Title: "Reset Camera", Icon: "reset_settings", Group: runtime.Chat},
-	{Name: "record", Title: "Record", Icon: "radio_button_checked", Group: runtime.Chat},
+	{Name: "resetcontrols", Title: "Reset Camera", Icon: "reset_settings", Group: action.Chat},
+	{Name: "record", Title: "Record", Icon: "radio_button_checked", Group: action.Chat},
 }
 
 var Locations = []*runtime.Location{
@@ -35,24 +34,24 @@ var Locations = []*runtime.Location{
 }
 
 func main() {
-	filename := "config.json"
-	cfg := runtime.NewConfig()
-	for _, action := range ActionsCamera {
-		cfg.Actions[action.Name] = action
-	}
-	for _, action := range ActionsHome {
-		cfg.Actions[action.Name] = action
-	}
-	for _, action := range ActionsChat {
-		cfg.Actions[action.Name] = action
-	}
-	cfg.Locations = Locations
+	// filename := "config.json"
+	// // cfg := runtime.NewConfig()
+	// for _, action := range ActionsCamera {
+	// 	cfg.Actions[action.Name] = action
+	// }
+	// for _, action := range ActionsHome {
+	// 	cfg.Actions[action.Name] = action
+	// }
+	// for _, action := range ActionsChat {
+	// 	cfg.Actions[action.Name] = action
+	// }
+	// cfg.Locations = Locations
 
-	err := cfg.Write(filename)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	// err := cfg.Write(filename)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// 	return
+	// }
 
-	log.Printf("%s was successfully created\n", filename)
+	// log.Printf("%s was successfully created\n", filename)
 }

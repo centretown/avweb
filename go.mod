@@ -7,6 +7,8 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.28
+	golang.org/x/text v0.3.3
+	gopkg.in/yaml.v2 v2.2.8
 )
 
 replace github.com/centretown/avcamx => /home/dave/src/avcamx

@@ -1,0 +1,556 @@
+response:
+    id: 21
+    type: result
+success: true
+result:
+    - entity_id: person.dave
+      state: unknown
+      last_changed: 2024-07-02T13:39:04.30039Z
+      last_reported: 2024-07-02T13:39:06.289816Z
+      last_updated: 2024-07-02T13:39:06.289816Z
+      context:
+        id: 01J1STQ8DHEDQA03WAFHZXNDP0
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_trackers:
+            - device_tracker.sm_a037w
+            - device_tracker.huawei_mla_l03
+        editable: true
+        friendly_name: Dave
+        id: dave
+        user_id: 4fcc5ee6683d4c9eb1ac5e8e1e42d240
+    - entity_id: zone.home
+      state: "0"
+      last_changed: 2024-07-02T13:39:05.432772Z
+      last_reported: 2024-07-02T13:39:05.432772Z
+      last_updated: 2024-07-02T13:39:05.432772Z
+      context:
+        id: 01J1STQ7JR8B1A1SCJR1YCSPPH
+        parent_id: ""
+        user_id: ""
+      attributes:
+        editable: true
+        friendly_name: Home
+        icon: mdi:home
+        latitude: 45.4208777
+        longitude: -75.6901106
+        passive: false
+        persons: []
+        radius: 100
+    - entity_id: conversation.home_assistant
+      state: unknown
+      last_changed: 2024-07-02T13:39:05.441609Z
+      last_reported: 2024-07-02T13:39:05.441609Z
+      last_updated: 2024-07-02T13:39:05.441609Z
+      context:
+        id: 01J1STQ7K1Z8TS7MNAHAEYNHTZ
+        parent_id: ""
+        user_id: ""
+      attributes:
+        friendly_name: Home Assistant
+    - entity_id: sensor.connected_clients
+      state: "1"
+      last_changed: 2024-07-07T11:39:10.536439Z
+      last_reported: 2024-07-07T11:39:10.536439Z
+      last_updated: 2024-07-07T11:39:10.536439Z
+      context:
+        id: 01J26FV8A8FKWQKSV88DY4GKDG
+        parent_id: ""
+        user_id: ""
+      attributes:
+        friendly_name: Connected clients
+        unit_of_measurement: clients
+    - entity_id: sun.sun
+      state: above_horizon
+      last_changed: 2024-07-07T09:21:03.540493Z
+      last_reported: 2024-07-07T11:36:08.034212Z
+      last_updated: 2024-07-07T11:36:08.034212Z
+      context:
+        id: 01J26FNP320DX1Q77SC9FYZ9MH
+        parent_id: ""
+        user_id: ""
+      attributes:
+        azimuth: 78.45
+        elevation: 20.68
+        friendly_name: Sun
+        next_dawn: "2024-07-08T08:45:55.244271+00:00"
+        next_dusk: "2024-07-08T01:30:06.920792+00:00"
+        next_midnight: "2024-07-08T05:07:59+00:00"
+        next_noon: "2024-07-07T17:07:43+00:00"
+        next_rising: "2024-07-08T09:23:41.249953+00:00"
+        next_setting: "2024-07-08T00:52:21.417386+00:00"
+        rising: true
+    - entity_id: sensor.sun_next_dawn
+      state: "2024-07-08T08:45:55+00:00"
+      last_changed: 2024-07-07T08:45:03.527646Z
+      last_reported: 2024-07-07T10:32:08.003746Z
+      last_updated: 2024-07-07T08:45:03.527646Z
+      context:
+        id: 01J265WE575JDEKH7H83KPP8N4
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: timestamp
+        friendly_name: Sun Next dawn
+    - entity_id: sensor.sun_next_dusk
+      state: "2024-07-08T01:30:06+00:00"
+      last_changed: 2024-07-07T01:30:39.311312Z
+      last_reported: 2024-07-07T10:32:08.003875Z
+      last_updated: 2024-07-07T01:30:39.311312Z
+      context:
+        id: 01J25D10TF60EZWCB69TR7S4MD
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: timestamp
+        friendly_name: Sun Next dusk
+    - entity_id: sensor.sun_next_midnight
+      state: "2024-07-08T05:07:59+00:00"
+      last_changed: 2024-07-07T05:07:49.006572Z
+      last_reported: 2024-07-07T10:32:08.003986Z
+      last_updated: 2024-07-07T05:07:49.006572Z
+      context:
+        id: 01J25SEN4EXY8QTDKA8HSTYDXX
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: timestamp
+        friendly_name: Sun Next midnight
+    - entity_id: sensor.sun_next_noon
+      state: "2024-07-07T17:07:43+00:00"
+      last_changed: 2024-07-06T17:07:33.007411Z
+      last_reported: 2024-07-06T17:07:33.007411Z
+      last_updated: 2024-07-06T17:07:33.007411Z
+      context:
+        id: 01J24G7T0FGER23HDW1FMX0CD7
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: timestamp
+        friendly_name: Sun Next noon
+    - entity_id: sensor.sun_next_rising
+      state: "2024-07-08T09:23:41+00:00"
+      last_changed: 2024-07-07T09:22:55.276706Z
+      last_reported: 2024-07-07T10:32:08.004196Z
+      last_updated: 2024-07-07T09:22:55.276706Z
+      context:
+        id: 01J2681RNC8FR9ZSV07CPTZP0J
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: timestamp
+        friendly_name: Sun Next rising
+    - entity_id: sensor.sun_next_setting
+      state: "2024-07-08T00:52:21+00:00"
+      last_changed: 2024-07-07T00:52:48.033191Z
+      last_reported: 2024-07-07T00:52:48.033191Z
+      last_updated: 2024-07-07T00:52:48.033191Z
+      context:
+        id: 01J25AVPS1J701WDVWZM8BFTE8
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: timestamp
+        friendly_name: Sun Next setting
+    - entity_id: device_tracker.sm_a037w
+      state: unknown
+      last_changed: 2024-07-02T13:39:05.954065Z
+      last_reported: 2024-07-02T13:39:05.954065Z
+      last_updated: 2024-07-02T13:39:05.954065Z
+      context:
+        id: 01J1STQ832CH6WR38PRKMK51QP
+        parent_id: ""
+        user_id: ""
+      attributes:
+        friendly_name: SM-A037W
+        source_type: gps
+    - entity_id: sensor.sm_a037w_battery_level
+      state: "80"
+      last_changed: 2024-07-07T10:37:52.22651Z
+      last_reported: 2024-07-07T10:37:52.22651Z
+      last_updated: 2024-07-07T10:37:52.22651Z
+      context:
+        id: 01J26CB0723F30XRQEZSNT32GV
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: battery
+        friendly_name: SM-A037W Battery level
+        icon: mdi:battery-80
+        unit_of_measurement: '%'
+    - entity_id: sensor.sm_a037w_battery_state
+      state: discharging
+      last_changed: 2024-07-06T01:40:18.309602Z
+      last_reported: 2024-07-06T01:40:18.316135Z
+      last_updated: 2024-07-06T01:40:18.309602Z
+      context:
+        id: 01J22V5Z85HQEZ0CV3KZ715N5S
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: enum
+        friendly_name: SM-A037W Battery state
+        icon: mdi:battery-minus
+        options:
+            - charging
+            - discharging
+            - full
+            - not_charging
+    - entity_id: sensor.sm_a037w_charger_type
+      state: none
+      last_changed: 2024-07-06T01:40:18.310174Z
+      last_reported: 2024-07-06T01:40:18.31643Z
+      last_updated: 2024-07-06T01:40:18.310174Z
+      context:
+        id: 01J22V5Z869W88HXR0Y27WMKAV
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: enum
+        friendly_name: SM-A037W Charger type
+        icon: mdi:battery
+        options:
+            - ac
+            - usb
+            - wireless
+            - dock
+            - none
+    - entity_id: device_tracker.huawei_mla_l03
+      state: unknown
+      last_changed: 2024-07-02T13:39:05.963112Z
+      last_reported: 2024-07-02T13:39:05.963112Z
+      last_updated: 2024-07-02T13:39:05.963112Z
+      context:
+        id: 01J1STQ83BT1FNGKQR8H087PYQ
+        parent_id: ""
+        user_id: ""
+      attributes:
+        friendly_name: HUAWEI MLA-L03
+        source_type: gps
+    - entity_id: sensor.huawei_mla_l03_battery_level
+      state: "82"
+      last_changed: 2024-07-02T15:35:59.438109Z
+      last_reported: 2024-07-02T15:35:59.438109Z
+      last_updated: 2024-07-02T15:35:59.438109Z
+      context:
+        id: 01J1T1D96E1B51F21X0PBCJRF0
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: battery
+        friendly_name: HUAWEI MLA-L03 Battery level
+        icon: mdi:battery-80
+        unit_of_measurement: '%'
+    - entity_id: sensor.huawei_mla_l03_battery_state
+      state: discharging
+      last_changed: 2024-07-02T13:39:05.966198Z
+      last_reported: 2024-07-02T13:39:05.966198Z
+      last_updated: 2024-07-02T13:39:05.966198Z
+      context:
+        id: 01J1STQ83ED1MKFXJZTTKZ8CRX
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: enum
+        friendly_name: HUAWEI MLA-L03 Battery state
+        icon: mdi:battery-minus
+        options:
+            - charging
+            - discharging
+            - full
+            - not_charging
+    - entity_id: sensor.huawei_mla_l03_charger_type
+      state: none
+      last_changed: 2024-07-02T13:39:05.967225Z
+      last_reported: 2024-07-02T13:39:05.967225Z
+      last_updated: 2024-07-02T13:39:05.967225Z
+      context:
+        id: 01J1STQ83FYQYGEW4GJRSVXB9E
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: enum
+        friendly_name: HUAWEI MLA-L03 Charger type
+        icon: mdi:battery
+        options:
+            - ac
+            - usb
+            - wireless
+            - dock
+            - none
+    - entity_id: tts.google_en_com
+      state: unknown
+      last_changed: 2024-07-02T13:39:05.983692Z
+      last_reported: 2024-07-02T13:39:05.983692Z
+      last_updated: 2024-07-02T13:39:05.983692Z
+      context:
+        id: 01J1STQ83ZMFVN2K47D9ASA32P
+        parent_id: ""
+        user_id: ""
+      attributes:
+        friendly_name: Google en com
+    - entity_id: todo.shopping_list
+      state: "0"
+      last_changed: 2024-07-02T13:39:05.996874Z
+      last_reported: 2024-07-02T13:39:05.996874Z
+      last_updated: 2024-07-02T13:39:05.996874Z
+      context:
+        id: 01J1STQ84CGW129NV7WY8MMG1E
+        parent_id: ""
+        user_id: ""
+      attributes:
+        friendly_name: Shopping List
+        supported_features: 15
+    - entity_id: light.led_matrix_24
+      state: "on"
+      last_changed: 2024-07-05T17:24:11.624421Z
+      last_reported: 2024-07-07T01:59:33.003113Z
+      last_updated: 2024-07-07T01:59:33.003113Z
+      context:
+        id: 01J25ENXT6R7AF45VNMD2X0E6Q
+        parent_id: ""
+        user_id: 4fcc5ee6683d4c9eb1ac5e8e1e42d240
+      attributes:
+        brightness: 36
+        color_mode: rgb
+        effect: None
+        effect_list:
+            - None
+            - black-white-scan
+            - complementary-scan
+            - double-scan
+            - gradient-scan
+            - rainbow-diagonal
+            - rainbow-horizontal
+            - rainbow-vertical
+            - split_in_three
+            - split_in_two
+            - spotlight
+        friendly_name: LED Matrix 24
+        hs_color:
+            - 131.765
+            - 100
+        rgb_color:
+            - 0
+            - 255
+            - 50
+        supported_color_modes:
+            - rgb
+        supported_features: 44
+        xy_color:
+            - 0.171
+            - 0.718
+    - entity_id: light.led_strip_24
+      state: "on"
+      last_changed: 2024-07-05T17:24:18.998368Z
+      last_reported: 2024-07-07T00:45:26.549194Z
+      last_updated: 2024-07-07T00:45:26.549194Z
+      context:
+        id: 01J25AE7GN9SGN4YP3KM6HKR4V
+        parent_id: ""
+        user_id: 4fcc5ee6683d4c9eb1ac5e8e1e42d240
+      attributes:
+        brightness: 43
+        color_mode: rgb
+        effect: None
+        effect_list:
+            - None
+            - black-white-scan
+            - complementary-scan
+            - double-scan
+            - gradient-scan
+            - rainbow-diagonal
+            - rainbow-horizontal
+            - rainbow-vertical
+            - split_in_three
+            - split_in_two
+            - spotlight
+        friendly_name: LED Strip 24
+        hs_color:
+            - 223.83
+            - 55.294
+        rgb_color:
+            - 114
+            - 152
+            - 255
+        supported_color_modes:
+            - rgb
+        supported_features: 44
+        xy_color:
+            - 0.197
+            - 0.187
+    - entity_id: sensor.wifi_signal_24
+      state: "-33"
+      last_changed: 2024-07-07T11:39:03.611772Z
+      last_reported: 2024-07-07T11:39:03.611772Z
+      last_updated: 2024-07-07T11:39:03.611772Z
+      context:
+        id: 01J26FV1HVJJCKDEKDJ4X1XNQ0
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: signal_strength
+        friendly_name: WiFi Signal 24
+        state_class: measurement
+        unit_of_measurement: dBm
+    - entity_id: sensor.ip_address_24
+      state: 192.168.0.24
+      last_changed: 2024-07-05T02:12:39.398847Z
+      last_reported: 2024-07-05T02:12:39.398847Z
+      last_updated: 2024-07-05T02:12:39.398847Z
+      context:
+        id: 01J20AMFV6P4755N590RQ8C27B
+        parent_id: ""
+        user_id: ""
+      attributes:
+        friendly_name: IP Address 24
+    - entity_id: sensor.gimbal_rotary
+      state: "19"
+      last_changed: 2024-07-02T16:04:25.056003Z
+      last_reported: 2024-07-02T16:04:25.056003Z
+      last_updated: 2024-07-02T16:04:25.056003Z
+      context:
+        id: 01J1T31AV0SM65GP9CQKSC3ESR
+        parent_id: ""
+        user_id: ""
+      attributes:
+        friendly_name: Gimbal Rotary
+        icon: mdi:rotate-right
+        unit_of_measurement: °
+    - entity_id: binary_sensor.gimbal_toggle_button
+      state: "off"
+      last_changed: 2024-07-02T16:04:49.272659Z
+      last_reported: 2024-07-02T16:04:49.272659Z
+      last_updated: 2024-07-02T16:04:49.272659Z
+      context:
+        id: 01J1T322FRG53XJ7NV76J6GD8Y
+        parent_id: ""
+        user_id: ""
+      attributes:
+        friendly_name: Gimbal Toggle Button
+    - entity_id: switch.gimbal_toggle_switch
+      state: "on"
+      last_changed: 2024-07-02T16:04:49.218799Z
+      last_reported: 2024-07-02T16:04:49.218799Z
+      last_updated: 2024-07-02T16:04:49.218799Z
+      context:
+        id: 01J1T322E2CHEK608B4N4PNT54
+        parent_id: ""
+        user_id: ""
+      attributes:
+        friendly_name: Gimbal Toggle Switch
+    - entity_id: number.tilt
+      state: "180.0"
+      last_changed: 2024-07-07T00:58:26.960771Z
+      last_reported: 2024-07-07T00:58:26.960771Z
+      last_updated: 2024-07-07T00:58:26.960771Z
+      context:
+        id: 01J25B61M3651149V2NAXMQB45
+        parent_id: ""
+        user_id: 4fcc5ee6683d4c9eb1ac5e8e1e42d240
+      attributes:
+        friendly_name: Tilt
+        max: 180
+        min: 0
+        mode: slider
+        step: 1
+        unit_of_measurement: °
+    - entity_id: number.pan
+      state: "140.0"
+      last_changed: 2024-07-07T00:43:39.650264Z
+      last_reported: 2024-07-07T00:43:39.650264Z
+      last_updated: 2024-07-07T00:43:39.650264Z
+      context:
+        id: 01J25AAZ3M4QFX15MD84Q04KV4
+        parent_id: ""
+        user_id: 4fcc5ee6683d4c9eb1ac5e8e1e42d240
+      attributes:
+        friendly_name: Pan
+        max: 180
+        min: 0
+        mode: slider
+        step: 1
+        unit_of_measurement: °
+    - entity_id: light.status_2
+      state: "off"
+      last_changed: 2024-07-04T20:19:04.506147Z
+      last_reported: 2024-07-04T20:19:04.506147Z
+      last_updated: 2024-07-04T20:19:04.506147Z
+      context:
+        id: 01J1ZPD25TA1YS4W7YX7DTPY43
+        parent_id: ""
+        user_id: ""
+      attributes:
+        color_mode: null
+        friendly_name: Status
+        supported_color_modes:
+            - onoff
+        supported_features: 8
+    - entity_id: sensor.wifi_signal_28
+      state: "-55"
+      last_changed: 2024-07-07T11:39:02.542276Z
+      last_reported: 2024-07-07T11:39:02.542276Z
+      last_updated: 2024-07-07T11:39:02.542276Z
+      context:
+        id: 01J26FV0GEK9Q8B01S5HTXRW8A
+        parent_id: ""
+        user_id: ""
+      attributes:
+        device_class: signal_strength
+        friendly_name: WiFi Signal 28
+        state_class: measurement
+        unit_of_measurement: dBm
+    - entity_id: camera.cam28
+      state: idle
+      last_changed: 2024-07-04T20:19:06.74468Z
+      last_reported: 2024-07-07T11:39:07.615165Z
+      last_updated: 2024-07-07T11:39:07.615165Z
+      context:
+        id: 01J26FV5EZ1Q7Z2Z08Y33WKNR9
+        parent_id: ""
+        user_id: ""
+      attributes:
+        access_token: 9cdf358adc3c1091e27b5539abbbaab9d6a8dbe9a26c53588305f4d9c22650c2
+        entity_picture: /api/camera_proxy/camera.cam28?token=9cdf358adc3c1091e27b5539abbbaab9d6a8dbe9a26c53588305f4d9c22650c2
+        friendly_name: cam28
+        supported_features: 0
+    - entity_id: light.status
+      state: unavailable
+      last_changed: 2024-07-02T13:39:06.035237Z
+      last_reported: 2024-07-02T13:39:06.035237Z
+      last_updated: 2024-07-02T13:39:06.035237Z
+      context:
+        id: 01J1STQ85KKJXG1JETDP9QA7P4
+        parent_id: ""
+        user_id: ""
+      attributes:
+        friendly_name: Status
+        supported_color_modes:
+            - onoff
+        supported_features: 8
+    - entity_id: weather.forecast_home
+      state: fog
+      last_changed: 2024-07-07T11:16:20.477213Z
+      last_reported: 2024-07-07T11:16:20.477213Z
+      last_updated: 2024-07-07T11:16:20.477213Z
+      context:
+        id: 01J26EHEBXEWTRZ5JDQMWENT2W
+        parent_id: ""
+        user_id: ""
+      attributes:
+        attribution: Weather forecast from met.no, delivered by the Norwegian Meteorological Institute.
+        cloud_coverage: 98.4
+        dew_point: 18.6
+        friendly_name: Forecast Home
+        humidity: 98
+        precipitation_unit: mm
+        pressure: 1013.2
+        pressure_unit: hPa
+        supported_features: 3
+        temperature: 18.9
+        temperature_unit: °C
+        visibility_unit: km
+        wind_bearing: 276.2
+        wind_speed: 7.6
+        wind_speed_unit: km/h

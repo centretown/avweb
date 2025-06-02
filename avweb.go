@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/centretown/avcamx"
+	"github.com/centretown/avweb/homeasst"
 	"github.com/centretown/avweb/runtime"
 	"github.com/centretown/avweb/socket"
 )
@@ -25,6 +26,8 @@ func main() {
 		hostPortUsage   = "web site ip port number"
 		host            *avcamx.AvHost
 		rt              *runtime.Runtime
+		outputBase      = "/mnt/molly/output"
+		outputBaseUsage = "recording directory path"
 	)
 
 	flag.StringVar(&hostAddr, "host", hostAddr, hostAddrUsage)
@@ -33,8 +36,10 @@ func main() {
 	flag.StringVar(&hostPort, "p", hostPort, hostPortUsage)
 	flag.StringVar(&remoteAddr, "remote", remoteAddr, remoteAddrUsage)
 	flag.StringVar(&remoteAddr, "r", remoteAddr, remoteAddrUsage)
+	flag.StringVar(&outputBase, "o", outputBase, outputBaseUsage)
 	flag.Parse()
 
+	avcamx.OutputBase = outputBase
 	host = avcamx.NewAvHost(hostAddr, hostPort)
 
 	funcMap := template.FuncMap{
@@ -93,6 +98,12 @@ func main() {
 
 	rt.HandleWeather()
 	rt.HandleCameras()
+
+	rt.Home, err = homeasst.NewHomeRuntime()
+	if err == nil {
+		rt.ServeHomeData()
+		rt.HandleHome()
+	}
 
 	go rt.Monitor()
 

@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/centretown/avcamx"
+	"github.com/centretown/avweb/action"
+	"github.com/centretown/avweb/homeasst"
 	"github.com/centretown/avweb/socket"
 	"github.com/jmoiron/sqlx"
 )
@@ -21,18 +23,18 @@ type Runtime struct {
 	LocationIndex int
 	WebcamUrl     string
 	WebcamIndex   int
-	ActionsCamera []*Action
-	ActionsHome   []*Action
-	ActionsChat   []*Action
-	ActionMap     map[string]*Action
+	ActionsCamera []*action.Action
+	ActionsHome   []*action.Action
+	ActionsChat   []*action.Action
+	ActionMap     map[string]*action.Action
 	WebSocket     *socket.Server
 	Host          *avcamx.AvHost
 	Webcams       map[string]*avcamx.AvItem
 	Template      *template.Template
-
-	ticker *time.Ticker
-	retry  *time.Ticker
-	db     *sqlx.DB
+	Home          *homeasst.HomeRuntime
+	ticker        *time.Ticker
+	retry         *time.Ticker
+	db            *sqlx.DB
 }
 
 func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
@@ -44,27 +46,27 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 	rt = &Runtime{
 		Host:      host,
 		WebcamUrl: webcamUrl,
-		ActionsCamera: []*Action{
-			{Name: "camera_list", Title: "Select Camera", Icon: "replace_video", Group: Camera},
-			{Name: "camera", Title: "Setup Camera", Icon: "settings_video_camera", Group: Camera},
+		ActionsCamera: []*action.Action{
+			{Name: "camera_list", Title: "Select Camera", Icon: "replace_video", Group: action.Camera},
+			{Name: "camera", Title: "Setup Camera", Icon: "settings_video_camera", Group: action.Camera},
 			// {Name: "cameraadd", Title: "Add Camera", Icon: "linked_camera", Group: Camera},
 		},
-		ActionsHome: []*Action{
+		ActionsHome: []*action.Action{
 			// {Name: "sun", Title: "Next Sun", Icon: "wb_twilight", Group: Home},
-			{Name: "weather_current", Title: "Current Weather", Icon: "thunderstorm", Group: Home},
-			{Name: "weather_hourly", Title: "24 Hour Forecast", Icon: "schedule", Group: Home},
-			{Name: "weather_daily", Title: "7 Day Forecast", Icon: "calendar_view_week", Group: Home},
-			// {Name: "weather_sun", Title: "Sun", Icon: "wb_twilight", Group: Home},
-			// {Name: "wifi", Title: "WIFI Signals", Icon: "network_wifi", Group: Home},
-			// {Name: "lights", Title: "LED Lights", Icon: "backlight_high", Group: Home},
+			{Name: "weather_current", Title: "Current Weather", Icon: "thunderstorm", Group: action.Home},
+			{Name: "weather_hourly", Title: "24 Hour Forecast", Icon: "schedule", Group: action.Home},
+			{Name: "weather_daily", Title: "7 Day Forecast", Icon: "calendar_view_week", Group: action.Home},
+			// {Name: "weather_sun", Title: "Sun", Icon: "wb_twilight", Group: action.Home},
+			{Name: "home", Title: "Home Assistant", Icon: "home", Group: action.Home},
+			// {Name: "lights", Title: "LED Lights", Icon: "backlight_high", Group: action.Home},
 		},
-		ActionsChat: []*Action{
+		ActionsChat: []*action.Action{
 			// {Name: "chat", Title: "Chat", Icon: "chat", Group: Chat},
-			{Name: "resetcontrols", Title: "Reset Camera", Icon: "reset_settings", Group: Chat},
-			{Name: "record", Title: "Record", Icon: "radio_button_checked", Group: Chat},
+			{Name: "resetcontrols", Title: "Reset Camera", Icon: "reset_settings", Group: action.Chat},
+			{Name: "record", Title: "Record", Icon: "radio_button_checked", Group: action.Chat},
 		},
 
-		ActionMap: make(map[string]*Action),
+		ActionMap: make(map[string]*action.Action),
 		Webcams:   make(map[string]*avcamx.AvItem),
 	}
 
@@ -82,6 +84,7 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 
 	for _, item := range host.Items {
 		rt.Webcams[item.Url] = item
+		log.Println(item.Url)
 	}
 
 	err := rt.Connect()
@@ -203,14 +206,14 @@ func (rt *Runtime) BroadcastTemperature() {
 }
 
 type FormData struct {
-	Action  *Action
+	Action  *action.Action
 	Data    any
 	Codes   any
 	Runtime *Runtime
 }
 
 type WeatherFormData struct {
-	Action  *Action
+	Action  *action.Action
 	Data    any
 	Codes   map[int32]*WeatherCode
 	Runtime *Runtime
@@ -351,7 +354,8 @@ func (rt *Runtime) setPrimaryCamera() func(w http.ResponseWriter, r *http.Reques
 		const sourceID = "source"
 
 		wrapSource := func(id, src string) []byte {
-			return []byte(fmt.Sprintf(`<img id="%s" src="%s">`, id, src))
+			s := fmt.Sprintf(`<img id="%s" src="%s">`, id, src)
+			return []byte(s)
 		}
 
 		cam, path, index, err := rt.parseCameraPath(r)
@@ -407,21 +411,21 @@ func (rt *Runtime) parseCameraPath(r *http.Request) (cam *avcamx.AvItem,
 
 func (rt *Runtime) handleRecord() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// avitem, err := rt.parseSourceId(r)
-		_, err := rt.parseSourceId(r)
+		avitem, err := rt.parseSourceId(r)
+		// _, err := rt.parseSourceId(r)
 		if err != nil {
 			log.Println("handleRecord", err)
 			return
 		}
 		log.Println("handleRecord", r.URL)
 
-		// 	if !avitem.IsRecording() {
-		// 		log.Printf("recording...")
-		// 		avitem.RecordCmd(300)
-		// 	} else {
-		// 		log.Printf("stop recording...")
-		// 		avitem.StopRecordCmd()
-		// 	}
+		if !avitem.IsRecording() {
+			log.Printf("recording...")
+			avitem.RecordCmd(300)
+		} else {
+			log.Printf("stop recording...")
+			avitem.StopRecordCmd()
+		}
 	}
 }
 
@@ -433,10 +437,45 @@ func (rt *Runtime) parseSourceId(r *http.Request) (item *avcamx.AvItem, err erro
 	}
 
 	source := r.FormValue("source")
+	source = source[strings.LastIndex(source, "/"):]
 	item, ok := rt.Webcams[source]
 	if !ok {
 		err = fmt.Errorf("source: '%s' not found", source)
 		return
 	}
+	return
+}
+
+func (rt *Runtime) ServeHomeData() (err error) {
+	home := rt.Home
+	var ok bool
+	ok, err = home.Authorize()
+	if err != nil {
+		log.Println("authorize", err)
+		return
+	}
+	if !ok {
+		err = fmt.Errorf("not authorized")
+		log.Println(err)
+		return
+	}
+
+	log.Println("Authorized HA")
+
+	err = home.BuildEntities()
+	if err != nil {
+		log.Println("BuildEntities", err)
+		return
+
+	}
+	log.Println("Build Entities")
+
+	go home.Monitor()
+
+	if home.Monitoring {
+		log.Println("Monitor Entity States")
+	}
+	log.Println("Monitoring")
+
 	return
 }

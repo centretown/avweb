@@ -5,7 +5,7 @@
     --fgBright: rgba(165, 208, 198, 1);
     --fgSelected: rgba(200, 255, 240, 1);
     --fgDim: rgba(165, 208, 198, 0.8);
-    --fgOut: rgba(128, 255, 0, 1);
+    --fgOut: rgba(120, 184, 244, 1);
     --fgIn: rgba(255, 255, 255, 1);
     --fgClock: rgba(165, 208, 198, 1);
     --fgStatus: rgba(255, 255, 0, 0.9);
@@ -25,8 +25,9 @@
 @font-face {
     font-family: "Material Symbols Outlined";
     font-style: normal;
-    font-weight: 100 700;
-    src: url(symbols.woff2) format("woff2");
+    font-weight: 400;
+    font-display: block;
+    src: url("symbols.woff2") format("woff2");
 }
 
 .material-symbols-outlined,
@@ -54,6 +55,7 @@
 .symbols {
     color: var(--fgIcon);
     font-size: 2.25rem;
+    width: 2.5rem;
 }
 
 .symbols-title,
@@ -530,6 +532,7 @@ input::-webkit-calendar-picker-indicator {
     color: rgba(255, 255, 0, 255);
 }
 
+.grid-home,
 .grid-container,
 .grid-day,
 .grid-hour,
@@ -575,11 +578,39 @@ input::-webkit-calendar-picker-indicator {
 }
 
 .grid-label {
+    font-size: 0.75rem;
+    background-color: var(--bgTransparent);
+    color: var(--fgBright);
+}
+
+.title-home {
+    font-weight: bold;
+    font-size: 0.9rem;
+    padding-bottom: 0.2rem;
+    padding-top: 0.2rem;
+}
+
+.home-data {
     font-size: 0.7rem;
     background-color: var(--bgTransparent);
+    color: var(--fgOut);
 }
+
+.grid-container {
+    justify-content: left;
+    grid-template-columns: 1.3rem 3fr 3fr 4fr;
+    margin-left: 0.3rem;
+    padding-bottom: 1rem;
+}
+
+.grid-home {
+    justify-content: left;
+    grid-template-columns: 1.3rem 3fr 4fr 1fr;
+    margin-left: 0.3rem;
+}
+
 .grid-data {
-    font-size: 0.6rem;
+    font-size: 0.7rem;
     background-color: var(--bgTransparent);
     color: var(--fgOut);
 }

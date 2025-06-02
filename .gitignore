@@ -4,3 +4,4 @@ location.db
 *.db
 www/work/
 database/
+token.go

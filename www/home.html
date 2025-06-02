@@ -1,0 +1,116 @@
+<!--  -->
+{{ define "layout.lights" }}{{$on:="on"}}
+<!--  -->
+{{range $index,$light:=.Lights}}
+<div class="title-home">
+    <span class="symbols-weather-medium">backlight_high</span>
+    <span>{{.Attributes.Name}}</span>
+</div>
+<div class="grid-home">
+    <span class="symbols-small">power_settings_new</span>
+    <label for="state" class="grid-label">State</label>
+    <input
+        id="state{{$index}}"
+        class="grid-data"
+        type="checkbox"
+        name="state"
+        hx-post="/light/state"
+        hx-swap="none"
+        hx-vals='{"id": "{{.EntityID}}"}'
+        {{if
+        eq
+        .State
+        $on}}checked{{end}}
+    />
+</div>
+<div class="grid-home">
+    <span class="symbols-weather-medium">light_mode</span>
+    <label for="bright" class="grid-label">Brightness</label>
+    <input
+        id="bright{{$index}}"
+        hx-post="/light/brightness"
+        hx-swap="none"
+        hx-vals='{"id": "{{.EntityID}}"}'
+        name="brightness"
+        class="grid-data"
+        type="range"
+        min="0"
+        max="255"
+        value="{{.Attributes.Brightness}}"
+    />
+</div>
+<div class="grid-home">
+    <span class="symbols-weather-medium">palette</span>
+    <label for="color" class="grid-label">Color</label>
+    <input
+        id="color{{$index}}"
+        hx-post="/light/color"
+        hx-swap="none"
+        hx-vals='{"id": "{{.EntityID}}"}'
+        name="rgb_color"
+        type="color"
+        class="grid-data"
+        value="{{.HexColor}}"
+    />
+</div>
+<div class="grid-home">
+    <span class="symbols-weather-medium">flare</span>
+    <label for="effect" class="grid-label">Effect</label>
+    <select
+        id="effect{{$index}}"
+        hx-post="/light/effect"
+        hx-swap="none"
+        hx-vals='{"id": "{{.EntityID}}"}'
+        name="effect"
+        class="grid-data"
+    >
+        {{$eff:=.Attributes.Effect}} {{range .Attributes.EffectList}}
+        <option
+            class="form-option"
+            value="{{.}}"
+            {{if
+            eq
+            $eff
+            .}}selected{{end}}
+        >
+            {{.}}
+        </option>
+        {{end}}
+    </select>
+</div>
+<div class="note">Last Update: <span>{{.FormatTime}}</span></div>
+{{end}}
+<!--  -->
+{{end}}
+<!--  -->
+{{ define "layout.home" }}
+<div id="slot-{{.Action.Name}}" class="slot" draggable="false">
+    {{template "layout.content.head" .Action }}
+    <!--  -->
+    <div class="content">
+        <!--  -->
+        {{template "layout.wifi" . }}
+        <!--  -->
+        {{template "layout.lights" . }}
+    </div>
+</div>
+{{ end }}
+<!--  -->
+<!--  -->
+{{ define "layout.wifi" }}{{$wifiList:=.Wifi}}
+<div class="title-home">
+    <span class="symbols-weather-medium">wifi</span>
+    Wifi Sensors
+</div>
+<div class="grid-container">
+    {{range $wifi := $wifiList}}
+    <span class="symbols-small">{{$wifi.SignalIcon}}</span>
+    <span class="grid-label"> {{$wifi.Attributes.Name}} </span>
+    <span class="home-data">
+        {{$wifi.State}} {{if ne $wifi.State "unavailable"}}
+        {{$wifi.Attributes.Units}} {{end}}
+    </span>
+    <span class="home-data">{{$wifi.FormatTime}}</span>
+    {{end}}
+</div>
+{{ end }}

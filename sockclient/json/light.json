@@ -1,0 +1,48 @@
+{
+    "entity_id": "light.led_matrix_24",
+    "state": "on",
+    "attributes": {
+        "effect_list": [
+            "None",
+            "black-white-scan",
+            "complementary-scan",
+            "double-scan",
+            "gradient-scan",
+            "rainbow-diagonal",
+            "rainbow-horizontal",
+            "rainbow-vertical",
+            "split_in_three",
+            "split_in_two",
+            "spotlight"
+        ],
+        "supported_color_modes": [
+            "rgb"
+        ],
+        "effect": "None",
+        "color_mode": "rgb",
+        "brightness": 99,
+        "hs_color": [
+            27.13,
+            45.098
+        ],
+        "rgb_color": [
+            255,
+            192,
+            140
+        ],
+        "xy_color": [
+            0.455,
+            0.374
+        ],
+        "friendly_name": "LED Matrix 24",
+        "supported_features": 44
+    },
+    "last_changed": "2024-07-01T02:38:34.384119+00:00",
+    "last_reported": "2024-07-01T02:39:37.765363+00:00",
+    "last_updated": "2024-07-01T02:39:37.765363+00:00",
+    "context": {
+        "id": "01J1P2K05DVE4B3K87GCNDYCM7",
+        "parent_id": null,
+        "user_id": "4fcc5ee6683d4c9eb1ac5e8e1e42d240"
+    }
+}
