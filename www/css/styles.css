@@ -55,7 +55,6 @@
 .symbols {
     color: var(--fgIcon);
     font-size: 2.25rem;
-    width: 2.5rem;
 }
 
 .symbols-title,
@@ -532,6 +531,7 @@ input::-webkit-calendar-picker-indicator {
     color: rgba(255, 255, 0, 255);
 }
 
+.grid-entity,
 .grid-home,
 .grid-container,
 .grid-day,
@@ -596,17 +596,41 @@ input::-webkit-calendar-picker-indicator {
     color: var(--fgOut);
 }
 
+.spacer {
+    margin-bottom: 1.25rem;
+}
+.indent {
+    margin-left: 0.3rem;
+}
+
 .grid-container {
     justify-content: left;
     grid-template-columns: 1.3rem 3fr 3fr 4fr;
     margin-left: 0.3rem;
-    padding-bottom: 1rem;
 }
 
 .grid-home {
     justify-content: left;
-    grid-template-columns: 1.3rem 3fr 4fr 1fr;
-    margin-left: 0.3rem;
+    grid-template-columns: 1.3rem 3fr 4fr auto;
+    margin-left: 0.5rem;
+    margin-bottom: 0.2rem;
+}
+
+.grid-entity {
+    justify-content: left;
+    grid-template-columns: 1.3rem 3fr 4fr;
+    margin-left: 0.5rem;
+    margin-bottom: 0.2rem;
+}
+
+.grid-button {
+    font-size: 0.7rem;
+    background-color: var(--bgTransparent);
+    color: var(--fgOut);
+    width: 100%;
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+    height: 1.2rem;
 }
 
 .grid-data {

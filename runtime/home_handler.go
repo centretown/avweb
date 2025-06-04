@@ -19,9 +19,10 @@ func (rt *Runtime) HandleHome() {
 }
 
 type HomeAssistantData struct {
-	Action *action.Action
-	Wifi   []*homeasst.WifiSensors
-	Lights []*homeasst.Light
+	Action   *action.Action
+	Wifi     []*homeasst.WifiSensors
+	Lights   []*homeasst.Light
+	Entities homeasst.EntityMap
 }
 
 func (rt *Runtime) HandleHomeAssistant() func(http.ResponseWriter, *http.Request) {
@@ -31,6 +32,7 @@ func (rt *Runtime) HandleHomeAssistant() func(http.ResponseWriter, *http.Request
 		w.Header().Add("Cache-Control", "no-cache")
 		data.Wifi = rt.Home.WifiSensors()
 		data.Lights = rt.Home.NewLedLights()
+		data.Entities = rt.Home.Entities
 		err := rt.Template.Lookup("layout.home").Execute(w, data)
 		if err != nil {
 			log.Fatal("/home", err)

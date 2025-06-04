@@ -44,12 +44,12 @@
     <label for="color" class="grid-label">Color</label>
     <input
         id="color{{$index}}"
+        class="grid-button"
         hx-post="/light/color"
         hx-swap="none"
         hx-vals='{"id": "{{.EntityID}}"}'
         name="rgb_color"
         type="color"
-        class="grid-data"
         value="{{.HexColor}}"
     />
 </div>
@@ -58,11 +58,11 @@
     <label for="effect" class="grid-label">Effect</label>
     <select
         id="effect{{$index}}"
+        class="grid-data"
         hx-post="/light/effect"
         hx-swap="none"
         hx-vals='{"id": "{{.EntityID}}"}'
         name="effect"
-        class="grid-data"
     >
         {{$eff:=.Attributes.Effect}} {{range .Attributes.EffectList}}
         <option
@@ -78,7 +78,11 @@
         {{end}}
     </select>
 </div>
-<div class="note">Last Update: <span>{{.FormatTime}}</span></div>
+<div class="grid-home">
+    <span class="symbols-weather-medium">calendar_month</span>
+    <span class="grid-label">Last Update</span>
+    <span class="grid-data">{{.FormatTime}}</span>
+</div>
 {{end}}
 <!--  -->
 {{end}}
@@ -87,11 +91,13 @@
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
     {{template "layout.content.head" .Action }}
     <!--  -->
-    <div class="content">
+    <div class="content scroll">
         <!--  -->
-        {{template "layout.wifi" . }}
+        <div class="spacer">{{template "layout.wifi" . }}</div>
         <!--  -->
-        {{template "layout.lights" . }}
+        <div class="spacer">{{template "layout.lights" . }}</div>
+        <!--  -->
+        <div class="spacer">{{template "layout.entities" . }}</div>
     </div>
 </div>
 {{ end }}
@@ -113,4 +119,36 @@
     <span class="home-data">{{$wifi.FormatTime}}</span>
     {{end}}
 </div>
+{{ end }}
+<!--  -->
+{{ define "layout.entities" }}
+<div class="title-home">
+    <span class="symbols-weather-medium">star</span>
+    Entities
+</div>
+{{range $key,$ent:=.Entities}}
+<div class="spacer">
+    <div class="grid-entity">
+        <span class="symbols-small">diamond</span>
+        <span class="home-label"> {{$ent.EntityID}} </span>
+    </div>
+    <!--
+    <div class="grid-entity">
+        <span class="symbols-small">label</span>
+        <span class="home-data"> {{$ent.Context.ID}} </span>
+    </div> -->
+    <div class="grid-entity indent">
+        <span class="symbols-small">star</span>
+        <span class="grid-label">State</span>
+        <span class="home-data"> {{$ent.State}} </span>
+    </div>
+    <div class="grid-entity indent">
+        <span class="symbols-small">calendar_month</span>
+        <span class="grid-label">Last Update</span>
+        <span class="home-data">{{$ent.FormatTime}}</span>
+    </div>
+</div>
+<!--  -->
+{{ end }}
+<!--  -->
 {{ end }}
