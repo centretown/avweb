@@ -421,7 +421,7 @@ func (rt *Runtime) handleRecord() func(w http.ResponseWriter, r *http.Request) {
 
 		if !avitem.IsRecording() {
 			log.Printf("recording...")
-			avitem.RecordCmd(300)
+			avitem.RecordCmd(3600)
 		} else {
 			log.Printf("stop recording...")
 			avitem.StopRecordCmd()

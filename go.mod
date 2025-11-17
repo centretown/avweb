@@ -3,15 +3,13 @@ module github.com/centretown/avweb
 go 1.24.0
 
 require (
-	github.com/centretown/avcamx v0.0.0-20250428013103-b766ebf74a61
+	github.com/centretown/avcamx v0.0.0-20250605133042-b3855e2b1dfc
 	github.com/gorilla/websocket v1.5.3
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.28
 	golang.org/x/text v0.3.3
 	gopkg.in/yaml.v2 v2.2.8
 )
-
-replace github.com/centretown/avcamx => /home/dave/src/avcamx
 
 require (
 	github.com/aws/aws-sdk-go v1.38.20 // indirect
