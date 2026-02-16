@@ -109,7 +109,7 @@
 <div id="slot-{{.Action.Name}}" class="slot" draggable="false">
     {{template "layout.content.head" .Action }}
     <div class="content">
-        {{range $index, $cam := .Data.Items}}
+        {{range $index, $cam := .Data.Streams}}
         <div class="form-entry">
             <span class="symbols-small">videocam</span>
             {{if eq $cam.IsOpened true}}

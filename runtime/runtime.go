@@ -29,18 +29,19 @@ type Runtime struct {
 	ActionMap     map[string]*action.Action
 	WebSocket     *socket.Server
 	Host          *avcamx.AvHost
-	Webcams       map[string]*avcamx.AvItem
-	Template      *template.Template
-	Home          *homeasst.HomeRuntime
-	ticker        *time.Ticker
-	retry         *time.Ticker
-	db            *sqlx.DB
+	// Webcams   map[string]*avcamx.AvStream
+	Template *template.Template
+	Home     *homeasst.HomeRuntime
+	ticker   *time.Ticker
+	retry    *time.Ticker
+	db       *sqlx.DB
 }
 
 func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 	var webcamUrl = ""
-	if len(host.Items) > 0 {
-		webcamUrl = host.Items[0].Url
+	streams := host.Streams()
+	if len(streams) > 0 {
+		webcamUrl = streams[0].Url
 	}
 
 	rt = &Runtime{
@@ -48,7 +49,7 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 		WebcamUrl: webcamUrl,
 		ActionsCamera: []*action.Action{
 			{Name: "camera_list", Title: "Select Camera", Icon: "replace_video", Group: action.Camera},
-			{Name: "camera", Title: "Setup Camera", Icon: "settings_video_camera", Group: action.Camera},
+			{Name: "camera", Title: "Camera Settings", Icon: "settings_video_camera", Group: action.Camera},
 			// {Name: "cameraadd", Title: "Add Camera", Icon: "linked_camera", Group: Camera},
 		},
 		ActionsHome: []*action.Action{
@@ -67,7 +68,7 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 		},
 
 		ActionMap: make(map[string]*action.Action),
-		Webcams:   make(map[string]*avcamx.AvItem),
+		// Webcams:   make(map[string]*avcamx.AvStream),
 	}
 
 	for _, action := range rt.ActionsCamera {
@@ -82,10 +83,10 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 
 	rt.ticker = time.NewTicker(FirstTicker())
 
-	for _, item := range host.Items {
-		rt.Webcams[item.Url] = item
-		log.Println(item.Url)
-	}
+	// for _, item := range host.Streams() {
+	// 	rt.Webcams[item.Url] = item
+	// 	log.Println(item.Url)
+	// }
 
 	err := rt.Connect()
 	if err != nil {
@@ -325,6 +326,7 @@ func (rt *Runtime) handleControl(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	source := r.FormValue("source")
 	req := strings.Replace(url, "/camera_control", source, 1)
+	// log.Printf("handleControl Replace req=%v", req)
 	resp, err := http.Get(req)
 	if err != nil {
 		log.Println(err)
@@ -336,6 +338,7 @@ func (rt *Runtime) handleControl(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+	// log.Printf("handleControl Get req buf='%v'", string(buf))
 	w.Write(buf)
 }
 
@@ -366,7 +369,7 @@ func (rt *Runtime) setPrimaryCamera() func(w http.ResponseWriter, r *http.Reques
 		}
 
 		rt.WebcamIndex = index
-		rt.WebcamUrl = rt.Host.Items[index].Url
+		rt.WebcamUrl = cam.Url
 
 		if !cam.IsOpened() {
 			msg := fmt.Sprintf("%s as %s is not connected", path, cam.Url)
@@ -387,11 +390,8 @@ func wrapStatus(id, msg string) []byte {
 	return []byte(fmt.Sprintf(`<div id="%s" class="status">%s</div>`, id, msg))
 }
 
-func (rt *Runtime) parseCameraPath(r *http.Request) (cam *avcamx.AvItem,
+func (rt *Runtime) parseCameraPath(r *http.Request) (cam *avcamx.AvStream,
 	path string, index int, err error) {
-	var (
-		ok bool
-	)
 	err = r.ParseForm()
 	if err != nil {
 		err = fmt.Errorf("parse form: %v", err)
@@ -401,8 +401,8 @@ func (rt *Runtime) parseCameraPath(r *http.Request) (cam *avcamx.AvItem,
 	path = r.FormValue("path")
 	indexstr := r.FormValue("index")
 	fmt.Sscanf(indexstr, "%d", &index)
-	cam, ok = rt.Webcams[path]
-	if !ok {
+	cam = rt.Host.Stream(path)
+	if cam == nil {
 		err = fmt.Errorf("path not found: %s", path)
 		return
 	}
@@ -417,7 +417,7 @@ func (rt *Runtime) handleRecord() func(w http.ResponseWriter, r *http.Request) {
 			log.Println("handleRecord", err)
 			return
 		}
-		log.Println("handleRecord", r.URL)
+		// log.Println("handleRecord", r.URL)
 
 		if !avitem.IsRecording() {
 			log.Printf("recording...")
@@ -429,7 +429,7 @@ func (rt *Runtime) handleRecord() func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (rt *Runtime) parseSourceId(r *http.Request) (item *avcamx.AvItem, err error) {
+func (rt *Runtime) parseSourceId(r *http.Request) (item *avcamx.AvStream, err error) {
 	err = r.ParseForm()
 	if err != nil {
 		log.Println("ParseForm", err)
@@ -437,10 +437,10 @@ func (rt *Runtime) parseSourceId(r *http.Request) (item *avcamx.AvItem, err erro
 	}
 
 	source := r.FormValue("source")
-	source = source[strings.LastIndex(source, "/"):]
-	item, ok := rt.Webcams[source]
-	if !ok {
-		err = fmt.Errorf("source: '%s' not found", source)
+	url := source[strings.LastIndex(source, "/"):]
+	item = rt.Host.Stream(url)
+	if item == nil {
+		err = fmt.Errorf("url: '%s' not found", url)
 		return
 	}
 	return

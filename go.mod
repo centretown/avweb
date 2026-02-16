@@ -2,8 +2,10 @@ module github.com/centretown/avweb
 
 go 1.24.0
 
+replace github.com/centretown/avcamx => /home/dave/src/avcamx
+
 require (
-	github.com/centretown/avcamx v0.0.0-20250605133042-b3855e2b1dfc
+	github.com/centretown/avcamx v0.0.0-20260213212227-a149a8bf425b
 	github.com/gorilla/websocket v1.5.3
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.28

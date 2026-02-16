@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"html/template"
 	"log"
 	"net/http"
@@ -16,55 +15,45 @@ import (
 	"github.com/centretown/avweb/socket"
 )
 
+var funcMap = template.FuncMap{
+	"sub": func(i int, j int) int {
+		return i - j
+	},
+}
+
 func main() {
-	var (
-		remoteAddr      = "http://192.168.10.197:8080"
-		remoteAddrUsage = "remote camera ip address"
-		hostAddr        = avcamx.GetOutboundIP()
-		hostAddrUsage   = "web site ip address"
-		hostPort        = "9000"
-		hostPortUsage   = "web site ip port number"
-		host            *avcamx.AvHost
-		rt              *runtime.Runtime
-		outputBase      = "/mnt/molly/output"
-		outputBaseUsage = "recording directory path"
-	)
-
-	flag.StringVar(&hostAddr, "host", hostAddr, hostAddrUsage)
-	flag.StringVar(&hostAddr, "h", hostAddr, hostAddrUsage)
-	flag.StringVar(&hostPort, "port", hostPort, hostPortUsage)
-	flag.StringVar(&hostPort, "p", hostPort, hostPortUsage)
-	flag.StringVar(&remoteAddr, "remote", remoteAddr, remoteAddrUsage)
-	flag.StringVar(&remoteAddr, "r", remoteAddr, remoteAddrUsage)
-	flag.StringVar(&outputBase, "o", outputBase, outputBaseUsage)
-	flag.Parse()
-
-	avcamx.OutputBase = outputBase
-	host = avcamx.NewAvHost(hostAddr, hostPort)
-
-	funcMap := template.FuncMap{
-		"sub": func(i int, j int) int {
-			return i - j
-		},
+	avFlags := avcamx.NewAvFlags()
+	exists := avFlags.HasFile()
+	if exists {
+		avFlags.Load()
 	}
+
+	avFlags.Parse()
+	err := avFlags.Save()
+	if err != nil {
+		log.Printf("Error saving configuration file %s. %s", avcamx.ConfigName, err)
+	} else if exists {
+		log.Print("Saved configuration file. ", avcamx.ConfigName)
+	} else {
+		log.Print("Created configuration file. ", avcamx.ConfigName)
+	}
+
+	avFlags.Print()
+
 	const pattern = "www/*.html"
 	templ, err := template.New("").Funcs(funcMap).ParseGlob(pattern)
 	if err != nil {
 		log.Fatalln("ParseGlob", pattern, err)
 	}
+
 	sockServer := socket.NewServer(templ)
+	var _ avcamx.StreamListener = sockServer
 
-	host.MakeLocal(sockServer)
-	log.Print("FetchRemote")
-	remote, err := host.FetchRemote(remoteAddr)
-	if err != nil {
-		log.Fatal(err)
-	}
+	host := avcamx.NewAvHost(avFlags.HostAddr, avFlags.HostPort, avFlags.Remotes, 1000, sockServer)
+	time.Sleep(time.Second * 2)
+	log.Printf("\nServing %s...", host.Url)
 
-	log.Print("MakeProxy")
-	host.MakeProxy(remote, sockServer)
-
-	rt = runtime.NewRuntime(host)
+	rt := runtime.NewRuntime(host)
 
 	rt.Template = templ
 	rt.WebSocket = sockServer
@@ -80,6 +69,7 @@ func main() {
 	})
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// refresh template (dev only)
 		w.Header().Add("Cache-Control", "no-cache")
 		rt.Template, err = template.New("").Funcs(funcMap).ParseGlob(pattern)
 		if err != nil {
@@ -107,19 +97,10 @@ func main() {
 
 	go rt.Monitor()
 
-	httpErr := make(chan error, 1)
-	go func() {
-		httpErr <- host.ListenAndServe()
-	}()
-
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, os.Interrupt)
-	select {
-	case err := <-httpErr:
-		log.Printf("failed to serve http: %v", err)
-	case sig := <-sigs:
-		log.Printf("terminating: %v", sig)
-	}
+	sig := <-sigs
+	log.Printf("Signal: %v", sig)
 
 	rt.WebSocket.SaveMessages()
 	// rt.SaveHistory()
