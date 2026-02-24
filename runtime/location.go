@@ -1,14 +1,8 @@
 package runtime
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"log"
 	"math"
-	"net/http"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type CurrentProperty struct {
@@ -54,14 +48,6 @@ type Location struct {
 	CurrentProperties *LocationProperties `json:"-"`
 }
 
-const (
-	format         = "%s?latitude=%.2f&longitude=%.2f&timezone=%s%s&models=gem_seamless"
-	header         = "https://api.open-meteo.com/v1/forecast"
-	dailyTrailer   = "&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max,wind_direction_10m_dominant,wind_gusts_10m_max"
-	hourlytrailer  = "&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,relative_humidity_2m,surface_pressure,&forecast_hours=24"
-	currentTrailer = "&current=temperature_2m,precipitation,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,rain,showers,cloud_cover,pressure_msl,surface_pressure,snowfall"
-)
-
 var (
 	currentAttributes = []string{
 		TEMPERATURE,
@@ -98,29 +84,6 @@ var (
 		SUNSHINE,
 	}
 )
-
-func (loc *Location) QueryDaily() (err error) {
-	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, dailyTrailer)
-	loc.WeatherDaily, err = GetWeatherDaily(q)
-	return
-}
-
-func (loc *Location) QueryHourly() (err error) {
-	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, hourlytrailer)
-	loc.WeatherHourly, err = GetWeatherHourly(q)
-	return
-}
-
-func (loc *Location) QueryCurrent(db *sqlx.DB) (err error) {
-	q := fmt.Sprintf(format, header, loc.Latitude, loc.Longitude, loc.Zone, currentTrailer)
-	loc.WeatherCurrent, err = GetWeatherCurrent(q)
-	if err != nil {
-		log.Println("QueryCurrent", err)
-		return
-	}
-	err = InsertHistory(db, loc.ID, loc.WeatherCurrent.Current)
-	return
-}
 
 func (loc *Location) BuildCurrentProperties(history []*Current) {
 	p := &LocationProperties{}
@@ -331,7 +294,6 @@ func (loc *Location) BuildHourlyProperties() {
 	}
 
 	props.Scale(limits)
-	return
 }
 
 func (p *LocationProperties) BuildScale(limits map[string]*Limits, mnx *Limits, units string) {
@@ -364,56 +326,4 @@ func (p *LocationProperties) Scale(limits map[string]*Limits) {
 			item.ScaleMin = lim.Min
 		}
 	}
-}
-
-func GetWeatherDaily(query string) (daily *WeatherDaily, err error) {
-	daily = &WeatherDaily{}
-	err = GetWeather(query, daily)
-	return daily, err
-}
-
-func GetWeatherHourly(query string) (hourly *WeatherHourly, err error) {
-	hourly = &WeatherHourly{}
-	err = GetWeather(query, hourly)
-	return hourly, err
-}
-
-func GetWeatherCurrent(query string) (current *WeatherCurrent, err error) {
-	current = &WeatherCurrent{}
-	err = GetWeather(query, current)
-	return current, err
-}
-
-func GetWeather(query string, w any) (err error) {
-	var (
-		resp *http.Response
-	)
-
-	resp, err = http.Get(query)
-	if err != nil {
-		err = fmt.Errorf("weather Get: %v", err)
-		return
-	}
-	defer resp.Body.Close()
-	err = LoadWeather(resp.Body, w)
-	return
-}
-
-func LoadWeather(r io.Reader, w any) (err error) {
-	var (
-		buf []byte
-	)
-
-	buf, err = io.ReadAll(r)
-	if err != nil {
-		err = fmt.Errorf("LoadWeather ReadAll: %v", err)
-		return
-	}
-
-	err = json.Unmarshal(buf, w)
-	if err != nil {
-		err = fmt.Errorf("LoadWeather Unmarshal: %v", err)
-		return
-	}
-	return
 }

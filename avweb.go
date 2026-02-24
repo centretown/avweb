@@ -47,10 +47,9 @@ func main() {
 	}
 
 	sockServer := socket.NewServer(templ)
-	var _ avcamx.StreamListener = sockServer
-
-	host := avcamx.NewAvHost(avFlags.HostAddr, avFlags.HostPort, avFlags.Remotes, 1000, sockServer)
-	time.Sleep(time.Second * 2)
+	var listener avcamx.StreamListener = sockServer
+	host := avcamx.NewAvHost(avFlags.HostAddr, avFlags.HostPort, avFlags.Remotes, 1000, listener)
+	// time.Sleep(time.Second * 2)
 	log.Printf("\nServing %s...", host.Url)
 
 	rt := runtime.NewRuntime(host)

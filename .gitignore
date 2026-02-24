@@ -5,3 +5,4 @@ location.db
 www/work/
 database/
 token.go
+avcamx.json

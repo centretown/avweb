@@ -78,7 +78,7 @@ func testFile(t *testing.T, filename string, weather any) {
 	}
 	defer file.Close()
 
-	err = LoadWeather(file, weather)
+	err = readAndDecode(file, weather)
 	if err != nil {
 		t.Fatal(err)
 	}

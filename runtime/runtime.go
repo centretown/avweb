@@ -83,11 +83,6 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 
 	rt.ticker = time.NewTicker(FirstTicker())
 
-	// for _, item := range host.Streams() {
-	// 	rt.Webcams[item.Url] = item
-	// 	log.Println(item.Url)
-	// }
-
 	err := rt.Connect()
 	if err != nil {
 		log.Fatal(err)
@@ -238,53 +233,6 @@ func (rt *Runtime) HandleAction(path string, templ string, data *WeatherFormData
 
 }
 
-func (rt *Runtime) QueryDaily() {
-	for _, location := range rt.Locations {
-		err := location.QueryDaily()
-		if err != nil {
-			log.Printf("WeatherDaily: %v", err)
-			continue
-		}
-		location.WeatherDaily.UpdateTime = time.Now()
-		location.BuildDailyProperties()
-	}
-}
-
-type LocationData struct {
-	Index    int
-	Location *Location
-}
-
-func (rt *Runtime) QueryHourly() {
-	for _, location := range rt.Locations {
-		err := location.QueryHourly()
-		if err != nil {
-			log.Printf("WeatherHourly: %v", err)
-			continue
-		}
-		location.WeatherHourly.UpdateTime = time.Now()
-		location.BuildHourlyProperties()
-		// buf, _ := json.MarshalIndent(location.WeatherHourly, "", "  ")
-		// log.Println(string(buf))
-	}
-}
-
-func (rt *Runtime) QueryCurrent() {
-	for _, location := range rt.Locations {
-		err := location.QueryCurrent(rt.db)
-		if err != nil {
-			log.Printf("WeatherCurrent: %v", err)
-			continue
-		}
-		location.WeatherCurrent.UpdateTime = time.Now()
-	}
-
-	err := rt.LoadHistory()
-	if err != nil {
-		log.Printf("WeatherCurrent LoadHistory: %v", err)
-	}
-}
-
 func (rt *Runtime) HandleWeather() {
 	data := &WeatherFormData{
 		Codes:   WeatherCodes,
@@ -387,7 +335,9 @@ func (rt *Runtime) setPrimaryCamera() func(w http.ResponseWriter, r *http.Reques
 }
 
 func wrapStatus(id, msg string) []byte {
-	return []byte(fmt.Sprintf(`<div id="%s" class="status">%s</div>`, id, msg))
+	var buf []byte
+	buf = fmt.Appendf(buf, `<div id="%s" class="status">%s</div>`, id, msg)
+	return buf
 }
 
 func (rt *Runtime) parseCameraPath(r *http.Request) (cam *avcamx.AvStream,
