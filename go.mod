@@ -5,7 +5,7 @@ go 1.24.0
 //replace github.com/centretown/avcamx => /home/dave/src/avcamx
 
 require (
-	github.com/centretown/avcamx v0.0.0-20260225003450-0be477aee52b
+	github.com/centretown/avcamx v0.0.0-20260226151146-2066ddc95517
 	github.com/gorilla/websocket v1.5.3
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.28
