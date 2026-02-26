@@ -361,7 +361,7 @@ func (rt *Runtime) parseCameraPath(r *http.Request) (cam *avcamx.AvStream,
 
 func (rt *Runtime) handleRecord() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		avitem, err := rt.parseSourceId(r)
+		avStream, err := rt.parseSourceId(r)
 		// _, err := rt.parseSourceId(r)
 		if err != nil {
 			log.Println("handleRecord", err)
@@ -369,17 +369,17 @@ func (rt *Runtime) handleRecord() func(w http.ResponseWriter, r *http.Request) {
 		}
 		// log.Println("handleRecord", r.URL)
 
-		if !avitem.IsRecording() {
+		if !avStream.IsRecording() {
 			log.Printf("recording...")
-			avitem.RecordCmd(3600)
+			avStream.RecordCmd(3600)
 		} else {
 			log.Printf("stop recording...")
-			avitem.StopRecordCmd()
+			avStream.StopRecordCmd()
 		}
 	}
 }
 
-func (rt *Runtime) parseSourceId(r *http.Request) (item *avcamx.AvStream, err error) {
+func (rt *Runtime) parseSourceId(r *http.Request) (avStream *avcamx.AvStream, err error) {
 	err = r.ParseForm()
 	if err != nil {
 		log.Println("ParseForm", err)
@@ -388,8 +388,8 @@ func (rt *Runtime) parseSourceId(r *http.Request) (item *avcamx.AvStream, err er
 
 	source := r.FormValue("source")
 	url := source[strings.LastIndex(source, "/"):]
-	item = rt.Host.Stream(url)
-	if item == nil {
+	avStream = rt.Host.Stream(url)
+	if avStream == nil {
 		err = fmt.Errorf("url: '%s' not found", url)
 		return
 	}

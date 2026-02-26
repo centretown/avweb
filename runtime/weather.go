@@ -77,7 +77,7 @@ type Current struct {
 	SurfacePressure float64 `json:"surface_pressure" db:"SurfacePressure"`
 	Code            int32   `json:"weather_code" db:"Code"`
 	Interval        int32   `json:"interval" db:"Interval"`
-	IsDay           int8    `json:"is_day" db:"IsDay"`
+	IsDay           float32 `json:"is_day" db:"IsDay"`
 }
 
 const (

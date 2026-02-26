@@ -36,15 +36,15 @@ func FirstTicker() (ticker time.Duration) {
 
 func (rt *Runtime) Monitor() {
 	var (
-		now        time.Time
-		initialRun = true
+		now         time.Time
+		resetTicker = true
 	)
 
 	for {
 		now = <-rt.ticker.C
-		if initialRun {
+		if resetTicker {
 			rt.ticker.Reset(time.Minute * 15)
-			initialRun = false
+			resetTicker = false
 		}
 		rt.QueryCurrent()
 		if now.Minute() == 0 {
