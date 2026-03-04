@@ -48,7 +48,7 @@
     white-space: nowrap;
     word-wrap: normal;
     direction: ltr;
-    -webkit-font-feature-settings: "liga";
+    /*-webkit-font-feature-settings: "liga";*/
     -webkit-font-smoothing: antialiased;
 }
 
@@ -144,7 +144,7 @@ h3 {
     animation-timing-function: ease-out;
     animation-duration: 1000ms;
     animation-fill-mode: forwards;
-    max-height: 80%;
+    /*max-height: 90%;*/
     overflow-x: wrap;
     overflow-y: auto;
     scrollbar-color: var(--fgDim) var(--bgOpaque);
@@ -167,7 +167,7 @@ h3 {
 
 .scroll {
     overflow-y: scroll;
-    height: 22rem;
+    height: 30rem;
 }
 .cameras {
     position: absolute;

@@ -5,5 +5,7 @@
     "http://192.168.10.173:9000",
     "http://192.168.10.197:9000"
   ],
-  "OutputBase": "/mnt/molly/output"
+  "OutputBase": "/mnt/molly/output",
+  "Update": false,
+  "Recorder": false
 }
