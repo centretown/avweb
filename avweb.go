@@ -43,12 +43,17 @@ func main() {
 	const pattern = "www/*.html"
 	templ, err := template.New("").Funcs(funcMap).ParseGlob(pattern)
 	if err != nil {
-		log.Fatalln("ParseGlob", pattern, err)
+		log.Fatalln("Parse global templates", pattern, err)
 	}
 
 	sockServer := socket.NewServer(templ)
 	var listener avcamx.StreamListener = sockServer
-	host := avcamx.NewAvHost(avFlags.HostAddr, avFlags.HostPort, avFlags.Remotes, 1000, listener)
+	host := avcamx.NewAvHost(avFlags.HostAddr, avFlags.Connect, avFlags.Remotes, 1000, listener)
+	err = host.Run()
+	if err != nil {
+		log.Fatalln("host run", err)
+	}
+
 	// time.Sleep(time.Second * 2)
 	log.Printf("\nServing %s...", host.Url)
 

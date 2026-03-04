@@ -5,12 +5,12 @@ go 1.24.0
 //replace github.com/centretown/avcamx => /home/dave/src/avcamx
 
 require (
-	github.com/centretown/avcamx v0.0.0-20260226151146-2066ddc95517
+	github.com/centretown/avcamx v0.0.0-20260304010526-0afab1178c51
 	github.com/gorilla/websocket v1.5.3
 	github.com/jmoiron/sqlx v1.4.0
-	github.com/mattn/go-sqlite3 v1.14.28
-	golang.org/x/text v0.3.3
-	gopkg.in/yaml.v2 v2.2.8
+	github.com/mattn/go-sqlite3 v1.14.34
+	golang.org/x/text v0.34.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
