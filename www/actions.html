@@ -1,4 +1,27 @@
 {{ define "layout.actions" }}
+<script>
+    var currentView = "viewfull";
+    var hideChat = true;
+    function toggleChat(id) {
+        if (hideChat) {
+            hideChat = false;
+            htmx.removeClass("#" + id, "hide");
+        } else {
+            hideChat = true;
+            htmx.addClass("#" + id, "hide");
+        }
+    }
+    function setCurrentView(view) {
+        htmx.removeClass("#" + currentView, "hide");
+        currentView = view;
+        htmx.addClass("#" + view, "hide");
+    }
+    function currentPath() {
+        let s = currentSource();
+        let result = s.lastIndexOf("/");
+        return s.substring(result);
+    }
+</script>
 <div class="actions">
     <button class="action" hx-on:click="toggleMenu('leftmenu')" hx-swap="none">
         <span class="symbols">menu</span>
@@ -36,6 +59,30 @@
     <span id="rightmenu">
         <button class="action" hx-on:click="toggleChat('chat')">
             <span id="ws-status-menu" class="symbols">chat</span>
+        </button>
+
+        <button
+            id="viewcompact"
+            class="action"
+            hx-put="/viewcompact"
+            hx-swap="none"
+            hx-select-oob="#layout"
+            hx-vals="js:{path: currentPath(), view: 'viewcompact'}"
+            hx-on::after-request="setCurrentView('viewcompact')"
+        >
+            <span class="symbols">view_cozy</span>
+        </button>
+
+        <button
+            id="viewfull"
+            class="action hide"
+            hx-put="/viewfull"
+            hx-swap="none"
+            hx-select-oob="#layout"
+            hx-vals="js:{path: currentPath(), view: 'viewfull'}"
+            hx-on::after-request="setCurrentView('viewfull')"
+        >
+            <span class="symbols">capture</span>
         </button>
 
         <button

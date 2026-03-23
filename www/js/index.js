@@ -34,17 +34,6 @@ function toggleMenu(id) {
   }
 }
 
-var hideChat = true;
-function toggleChat(id) {
-  if (hideChat) {
-    hideChat = false;
-    htmx.removeClass("#" + id, "hide");
-  } else {
-    hideChat = true;
-    htmx.addClass("#" + id, "hide");
-  }
-}
-
 function startTime() {
   const today = new Date();
   let clockFmt = new Intl.DateTimeFormat("en-US", {

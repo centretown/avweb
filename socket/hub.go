@@ -56,11 +56,11 @@ func (h *Hub) Broadcast(message string) {
 
 // Run handles communication operations with Hub
 func (h *Hub) Run() {
-	log.Println("HUB RUNNING")
+	log.Println("Web Socket hub active.")
 	for {
 		select {
 		case <-h.Done:
-			log.Println("HUB Done")
+			log.Println("Web Socket hub inactive.")
 			return
 		case client := <-h.Register:
 			log.Printf("Registering client %s", client.name)

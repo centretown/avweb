@@ -141,7 +141,7 @@ func (home *HomeRuntime) BuildEntities() (err error) {
 		buf []byte
 	)
 
-	log.Println("BuildEntities Loop")
+	// log.Println("BuildEntities Loop")
 	for {
 		buf, err = home.sock.Read()
 		if err != nil && err != io.EOF {
@@ -152,10 +152,10 @@ func (home *HomeRuntime) BuildEntities() (err error) {
 		if len(buf) > 0 {
 			home.ParseResponse(buf)
 			if len(home.Entities) > 0 {
-				log.Println("COUNT", len(buf), len(home.Entities))
+				// log.Println("COUNT", len(buf), len(home.Entities))
 				break
 			}
-			log.Println(len(buf), string(buf))
+			// log.Println(len(buf), string(buf))
 		}
 		time.Sleep(time.Millisecond)
 	}
@@ -165,7 +165,7 @@ func (home *HomeRuntime) BuildEntities() (err error) {
 }
 
 func (home *HomeRuntime) Monitor() {
-	log.Println("monitor")
+	// log.Println("monitor")
 	var (
 		errCount int
 		delay    time.Duration = time.Millisecond * 5
@@ -178,7 +178,7 @@ func (home *HomeRuntime) Monitor() {
 		log.Println("StatesCommand", err)
 		return
 	}
-	log.Println("StatesCommand")
+	// log.Println("StatesCommand")
 	home.Monitoring = true
 
 	home.eventsID, err = home.sock.WriteCommandID(SubscribeCommand)
@@ -186,14 +186,14 @@ func (home *HomeRuntime) Monitor() {
 		log.Println("SubscribeCommand", err)
 		return
 	}
-	log.Println("SubscribeCommand")
+	// log.Println("SubscribeCommand")
 
 	for {
 		time.Sleep(delay)
 
 		select {
 		case <-home.stop:
-			log.Println("STOP RECEIVED")
+			log.Println("Home stop received.")
 			home.Monitoring = false
 			return
 

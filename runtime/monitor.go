@@ -30,7 +30,7 @@ func FirstTicker() (ticker time.Duration) {
 		log.Fatal(minute, now, next)
 	}
 	ticker = next.Sub(now)
-	log.Printf("ticker=%v, minute=%v now=%v next=%v\n", ticker, minute, now, next)
+	// log.Printf("ticker=%v, minute=%v now=%v next=%v\n", ticker, minute, now, next)
 	return
 }
 

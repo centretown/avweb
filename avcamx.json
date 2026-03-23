@@ -1,7 +1,11 @@
 {
   "HostAddr": "192.168.10.188",
-  "Connect": "none",
-  "Remotes": [],
+  "Connect": "all",
+  "Remotes": [
+    "192.168.10.7",
+    "192.168.10.173",
+    "192.168.10.197"
+  ],
   "OutputBase": "/mnt/molly/output",
   "Update": false,
   "Recorders": 0

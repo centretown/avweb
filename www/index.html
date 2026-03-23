@@ -18,17 +18,17 @@
 
     <body>
         <span id="events" hx-ext="ws" ws-connect="/events">
-            <div class="cameras"></div>
-            <div class="source">
-                <img id="source" src="{{.WebcamUrl}}" />
-            </div>
-            <span>
-                {{ template "layout.actions" . }} {{ template "layout.chat"
-                .WebSocket }}
-                <span id="slots" class="slots"></span>
-                {{ template "weather.clock" . }}
+            <span id="layout">
+                <div class="viewfull source">
+                    <img id="source" src="{{.WebcamUrl}}" />
+                </div>
             </span>
+            <span>
+                <span id="slots" class="slots"></span>
+            </span>
+            {{ template "layout.actions" . }} {{ template "layout.chat"
+            .WebSocket }} {{ template "weather.clock" . }}
+            <script src="/static/js/wsstatus.js" defer></script>
         </span>
-        <script src="/static/js/wsstatus.js" defer></script>
     </body>
 </html>

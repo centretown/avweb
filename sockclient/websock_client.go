@@ -34,12 +34,12 @@ func NewSockClient() (*SockClient, error) {
 		ReadBufferSize: 16_000,
 	}
 	// conn, resp, err := websocket.DefaultDialer.Dial(dial, nil)
-	conn, resp, err := dialer.DialContext(ctx, dial, nil)
+	conn, _, err := dialer.DialContext(ctx, dial, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println("Dial", resp.Status)
+	// log.Println("Dial", resp.Status)
 	client := &SockClient{
 		ctx:       ctx,
 		conn:      conn,
@@ -72,7 +72,9 @@ func (client *SockClient) WriteCommand(cmd string) error {
 	}
 	defer w.Close()
 	_, err = w.Write([]byte(cmd))
-	log.Println("Write", cmd, err)
+	if err != nil {
+		log.Println("Write", cmd, err)
+	}
 	return err
 }
 

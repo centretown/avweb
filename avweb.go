@@ -90,6 +90,7 @@ func main() {
 	rt.QueryDaily()
 	rt.QueryHourly()
 
+	rt.HandleViews()
 	rt.HandleWeather()
 	rt.HandleCameras()
 

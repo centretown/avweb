@@ -156,9 +156,15 @@ h3 {
     width: var(--slotWidth);
 }
 
+.slot-right {
+    right: 1rem;
+    width: var(--slotWidth);
+}
+
 .chat {
     right: 1rem;
-    width: 15rem;
+    width: var(--slotWidth);
+    /*width: 15rem;*/
 }
 
 .content {
@@ -197,19 +203,43 @@ h3 {
     width: var(--slotImageWidth);
 }
 
-.source > img {
+.viewfull > img {
     width: 100%;
+}
+
+.viewcompact {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+.viewcompact > * {
+    width: 100%;
+}
+
+.viewsidepanel {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+}
+.viewsidepanelmain {
+    width: 100%;
+}
+.viewsidepanelitem {
+    width: 100%;
+    overflow-y: auto;
 }
 
 .actions {
     position: fixed;
+    top: 1rem;
+    left: 1rem;
     margin: 0.6rem;
     overflow: hidden;
 }
 
 .actions-right {
     position: fixed;
-    right: 0rem;
+    top: 1rem;
+    right: 1rem;
     margin: 0.6rem;
     overflow: hidden;
 }

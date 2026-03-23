@@ -50,10 +50,12 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 		ActionsCamera: []*action.Action{
 			{Name: "camera_list", Title: "Select Camera", Icon: "replace_video", Group: action.Camera},
 			{Name: "camera", Title: "Camera Settings", Icon: "settings_video_camera", Group: action.Camera},
+			// {Name: "views", Title: "Views", Icon: "window", Group: action.Camera},
+			// {Name: "resetcontrols", Title: "Reset Camera", Icon: "reset_settings", Group: action.Camera},
+			// {Name: "record", Title: "Record", Icon: "radio_button_checked", Group: action.Camera},
 			// {Name: "cameraadd", Title: "Add Camera", Icon: "linked_camera", Group: Camera},
 		},
 		ActionsHome: []*action.Action{
-			// {Name: "sun", Title: "Next Sun", Icon: "wb_twilight", Group: Home},
 			{Name: "weather_current", Title: "Current Weather", Icon: "thunderstorm", Group: action.Home},
 			{Name: "weather_hourly", Title: "24 Hour Forecast", Icon: "schedule", Group: action.Home},
 			{Name: "weather_daily", Title: "7 Day Forecast", Icon: "calendar_view_week", Group: action.Home},
@@ -63,8 +65,6 @@ func NewRuntime(host *avcamx.AvHost) (rt *Runtime) {
 		},
 		ActionsChat: []*action.Action{
 			// {Name: "chat", Title: "Chat", Icon: "chat", Group: Chat},
-			{Name: "resetcontrols", Title: "Reset Camera", Icon: "reset_settings", Group: action.Chat},
-			{Name: "record", Title: "Record", Icon: "radio_button_checked", Group: action.Chat},
 		},
 
 		ActionMap: make(map[string]*action.Action),
@@ -233,6 +233,51 @@ func (rt *Runtime) HandleAction(path string, templ string, data *WeatherFormData
 
 }
 
+type ViewData struct {
+	Action  *action.Action
+	Host    *avcamx.AvHost
+	Stream  *avcamx.AvStream
+	Streams []*avcamx.AvStream
+}
+
+func (rt *Runtime) HandleViews() {
+	mux := rt.Host.Mux()
+	mux.HandleFunc("/views", func(w http.ResponseWriter, r *http.Request) {
+		data := &ViewData{
+			Action: rt.ActionMap["views"],
+		}
+		err := rt.Template.Lookup("layout.view.selection").Execute(w, data)
+		if err != nil {
+			log.Fatal("/views", err)
+		}
+	})
+	mux.HandleFunc("/viewcompact", rt.setView)
+	mux.HandleFunc("/viewfull", rt.setView)
+	mux.HandleFunc("/viewsidepanel", rt.setView)
+	mux.HandleFunc("/viewcarousel", rt.setView)
+}
+
+func (rt *Runtime) setView(w http.ResponseWriter, r *http.Request) {
+	cam, path, view, err := rt.parseCameraPath(r)
+	if err != nil {
+		return
+	}
+	log.Printf("set view cam=%v, path=%v, view=%v, err=%v", cam.Url, path, view, err)
+	data := &ViewData{
+		Action:  rt.ActionMap["views"],
+		Stream:  cam,
+		Streams: rt.Host.Streams(),
+	}
+
+	tmpl := rt.Template.Lookup(view)
+	if tmpl != nil {
+		err = tmpl.Execute(w, data)
+		if err != nil {
+			log.Fatal("/views", err)
+		}
+	}
+}
+
 func (rt *Runtime) HandleWeather() {
 	data := &WeatherFormData{
 		Codes:   WeatherCodes,
@@ -293,45 +338,11 @@ func (rt *Runtime) handleControl(w http.ResponseWriter, r *http.Request) {
 func (rt *Runtime) HandleCameras() {
 	rt.HandleCameraAction("/camera", "layout.controls")
 	rt.HandleCameraAction("/camera_list", "layout.camera.list")
-	rt.Host.Mux().HandleFunc("/camera_primary", rt.setPrimaryCamera())
-	rt.Host.Mux().HandleFunc("/record", rt.handleRecord())
-	rt.Host.Mux().HandleFunc("/camera_control/", rt.handleControl)
+	mux := rt.Host.Mux()
+	mux.HandleFunc("/camera_primary", rt.setView)
+	mux.HandleFunc("/record", rt.handleRecord())
+	mux.HandleFunc("/camera_control/", rt.handleControl)
 
-}
-
-func (rt *Runtime) setPrimaryCamera() func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		const statusID = "camera_list_status"
-		const sourceID = "source"
-
-		wrapSource := func(id, src string) []byte {
-			s := fmt.Sprintf(`<img id="%s" src="%s">`, id, src)
-			return []byte(s)
-		}
-
-		cam, path, index, err := rt.parseCameraPath(r)
-		if err != nil {
-			msg := fmt.Sprintf("Error occured.<br>  %v", err)
-			w.Write(wrapStatus(statusID, msg))
-			return
-		}
-
-		rt.WebcamIndex = index
-		rt.WebcamUrl = cam.Url
-
-		if !cam.IsOpened() {
-			msg := fmt.Sprintf("%s as %s is not connected", path, cam.Url)
-			w.Write(wrapStatus(statusID, msg))
-			return
-		}
-
-		msg := fmt.Sprintf("%s is connected as %s (%d)", path, cam.Url, index)
-		w.Write(wrapStatus(statusID, msg))
-		w.Write(wrapSource(sourceID, cam.Url))
-
-		// `<img id="source" src="{{.WebcamUrl}}">`
-
-	}
 }
 
 func wrapStatus(id, msg string) []byte {
@@ -340,22 +351,53 @@ func wrapStatus(id, msg string) []byte {
 	return buf
 }
 
-func (rt *Runtime) parseCameraPath(r *http.Request) (cam *avcamx.AvStream,
-	path string, index int, err error) {
+func ParseForm(r *http.Request, keys ...string) (values []string, err error) {
+	values = make([]string, len(keys))
 	err = r.ParseForm()
 	if err != nil {
-		err = fmt.Errorf("parse form: %v", err)
+		log.Printf("ParseForm: %v", err)
 		return
 	}
 
-	path = r.FormValue("path")
-	indexstr := r.FormValue("index")
-	fmt.Sscanf(indexstr, "%d", &index)
-	cam = rt.Host.Stream(path)
-	if cam == nil {
-		err = fmt.Errorf("path not found: %s", path)
+	for i, key := range keys {
+		values[i] = r.FormValue(key)
+	}
+	return
+}
+
+func (rt *Runtime) parseCameraPath(r *http.Request) (cam *avcamx.AvStream,
+	path string, view string, err error) {
+	const (
+		PARSE_PATH = iota
+		PARSE_VIEW
+	)
+	vals, err := ParseForm(r, "path", "view")
+	if err != nil {
+		log.Printf("ParseForm: %v", err)
 		return
 	}
+	path, view = vals[PARSE_PATH], vals[PARSE_VIEW]
+	if len(path) == 0 {
+		msg := "path variable not found: %s"
+		err = fmt.Errorf(msg, path)
+		log.Printf(msg, path)
+		return
+	}
+	if len(view) == 0 {
+		msg := "view variable not found: %s"
+		err = fmt.Errorf(msg, path)
+		log.Printf(msg, path)
+		return
+	}
+
+	cam = rt.Host.Stream(path)
+	if cam == nil {
+		msg := "path not found: %s"
+		err = fmt.Errorf(msg, path)
+		log.Printf(msg, path)
+		return
+	}
+
 	return
 }
 
@@ -410,7 +452,7 @@ func (rt *Runtime) ServeHomeData() (err error) {
 		return
 	}
 
-	log.Println("Authorized HA")
+	// log.Println("Authorized HA")
 
 	err = home.BuildEntities()
 	if err != nil {
@@ -418,7 +460,7 @@ func (rt *Runtime) ServeHomeData() (err error) {
 		return
 
 	}
-	log.Println("Build Entities")
+	// log.Println("Build Entities")
 
 	go home.Monitor()
 
