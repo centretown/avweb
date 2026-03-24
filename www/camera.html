@@ -108,7 +108,7 @@
 {{ end }}
 <!---->
 {{ define "layout.camera.list" }}
-<div id="slot-{{.Action.Name}}" class="slot" draggable="false">
+<div id="slot-{{.Action.Name}}" class="slot-right" draggable="false">
     {{template "layout.content.head" .Action }}
     <div class="content scroll">
         {{range $index, $cam := .Data.Streams}}

@@ -132,6 +132,7 @@ h3 {
 }
 
 .slot,
+.slot-right,
 .chat {
     position: fixed;
     top: 5rem;

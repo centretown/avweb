@@ -1,5 +1,5 @@
 {{ define "layout.controls" }}
-<div id="slot-{{.Action.Name}}" class="slot" draggable="false">
+<div id="slot-{{.Action.Name}}" class="slot-right" draggable="false">
     {{template "layout.content.head" .Action }}
     <div class="content">
         {{range .Codes}} {{range .}}

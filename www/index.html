@@ -23,9 +23,8 @@
                     <img id="source" src="{{.WebcamUrl}}" />
                 </div>
             </span>
-            <span>
-                <span id="slots" class="slots"></span>
-            </span>
+            <span id="slots" class="slots"></span>
+            <span id="slots-right" class="slots-right"></span>
             {{ template "layout.actions" . }} {{ template "layout.chat"
             .WebSocket }} {{ template "weather.clock" . }}
             <script src="/static/js/wsstatus.js" defer></script>

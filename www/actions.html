@@ -27,20 +27,7 @@
         <span class="symbols">menu</span>
     </button>
     <span id="leftmenu" class="hide">
-        {{range .ActionsCamera}}
-        <div
-            id="{{.Name}}"
-            class="hide"
-            hx-put="/{{.Name}}"
-            hx-swap="beforeend"
-            hx-target="#slots"
-            hx-on::afterSwap="addDragHandlers('slot-{{.Name}}')"
-            hx-vals="js:{source: currentSource()}"
-        ></div>
-        <button class="action" hx-on:click="doAction('{{.Name}}')">
-            <span class="symbols">{{.Icon}}</span>
-        </button>
-        {{ end }} {{range .ActionsHome}}
+        {{range .ActionsHome}}
         <div
             id="{{.Name}}"
             class="hide"
@@ -53,14 +40,27 @@
             <span class="symbols">{{.Icon}}</span>
         </button>
         {{ end }}
+        <button class="action" hx-on:click="toggleChat('chat')">
+            <span id="ws-status-menu" class="symbols">chat</span>
+        </button>
     </span>
 </div>
 <div class="actions-right">
     <span id="rightmenu">
-        <button class="action" hx-on:click="toggleChat('chat')">
-            <span id="ws-status-menu" class="symbols">chat</span>
+        {{range .ActionsCamera}}
+        <div
+            id="{{.Name}}"
+            class="hide"
+            hx-put="/{{.Name}}"
+            hx-swap="beforeend"
+            hx-target="#slots-right"
+            hx-on::afterSwap="addDragHandlers('slot-{{.Name}}')"
+            hx-vals="js:{source: currentSource()}"
+        ></div>
+        <button class="action" hx-on:click="doAction('{{.Name}}')">
+            <span class="symbols">{{.Icon}}</span>
         </button>
-
+        {{ end }}
         <button
             id="viewcompact"
             class="action"
@@ -124,4 +124,4 @@
 </span>
 {{ end }}
 <!--  -->
-{{ define "layout.slot" }} {{ end }}
+<!--{{ define "layout.slot" }} {{ end }}-->
